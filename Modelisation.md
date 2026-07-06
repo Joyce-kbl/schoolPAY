@@ -376,3 +376,29 @@ Fin
 Cette modélisation montre que SchoolPAY est avant tout une application de caisse scolaire centrée sur un utilisateur unique : le caissier. Le cœur du système repose sur la recherche d’élèves, l’enregistrement des paiements, la génération des reçus et le suivi du journal de caisse.
 
 Avant d’aller vers la réalisation technique, il faudra maintenant transformer cette modélisation en architecture applicative, définir les entités de données précises, puis implémenter les écrans et les traitements métier.
+
+---
+
+## Note de mise a jour - 2026-07-06
+
+La modelisation initiale reste valable pour le coeur fonctionnel de SchoolPAY : un seul acteur principal, le caissier, qui gere les eleves, les paiements, les recus et le journal de caisse.
+
+Depuis cette modelisation, le projet a evolue techniquement :
+
+- le backend est maintenant operationnel avec SQLite ;
+- les classes, eleves, paiements, recus, journal et taux ont des routes API ;
+- le frontend consomme deja une partie de l'API ;
+- le backend a ete nettoye pour supprimer les routes dupliquees ;
+- les mises a jour partielles avec `PATCH` sont supportees.
+
+Points a ajouter dans une future version de la modelisation :
+
+- categorie de frais ;
+- facture contenant plusieurs operations ;
+- matricule automatique genere cote backend ;
+- synthese du journal par categorie ou periode ;
+- historique de modification des paiements.
+
+Point technique a corriger :
+
+- le nom actuel du fichier est `Mod#U00e9lisation.md`; il devrait etre renomme proprement en `Modelisation.md` ou `Modélisation.md` apres verification de l'encodage.

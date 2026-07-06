@@ -26,6 +26,7 @@ Ajouter au journal une vue plus exploitable avec :
 Étendre le flux actuel pour permettre :
 - la validation de plusieurs opérations dans une seule facture ;
 - le choix de la devise entre USD et CDF ;
+- La possibilité de modifier le taux dans les paramètre (Taux actuel : 1$= 22500 CDF)
 - un affichage plus clair du total et du détail des opérations.
 
 ### 3) Base de données
@@ -172,3 +173,33 @@ La demande client sera considérée comme satisfaite si :
 - une facture peut regrouper plusieurs opérations ;
 - les catégories de frais sont disponibles et utilisables ;
 - les matricules sont uniques et générés automatiquement.
+
+---
+
+## Mise a jour technique du 2026-07-06
+
+Avant de commencer les nouvelles demandes client, le backend a ete nettoye.
+
+Travail realise :
+
+- suppression des routes dupliquees dans `BACKEND/app.js` ;
+- centralisation de la recherche eleve et de la fiche eleve dans le controleur `eleves.controleur.js` ;
+- support des mises a jour partielles avec `PATCH` pour les classes, eleves et paiements ;
+- stabilisation de la suppression d'un eleve avec ses paiements associes ;
+- validation avec `npm run test:e2e`.
+
+Etat apres nettoyage :
+
+- le backend est pret pour les ajouts fonctionnels ;
+- les categories de frais ne sont pas encore implementees ;
+- les factures multi-operations ne sont pas encore implementees ;
+- la generation automatique de matricule doit encore etre deplacee cote backend ;
+- le journal ne possede pas encore de vraie synthese par categorie.
+
+Prochaine phase recommandee :
+
+1. creer la table `categories_frais` ;
+2. ajouter le lien entre `paiements` et `categories_frais` ;
+3. exposer `GET /api/categories-frais` ;
+4. remplacer le champ libre `libelle` par une selection de categorie dans le frontend ;
+5. ajouter la generation automatique du matricule dans `POST /api/eleves`.

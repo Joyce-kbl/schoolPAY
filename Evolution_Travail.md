@@ -310,3 +310,81 @@ Objectif concret :
 4. Afficher le numero de recu genere.
 
 Cette etape transformera SchoolPAY d'un backend teste separement en une application qui commence vraiment a fonctionner de bout en bout.
+
+## 7. Mise a jour du 2026-07-06
+
+Objectif de la session :
+
+- analyser l'etat reel du projet ;
+- nettoyer techniquement le backend ;
+- mettre a jour la documentation apres stabilisation.
+
+### Nettoyage backend realise
+
+Fichiers principaux concernes :
+
+- `BACKEND/app.js`
+- `BACKEND/src/controleurs/eleves.controleur.js`
+- `BACKEND/src/controleurs/classes.controleur.js`
+- `BACKEND/src/controleurs/paiements.controleur.js`
+
+Actions realisees :
+
+- suppression des routes dupliquees dans `BACKEND/app.js` ;
+- centralisation des routes vers les controleurs existants ;
+- deplacement de la recherche d'eleves vers `eleves.controleur.js` ;
+- deplacement de la fiche eleve vers `eleves.controleur.js` ;
+- prise en charge de `PATCH` pour les classes, eleves et paiements ;
+- prise en charge des modifications partielles sans obliger a renvoyer tous les champs ;
+- suppression d'un eleve avec ses paiements associes ;
+- conservation des routes utiles : sante, classes, eleves, paiements, journal, recu et taux.
+
+### Tests executes
+
+Commandes executees :
+
+```powershell
+node --check BACKEND\app.js
+node --check BACKEND\src\controleurs\eleves.controleur.js
+node --check BACKEND\src\controleurs\classes.controleur.js
+node --check BACKEND\src\controleurs\paiements.controleur.js
+npm run test:e2e
+```
+
+Resultat :
+
+- syntaxe backend : OK ;
+- demarrage du backend : OK ;
+- creation, modification et suppression de classe : OK ;
+- creation, modification et suppression d'eleve : OK ;
+- creation, recherche, modification et suppression de paiement : OK ;
+- recherche de recu : OK ;
+- mise a jour du taux : OK ;
+- test frontend/API minimal : OK.
+
+### Observation importante
+
+Le script `BACKEND/tmp-ui-e2e.js` fonctionne, mais sa logique de selection de la classe creee est fragile. Il recupere actuellement le dernier element d'une liste triee par nom, ce qui ne garantit pas toujours qu'il s'agit de la classe creee pendant le test.
+
+Taches a faire plus tard :
+
+- renommer les fichiers `tmp-test-admin.js` et `tmp-ui-e2e.js` ;
+- les placer dans un dossier `BACKEND/tests` ;
+- rendre les assertions plus strictes et plus fiables.
+
+### Etat reel actuel
+
+Le backend est maintenant plus propre et plus stable.
+
+Le frontend consomme deja une partie de l'API via `FRONTEND/js/app.js`, notamment :
+
+- les classes ;
+- les eleves ;
+- les paiements ;
+- le journal de caisse.
+
+La prochaine etape technique recommandee est maintenant :
+
+1. ajouter les categories de frais demandees par le client ;
+2. generer les matricules cote backend ;
+3. preparer les factures multi-operations.

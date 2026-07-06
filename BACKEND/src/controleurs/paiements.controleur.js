@@ -1,5 +1,10 @@
 const { construire_numero_recu } = require('../services/recu.service');
 
+function envoyer_json(reponse, code_statut, contenu) {
+  reponse.writeHead(code_statut, { 'Content-Type': 'application/json; charset=utf-8' });
+  reponse.end(JSON.stringify(contenu));
+}
+
 function lister_paiements(base_de_donnees, reponse) {
   const lignes = base_de_donnees.prepare(`
     SELECT p.id, p.numero_recu, p.libelle, p.montant, p.devise, p.paye_le,
@@ -9,8 +14,7 @@ function lister_paiements(base_de_donnees, reponse) {
     ORDER BY p.id DESC
   `).all();
 
-  reponse.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-  reponse.end(JSON.stringify({ donnees: lignes }));
+  envoyer_json(reponse, 200, { donnees: lignes });
 }
 
 function creer_paiement(base_de_donnees, corps, reponse) {
@@ -18,24 +22,21 @@ function creer_paiement(base_de_donnees, corps, reponse) {
   const libelle = String(corps.libelle || '').trim();
   const montant = Number(corps.montant);
   const devise = String(corps.devise || 'USD').toUpperCase();
-  const paye_le = String(corps.paye_le || new Date().toISOString());
+  const paye_le = String(corps.paye_le || new Date().toISOString()).slice(0, 10);
 
   if (!eleve_id || !libelle || !Number.isFinite(montant) || montant <= 0) {
-    reponse.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
-    return reponse.end(JSON.stringify({
+    return envoyer_json(reponse, 400, {
       erreur: 'eleve_id, libelle et montant positif sont obligatoires'
-    }));
+    });
   }
 
   if (!['USD', 'CDF'].includes(devise)) {
-    reponse.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
-    return reponse.end(JSON.stringify({ erreur: 'devise invalide' }));
+    return envoyer_json(reponse, 400, { erreur: 'devise invalide' });
   }
 
   const eleve = base_de_donnees.prepare('SELECT id FROM eleves WHERE id = ?').get(eleve_id);
   if (!eleve) {
-    reponse.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
-    return reponse.end(JSON.stringify({ erreur: 'eleve introuvable' }));
+    return envoyer_json(reponse, 404, { erreur: 'eleve introuvable' });
   }
 
   const insertion = base_de_donnees.prepare(`
@@ -50,8 +51,7 @@ function creer_paiement(base_de_donnees, corps, reponse) {
     .prepare('UPDATE paiements SET numero_recu = ? WHERE id = ?')
     .run(numero_recu, resultat.lastInsertRowid);
 
-  reponse.writeHead(201, { 'Content-Type': 'application/json; charset=utf-8' });
-  reponse.end(JSON.stringify({
+  envoyer_json(reponse, 201, {
     donnees: {
       id: resultat.lastInsertRowid,
       numero_recu,
@@ -61,7 +61,7 @@ function creer_paiement(base_de_donnees, corps, reponse) {
       devise,
       paye_le
     }
-  }));
+  });
 }
 
 function rechercher_paiement(base_de_donnees, numero_recu, reponse) {
@@ -74,41 +74,41 @@ function rechercher_paiement(base_de_donnees, numero_recu, reponse) {
   `).get(numero_recu);
 
   if (!paiement) {
-    reponse.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
-    return reponse.end(JSON.stringify({ erreur: 'Paiement introuvable' }));
+    return envoyer_json(reponse, 404, { erreur: 'Paiement introuvable' });
   }
 
-  reponse.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-  reponse.end(JSON.stringify({ donnees: paiement }));
+  envoyer_json(reponse, 200, { donnees: paiement });
 }
 
 function modifier_paiement(base_de_donnees, id, corps, reponse) {
-  const eleve_id = corps.eleve_id ? Number(corps.eleve_id) : null;
-  const libelle = String(corps.libelle || '').trim();
-  const montant = Number(corps.montant);
-  const devise = String(corps.devise || 'USD').toUpperCase();
-  const paye_le = String(corps.paye_le || new Date().toISOString()).slice(0, 10);
+  const paiement = base_de_donnees.prepare('SELECT * FROM paiements WHERE id = ?').get(id);
+  if (!paiement) {
+    return envoyer_json(reponse, 404, { erreur: 'Paiement introuvable' });
+  }
+
+  const eleve_id = Object.prototype.hasOwnProperty.call(corps, 'eleve_id')
+    ? Number(corps.eleve_id)
+    : paiement.eleve_id;
+  const libelle = String(corps.libelle || paiement.libelle || '').trim();
+  const montant = Object.prototype.hasOwnProperty.call(corps, 'montant')
+    ? Number(corps.montant)
+    : Number(paiement.montant);
+  const devise = String(corps.devise || paiement.devise || 'USD').toUpperCase();
+  const paye_le = String(corps.paye_le || paiement.paye_le || new Date().toISOString()).slice(0, 10);
 
   if (!eleve_id || !libelle || !Number.isFinite(montant) || montant <= 0) {
-    reponse.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
-    return reponse.end(JSON.stringify({ erreur: 'eleve_id, libelle et montant positif sont obligatoires' }));
+    return envoyer_json(reponse, 400, {
+      erreur: 'eleve_id, libelle et montant positif sont obligatoires'
+    });
   }
 
   if (!['USD', 'CDF'].includes(devise)) {
-    reponse.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
-    return reponse.end(JSON.stringify({ erreur: 'devise invalide' }));
-  }
-
-  const paiement = base_de_donnees.prepare('SELECT id FROM paiements WHERE id = ?').get(id);
-  if (!paiement) {
-    reponse.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
-    return reponse.end(JSON.stringify({ erreur: 'Paiement introuvable' }));
+    return envoyer_json(reponse, 400, { erreur: 'devise invalide' });
   }
 
   const eleve = base_de_donnees.prepare('SELECT id FROM eleves WHERE id = ?').get(eleve_id);
   if (!eleve) {
-    reponse.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
-    return reponse.end(JSON.stringify({ erreur: 'Élève introuvable' }));
+    return envoyer_json(reponse, 400, { erreur: 'Eleve introuvable' });
   }
 
   base_de_donnees.prepare(`
@@ -117,15 +117,22 @@ function modifier_paiement(base_de_donnees, id, corps, reponse) {
     WHERE id = ?
   `).run(eleve_id, libelle, montant, devise, paye_le, id);
 
-  reponse.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-  reponse.end(JSON.stringify({ donnees: { id, eleve_id, libelle, montant, devise, paye_le } }));
+  envoyer_json(reponse, 200, {
+    donnees: {
+      id,
+      eleve_id,
+      libelle,
+      montant,
+      devise,
+      paye_le
+    }
+  });
 }
 
 function supprimer_paiement(base_de_donnees, id, reponse) {
   const paiement = base_de_donnees.prepare('SELECT id FROM paiements WHERE id = ?').get(id);
   if (!paiement) {
-    reponse.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
-    return reponse.end(JSON.stringify({ erreur: 'Paiement introuvable' }));
+    return envoyer_json(reponse, 404, { erreur: 'Paiement introuvable' });
   }
 
   base_de_donnees.prepare('DELETE FROM paiements WHERE id = ?').run(id);
