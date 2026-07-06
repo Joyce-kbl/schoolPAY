@@ -1,0 +1,10 @@
+{
+  "name": "schoolpay-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "start": "node app.js",
+    "test:e2e": "node tmp-test-admin.js && node tmp-ui-e2e.js"
+  }
+}

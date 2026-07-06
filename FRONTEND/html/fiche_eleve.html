@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoolPAY - Fiche Élève</title>
+    <style>
+        :root { --primary: #8b0000; --bg: #f8fafc; --white: #ffffff; --success: #059669; --danger: #dc2626; --warning: #d97706; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        body { background-color: var(--bg); padding-bottom: 30px; }
+
+        header { background: var(--white); padding: 15px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .back-btn { text-decoration: none; color: var(--primary); font-size: 22px; font-weight: bold; padding: 4px 8px; border-radius: 8px; transition: background 0.15s; }
+        .back-btn:hover { background: #fef2f2; }
+
+        .container { padding: 20px; max-width: 480px; margin: 0 auto; }
+
+        /* Carte profil élève */
+        .profile-card { background: var(--primary); border-radius: 20px; padding: 24px; color: white; margin-bottom: 20px; position: relative; overflow: hidden; }
+        .profile-card::before { content: ''; position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.08); border-radius: 50%; }
+        .profile-avatar { width: 56px; height: 56px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; margin-bottom: 12px; }
+        .profile-name { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+        .profile-meta { font-size: 12px; opacity: 0.8; display: flex; gap: 12px; }
+        .profile-badge { background: rgba(255,255,255,0.15); border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700; }
+
+        /* Stats */
+        .grid-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-card { background: var(--white); padding: 15px 10px; border-radius: 14px; text-align: center; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+        .stat-value { font-size: 16px; font-weight: 900; display: block; }
+        .stat-label { font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 700; margin-top: 3px; }
+
+        /* Barre de progression */
+        .progress-card { background: var(--white); border-radius: 14px; padding: 18px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .progress-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; color: #64748b; font-weight: 700; }
+        .progress-bar { height: 10px; background: #f1f5f9; border-radius: 99px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #059669, #10b981); border-radius: 99px; transition: width 1s ease; }
+        .progress-fill.danger { background: linear-gradient(90deg, #dc2626, #f87171); }
+        .progress-fill.warning { background: linear-gradient(90deg, #d97706, #fbbf24); }
+
+        /* Tableau historique */
+        .table-card { background: var(--white); border-radius: 16px; padding: 18px; border: 1px solid #e2e8f0; }
+        .table-title { font-weight: 800; margin-bottom: 14px; font-size: 14px; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; color: #64748b; padding: 8px 6px; border-bottom: 1.5px solid #f1f5f9; font-size: 11px; text-transform: uppercase; }
+        td { padding: 12px 6px; border-bottom: 1px solid #f8fafc; }
+        tr:last-child td { border-bottom: none; }
+        .badge-libelle { background: #f1f5f9; color: #475569; border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 700; }
+
+        .btn-pay-more { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--primary); color: white; padding: 15px; border-radius: 14px; border: none; font-weight: bold; width: 100%; cursor: pointer; font-size: 14px; text-decoration: none; margin-top: 16px; }
+
+        .empty-state { text-align: center; padding: 30px 20px; color: #94a3b8; }
+        .loading { text-align: center; padding: 40px; color: #94a3b8; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="javascript:history.back()" class="back-btn">←</a>
+    <h2 style="color: var(--primary); font-size: 16px; font-weight: 700;">Fiche Élève</h2>
+</header>
+
+<div class="container" id="main-container">
+    <div class="loading">Chargement...</div>
+</div>
+
+<script>
+function formatMonnaie(val, devise = 'USD') {
+    const s = devise === 'CDF' ? 'FC' : '$';
+    return `${Number(val).toFixed(2).replace('.', ',')} ${s}`;
+}
+function formatDate(d) {
+    if (!d) return '—';
+    const dt = new Date(d);
+    return isNaN(dt) ? d : dt.toLocaleDateString('fr-FR');
+}
+
+async function chargerFiche() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    const container = document.getElementById('main-container');
+
+    if (!id) {
+        container.innerHTML = '<div class="empty-state">❌ Aucun élève sélectionné.<br><a href="index.html">← Retour</a></div>';
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/eleves/${id}/fiche`);
+        if (!res.ok) throw new Error('Élève introuvable');
+        const data = (await res.json()).donnees;
+
+        const { eleve, paiements, totalPaye, fraisTotal, reste } = data;
+        const pct = fraisTotal > 0 ? Math.min(100, (totalPaye / fraisTotal) * 100) : 0;
+        const initiales = eleve.nom_complet.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        const sexeLabel = eleve.sexe === 'M' ? '👦 Masculin' : eleve.sexe === 'F' ? '👧 Féminin' : '—';
+        
+        let progressClass = 'danger';
+        if (pct >= 80) progressClass = '';
+        else if (pct >= 40) progressClass = 'warning';
+
+        const historiqueHTML = paiements.length === 0
+            ? '<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:20px;">Aucun paiement enregistré</td></tr>'
+            : paiements.map(p => `
+                <tr>
+                    <td style="color:#64748b;font-size:12px;">${formatDate(p.paye_le)}</td>
+                    <td><span class="badge-libelle">${p.libelle}</span></td>
+                    <td style="text-align:right;font-weight:700;color:#1e293b;">${formatMonnaie(p.montant, p.devise)}</td>
+                </tr>
+            `).join('');
+
+        container.innerHTML = `
+            <div class="profile-card">
+                <div class="profile-avatar">${initiales}</div>
+                <div class="profile-name">${eleve.nom_complet}</div>
+                <div class="profile-meta">
+                    <span>${eleve.matricule || '—'}</span>
+                    <span class="profile-badge">${eleve.nom_classe || 'Classe inconnue'}</span>
+                    <span>${sexeLabel}</span>
+                </div>
+            </div>
+
+            <div class="grid-stats">
+                <div class="stat-card">
+                    <span class="stat-value" style="color:#1e293b;">${formatMonnaie(fraisTotal)}</span>
+                    <span class="stat-label">Frais total</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" style="color:var(--success);">${formatMonnaie(totalPaye)}</span>
+                    <span class="stat-label">Payé</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" style="color:var(--danger);">${formatMonnaie(reste)}</span>
+                    <span class="stat-label">Reste</span>
+                </div>
+            </div>
+
+            <div class="progress-card">
+                <div class="progress-label">
+                    <span>Avancement du paiement</span>
+                    <span style="color:${pct >= 80 ? 'var(--success)' : pct >= 40 ? 'var(--warning)' : 'var(--danger)'};">${pct.toFixed(0)}%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill ${progressClass}" style="width: ${pct}%;"></div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-title">📄 Historique des paiements <span style="background:#fef2f2;color:#8b0000;border-radius:20px;padding:2px 10px;font-size:11px;">${paiements.length}</span></div>
+                <table>
+                    <thead><tr><th>Date</th><th>Libellé</th><th style="text-align:right;">Montant</th></tr></thead>
+                    <tbody>${historiqueHTML}</tbody>
+                </table>
+            </div>
+
+            <a href="paiement.html" class="btn-pay-more">➕ Effectuer un paiement</a>
+        `;
+    } catch(err) {
+        container.innerHTML = `<div class="empty-state">❌ ${err.message}<br><br><a href="index.html" style="color:#8b0000;font-weight:700;">← Retour à l'accueil</a></div>`;
+    }
+}
+
+chargerFiche();
+</script>
+</body>
+</html>

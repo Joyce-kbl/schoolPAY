@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouveau Paiement - SchoolPAY</title>
+    <style>
+        :root { --primary: #8b0000; --bg: #f8fafc; --white: #fff; --success: #059669; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+        body { background-color: var(--bg); padding-bottom: 30px; }
+
+        header { background: var(--white); padding: 15px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .back-btn { text-decoration: none; color: var(--primary); font-size: 22px; font-weight: bold; padding: 4px 8px; border-radius: 8px; transition: background 0.15s; }
+        .back-btn:hover { background: #fef2f2; }
+        .logo-circle { width: 42px; height: 42px; background: var(--primary); color: var(--white); display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; font-size: 13px; }
+
+        .container { padding: 20px; max-width: 480px; margin: 0 auto; }
+        .card { background: var(--white); border-radius: 20px; padding: 22px; border: 1px solid #e2e8f0; box-shadow: 0 4px 10px rgba(0,0,0,0.04); }
+        .form-group { margin-bottom: 16px; }
+        label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; display: block; }
+        .form-control { width: 100%; padding: 13px 15px; border: 1.5px solid #e2e8f0; border-radius: 12px; background: #fdfdfd; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        .form-control:focus { border-color: var(--primary); }
+        
+        .btn-valider { background: var(--success); color: white; padding: 16px; border-radius: 14px; border: none; font-weight: bold; width: 100%; cursor: pointer; font-size: 15px; margin-top: 8px; transition: background 0.2s; }
+        .btn-valider:hover { background: #047857; }
+        .btn-valider:disabled { background: #94a3b8; cursor: not-allowed; }
+        
+        .row-2 { display: flex; gap: 12px; }
+        .row-2 > * { flex: 1; }
+        .row-2 > *:first-child { flex: 2; }
+
+        .success-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center; }
+        .success-card { background: white; border-radius: 24px; padding: 35px 25px; text-align: center; width: 90%; max-width: 340px; }
+        .success-icon { font-size: 56px; margin-bottom: 15px; }
+        .success-title { font-size: 20px; font-weight: 800; color: #059669; margin-bottom: 8px; }
+        .success-sub { color: #64748b; font-size: 14px; margin-bottom: 25px; }
+        .btn-facture { background: #8b0000; color: white; padding: 14px; border-radius: 12px; border: none; font-weight: bold; width: 100%; cursor: pointer; font-size: 14px; margin-bottom: 10px; text-decoration: none; display: block; }
+        .btn-skip { background: #f1f5f9; color: #64748b; padding: 12px; border-radius: 12px; border: none; font-weight: 600; width: 100%; cursor: pointer; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="index.html" class="back-btn">←</a>
+    <div class="logo-circle">SP</div>
+    <h2 style="color: var(--primary); font-size: 16px;">Nouveau Paiement</h2>
+</header>
+
+<div class="container">
+    <div class="card">
+        <div class="form-group">
+            <label>Classe</label>
+            <select id="classe-select" class="form-control" onchange="filtrerEleves()">
+                <option value="">Sélectionner la classe...</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Nom de l'élève</label>
+            <select id="eleve-select" class="form-control">
+                <option value="">Sélectionner l'élève...</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Type de frais</label>
+            <select id="frais-select" class="form-control">
+                <option value="">Sélectionner le type...</option>
+                <option value="Minerval">Minerval</option>
+                <option value="Inscription">Inscription</option>
+                <option value="Cantine">Cantine</option>
+                <option value="Autre">Autre</option>
+            </select>
+        </div>
+
+        <div class="row-2">
+            <div class="form-group">
+                <label>Montant</label>
+                <input id="montant-input" type="number" class="form-control" placeholder="0.00" min="0">
+            </div>
+            <div class="form-group">
+                <label>Devise</label>
+                <select id="devise-select" class="form-control">
+                    <option value="USD">USD $</option>
+                    <option value="CDF">CDF FC</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Date</label>
+            <input id="date-input" type="date" class="form-control">
+        </div>
+
+        <button id="btn-valider-paiement" class="btn-valider" type="button">✅ VALIDER LE PAIEMENT</button>
+    </div>
+</div>
+
+<!-- Overlay succès -->
+<div class="success-overlay" id="success-overlay">
+    <div class="success-card">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Paiement enregistré !</div>
+        <div class="success-sub" id="success-details">Le paiement a été enregistré avec succès.</div>
+        <a id="btn-voir-facture" href="#" class="btn-facture">🖨️ Imprimer la Facture</a>
+        <button class="btn-skip" onclick="window.location.href='index.html'">Retour à l'accueil</button>
+    </div>
+</div>
+
+<script>
+let tousLesEleves = [];
+
+async function chargerDonnees() {
+    const [classesRes, elevesRes] = await Promise.all([
+        fetch('/api/classes'),
+        fetch('/api/eleves')
+    ]);
+    const classesData = await classesRes.json();
+    const elevesData = await elevesRes.json();
+    
+    tousLesEleves = elevesData.donnees || [];
+    
+    const selectClasses = document.getElementById('classe-select');
+    (classesData.donnees || []).forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.nom;
+        selectClasses.appendChild(opt);
+    });
+
+    remplirEleves(tousLesEleves);
+    document.getElementById('date-input').value = new Date().toISOString().slice(0, 10);
+}
+
+function remplirEleves(eleves) {
+    const sel = document.getElementById('eleve-select');
+    sel.innerHTML = '<option value="">Sélectionner l\'élève...</option>';
+    eleves.forEach(e => {
+        const opt = document.createElement('option');
+        opt.value = e.id;
+        opt.textContent = `${e.nom_complet} (${e.matricule || '—'})`;
+        sel.appendChild(opt);
+    });
+}
+
+function filtrerEleves() {
+    const classeId = document.getElementById('classe-select').value;
+    if (!classeId) return remplirEleves(tousLesEleves);
+    remplirEleves(tousLesEleves.filter(e => String(e.classe_id) === String(classeId)));
+}
+
+document.getElementById('btn-valider-paiement').addEventListener('click', async function() {
+    const eleve_id = Number(document.getElementById('eleve-select').value);
+    const libelle = document.getElementById('frais-select').value;
+    const montant = Number(document.getElementById('montant-input').value);
+    const devise = document.getElementById('devise-select').value;
+    const paye_le = document.getElementById('date-input').value || new Date().toISOString().slice(0, 10);
+
+    if (!eleve_id || !libelle || !(montant > 0)) {
+        alert('Veuillez sélectionner un élève, un type de frais et un montant valide.');
+        return;
+    }
+
+    this.disabled = true;
+    this.textContent = 'Enregistrement...';
+    
+    try {
+        const res = await fetch('/api/paiements', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eleve_id, libelle, montant, devise, paye_le })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.erreur || 'Erreur');
+
+        const paiement = data.donnees;
+        const eleveNom = document.getElementById('eleve-select').selectedOptions[0]?.text || '';
+        const symbole = devise === 'CDF' ? 'FC' : '$';
+        
+        document.getElementById('success-details').textContent =
+            `${eleveNom.split('(')[0].trim()} — ${libelle} — ${montant.toFixed(2)} ${symbole}`;
+        
+        // Préparer le lien vers la facture
+        const params = new URLSearchParams({
+            id: paiement.id,
+            numero: paiement.numero_recu,
+            nom: eleveNom.split('(')[0].trim(),
+            libelle,
+            montant,
+            devise,
+            date: paye_le
+        });
+        document.getElementById('btn-voir-facture').href = `facture.html?${params.toString()}`;
+        document.getElementById('success-overlay').style.display = 'flex';
+    } catch (err) {
+        alert('Erreur : ' + err.message);
+        this.disabled = false;
+        this.textContent = '✅ VALIDER LE PAIEMENT';
+    }
+});
+
+chargerDonnees();
+</script>
+</body>
+</html>

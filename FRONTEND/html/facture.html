@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reçu de Paiement - SchoolPAY</title>
+    <style>
+        :root { --primary: #8b0000; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8fafc; }
+
+        /* === NAVIGATION (hors impression) === */
+        .no-print { }
+        .top-nav { background: white; padding: 14px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .back-btn { text-decoration: none; color: var(--primary); font-size: 22px; font-weight: bold; padding: 4px 8px; border-radius: 8px; }
+        .nav-title { color: var(--primary); font-size: 16px; font-weight: 700; }
+
+        .page-wrapper { padding: 20px; max-width: 520px; margin: 0 auto; }
+
+        /* === DESIGN REÇU === */
+        .recu-sheet { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 16px; }
+        
+        .recu-header { background: var(--primary); color: white; padding: 22px 24px; display: flex; align-items: center; gap: 16px; }
+        .recu-logo { width: 52px; height: 52px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--primary); font-size: 16px; }
+        .recu-school { font-size: 18px; font-weight: 800; }
+        .recu-subtitle { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+        .recu-numero-badge { margin-left: auto; background: rgba(255,255,255,0.2); border-radius: 10px; padding: 6px 12px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+
+        .recu-body { padding: 22px 24px; }
+        .recu-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+        .recu-row:last-child { border-bottom: none; }
+        .recu-key { font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700; }
+        .recu-val { font-size: 14px; color: #1e293b; font-weight: 600; text-align: right; max-width: 60%; }
+        
+        .montant-highlight { background: #fef2f2; border-radius: 12px; padding: 16px 24px; margin: 16px 0; text-align: center; }
+        .montant-highlight .label { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; }
+        .montant-highlight .valeur { font-size: 28px; font-weight: 900; color: var(--primary); margin-top: 4px; }
+        .montant-highlight .lettres { font-size: 12px; color: #64748b; margin-top: 4px; font-style: italic; }
+
+        .recu-footer { padding: 18px 24px; background: #f8fafc; display: flex; justify-content: space-between; gap: 20px; }
+        .sig-block { flex: 1; text-align: center; }
+        .sig-label { font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 35px; }
+        .sig-line { border-top: 1.5px solid #cbd5e1; padding-top: 6px; font-size: 11px; color: #94a3b8; }
+
+        .separator { text-align: center; color: #94a3b8; font-size: 12px; padding: 8px 0; letter-spacing: 4px; }
+
+        .btn-print-main { background: var(--primary); color: white; padding: 16px; border-radius: 14px; border: none; font-weight: bold; width: 100%; cursor: pointer; font-size: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-secondary { background: #f1f5f9; color: #475569; padding: 13px; border-radius: 14px; border: none; font-weight: 600; width: 100%; cursor: pointer; font-size: 14px; text-decoration: none; display: block; text-align: center; }
+
+        /* === IMPRESSION === */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+            .page-wrapper { padding: 0; max-width: 100%; }
+            .recu-sheet { border-radius: 0; box-shadow: none; margin-bottom: 0; border: 1px solid #ccc; }
+            .recu-sheet:last-of-type { border-top: 2px dashed #999; }
+            .separator { display: none; }
+            
+            /* Force deux reçus sur une page A4 */
+            .print-area { page-break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="no-print">
+    <div class="top-nav">
+        <a href="index.html" class="back-btn">←</a>
+        <span class="nav-title">Reçu de Paiement</span>
+    </div>
+</div>
+
+<div class="page-wrapper">
+    <!-- Reçu #1 (original) -->
+    <div class="recu-sheet print-area" id="recu1">
+        <div class="recu-header">
+            <div class="recu-logo">SP</div>
+            <div>
+                <div class="recu-school">ÉCOLE FATIMA</div>
+                <div class="recu-subtitle">Reçu de Paiement Scolaire</div>
+            </div>
+            <div class="recu-numero-badge" id="r1-numero">N° ...</div>
+        </div>
+        <div class="recu-body">
+            <div class="montant-highlight">
+                <div class="label">Montant reçu</div>
+                <div class="valeur" id="r1-montant">—</div>
+                <div class="lettres" id="r1-lettres">—</div>
+            </div>
+            <div class="recu-row">
+                <span class="recu-key">Élève</span>
+                <span class="recu-val" id="r1-nom">—</span>
+            </div>
+            <div class="recu-row">
+                <span class="recu-key">Type de frais</span>
+                <span class="recu-val" id="r1-libelle">—</span>
+            </div>
+            <div class="recu-row">
+                <span class="recu-key">Date</span>
+                <span class="recu-val" id="r1-date">—</span>
+            </div>
+        </div>
+        <div class="recu-footer">
+            <div class="sig-block">
+                <div class="sig-label">Caissier(e)</div>
+                <div class="sig-line">Signature</div>
+            </div>
+            <div class="sig-block">
+                <div class="sig-label">Parent / Tuteur</div>
+                <div class="sig-line">Signature</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="separator">✂ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ COPIE ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ✂</div>
+
+    <!-- Reçu #2 (copie) -->
+    <div class="recu-sheet print-area" id="recu2">
+        <div class="recu-header">
+            <div class="recu-logo">SP</div>
+            <div>
+                <div class="recu-school">ÉCOLE FATIMA</div>
+                <div class="recu-subtitle">Reçu de Paiement Scolaire — COPIE</div>
+            </div>
+            <div class="recu-numero-badge" id="r2-numero">N° ...</div>
+        </div>
+        <div class="recu-body">
+            <div class="montant-highlight">
+                <div class="label">Montant reçu</div>
+                <div class="valeur" id="r2-montant">—</div>
+                <div class="lettres" id="r2-lettres">—</div>
+            </div>
+            <div class="recu-row">
+                <span class="recu-key">Élève</span>
+                <span class="recu-val" id="r2-nom">—</span>
+            </div>
+            <div class="recu-row">
+                <span class="recu-key">Type de frais</span>
+                <span class="recu-val" id="r2-libelle">—</span>
+            </div>
+            <div class="recu-row">
+                <span class="recu-key">Date</span>
+                <span class="recu-val" id="r2-date">—</span>
+            </div>
+        </div>
+        <div class="recu-footer">
+            <div class="sig-block">
+                <div class="sig-label">Caissier(e)</div>
+                <div class="sig-line">Signature</div>
+            </div>
+            <div class="sig-block">
+                <div class="sig-label">Parent / Tuteur</div>
+                <div class="sig-line">Signature</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Boutons -->
+    <div style="margin-top: 20px;" class="no-print">
+        <button class="btn-print-main" onclick="window.print()">🖨️ Imprimer le Reçu</button>
+        <a href="index.html" class="btn-secondary">← Retour à l'accueil</a>
+    </div>
+</div>
+
+<script>
+function nombreEnLettres(n, devise) {
+    // Conversion simplifiée
+    const unites = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf',
+        'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf'];
+    const dizaines = ['', '', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante', 'quatre-vingt', 'quatre-vingt'];
+    
+    const entier = Math.floor(n);
+    const cents = Math.round((n - entier) * 100);
+    
+    function convertir(nb) {
+        if (nb === 0) return 'zéro';
+        if (nb < 20) return unites[nb];
+        if (nb < 100) {
+            const d = Math.floor(nb / 10);
+            const u = nb % 10;
+            if (d === 7 || d === 9) return dizaines[d] + (u === 1 ? '-et-' : '-') + unites[10 + u];
+            return dizaines[d] + (u > 0 ? (u === 1 && d !== 8 ? '-et-un' : '-' + unites[u]) : (d === 8 ? 's' : ''));
+        }
+        if (nb < 1000) return unites[Math.floor(nb/100)] + ' cent' + (nb % 100 > 0 ? ' ' + convertir(nb % 100) : 's');
+        return convertir(Math.floor(nb/1000)) + ' mille' + (nb % 1000 > 0 ? ' ' + convertir(nb % 1000) : '');
+    }
+    
+    const symb = devise === 'CDF' ? 'Franc(s) congolais' : 'Dollar(s)';
+    let result = convertir(entier) + ' ' + symb;
+    if (cents > 0) result += ' et ' + convertir(cents) + ' centime(s)';
+    return result.charAt(0).toUpperCase() + result.slice(1);
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return '—';
+    const [y, m, d] = dateStr.split('-');
+    return `${d}/${m}/${y}`;
+}
+
+function remplirRecu(suffix, data) {
+    const symbole = data.devise === 'CDF' ? 'FC' : '$';
+    document.getElementById(`${suffix}-numero`).textContent = `N° ${data.numero}`;
+    document.getElementById(`${suffix}-nom`).textContent = data.nom;
+    document.getElementById(`${suffix}-libelle`).textContent = data.libelle;
+    document.getElementById(`${suffix}-date`).textContent = formatDate(data.date);
+    document.getElementById(`${suffix}-montant`).textContent = `${Number(data.montant).toFixed(2)} ${symbole}`;
+    document.getElementById(`${suffix}-lettres`).textContent = nombreEnLettres(Number(data.montant), data.devise);
+}
+
+// Charger depuis URL params OU depuis l'API si seulement l'id est fourni
+const params = new URLSearchParams(window.location.search);
+const id = params.get('id');
+
+async function chargerFacture() {
+    let data = {};
+    if (params.get('numero')) {
+        data = {
+            numero: params.get('numero'),
+            nom: params.get('nom'),
+            libelle: params.get('libelle'),
+            montant: params.get('montant'),
+            devise: params.get('devise'),
+            date: params.get('date')
+        };
+    } else if (id) {
+        try {
+            const res = await fetch(`/api/paiements/${id}`);
+            const json = await res.json();
+            const p = json.donnees;
+            data = { numero: p.numero_recu, nom: p.nom_eleve, libelle: p.libelle, montant: p.montant, devise: p.devise, date: p.paye_le };
+        } catch(e) { data = { numero: '—', nom: '—', libelle: '—', montant: 0, devise: 'USD', date: '' }; }
+    }
+    remplirRecu('r1', data);
+    remplirRecu('r2', data);
+}
+
+chargerFacture();
+</script>
+</body>
+</html>

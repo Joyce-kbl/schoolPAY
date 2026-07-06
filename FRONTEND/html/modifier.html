@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoolPAY - Administration</title>
+    <style>
+        :root { --primary: #8b0000; --bg: #f8fafc; --white: #ffffff; --success: #059669; --accent: #d97706; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg); padding-bottom: 90px; }
+
+        /* Header */
+        header { background: var(--white); padding: 15px 20px; display: flex; align-items: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .logo-circle { width: 45px; height: 45px; background: var(--primary); color: var(--white); display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; margin-right: 15px; }
+
+        /* Conteneur */
+        .container { padding: 20px; }
+        .card { background: var(--white); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .card-title { font-size: 14px; font-weight: 800; color: var(--primary); margin-bottom: 15px; text-transform: uppercase; }
+
+        /* Formulaires */
+        .form-control { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 10px; background: #fcfcfc; }
+        .btn-action { background: var(--primary); color: var(--white); padding: 12px; border-radius: 12px; border: none; font-weight: bold; width: 100%; cursor: pointer; }
+
+        /* Navigation Bas */
+        .nav-bottom { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: var(--white); border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .nav-link { text-decoration: none; color: #64748b; font-size: 11px; font-weight: 600; text-align: center; }
+        .home-icon-circle { width: 60px; height: 60px; background: var(--primary); color: var(--white); display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 24px; box-shadow: 0 4px 10px rgba(139,0,0,0.3); margin-top: -30px; border: 4px solid var(--bg); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" style="text-decoration:none;color:var(--primary);font-size:22px;font-weight:bold;padding:4px 8px;border-radius:8px;">←</a>
+        <div class="logo-circle">SP</div>
+        <h2 style="color: var(--primary); font-size: 16px;">Administration</h2>
+    </header>
+
+    <div class="container">
+        <!-- Modification Reçu -->
+        <div class="card">
+            <div class="card-title">✏️ Modifier un reçu</div>
+            <input id="recu-search" type="text" class="form-control" placeholder="Entrez le numéro du reçu...">
+            <button id="btn-rechercher-recu" class="btn-action">Rechercher</button>
+        </div>
+
+        <!-- Ajout Élève -->
+        <div class="card">
+            <div class="card-title">👤 Ajouter une classe</div>
+    <input id="nouvelle-classe-nom" type="text" class="form-control" placeholder="Nom classe">
+    
+    <input id="nouvelle-classe-montant" type="number" class="form-control" placeholder="Montant Frais">
+    <button id="btn-ajouter-classe" class="btn-action" style="background: var(--success);">Enregistrer Classe</button>
+        <!-- Partie Ajout Élève (Mise à jour avec liste déroulante) -->
+<div class="card">
+    <div class="card-title">👤 Ajouter un élève</div>
+    <input id="nouvel-eleve-nom" type="text" class="form-control" placeholder="Nom complet">
+    
+    <select id="nouvel-eleve-sexe" class="form-control">
+        <option value="">Sélectionner le sexe</option>
+        <option value="M">Masculin</option>
+        <option value="F">Féminin</option>
+    </select>
+    
+    <select id="nouvel-eleve-classe" class="form-control">
+        <option value="">Sélectionner une classe...</option>
+    </select>
+    
+    <button id="btn-ajouter-eleve" class="btn-action" style="background: var(--success);">Enregistrer Élève</button>
+</div>
+
+        <!-- Taux de Change -->
+        <div class="card" style="border-left: 5px solid var(--accent);">
+            <div class="card-title">💱 Taux de change</div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="number" class="form-control" style="margin-bottom:0;" value="2850">
+                <span style="font-weight:bold; color: var(--accent);">FC / 1$</span>
+            </div>
+            <button class="btn-action" style="background: var(--accent); margin-top: 10px;">Mettre à jour le taux</button>
+        </div>
+    </div>
+
+    <nav class="nav-bottom">
+        <a href="journal de caisse.html" class="nav-link"><span style="font-size: 28px;">📒</span><br>Journal</a>
+        <a href="index.html"><div class="home-icon-circle">🏠</div></a>
+        <a href="modifier.html" class="nav-link" style="color: var(--primary);"><span style="font-size: 28px;">⚙️</span><br>Paramètre</a>
+    </nav>
+    <script src="/js/app.js" defer></script>
+</body>
+</html>
