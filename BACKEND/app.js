@@ -21,13 +21,21 @@ const {
   modifier_paiement,
   supprimer_paiement
 } = require('./src/controleurs/paiements.controleur');
-const obtenir_journal = require('./src/controleurs/journal.controleur');
+const { obtenir_journal, obtenir_journal_synthese } = require('./src/controleurs/journal.controleur');
 const {
   lister_classes,
   creer_classe,
   modifier_classe,
   supprimer_classe
 } = require('./src/controleurs/classes.controleur');
+const {
+  lister_categories_frais,
+  creer_categorie_frais
+} = require('./src/controleurs/categories_frais.controleur');
+const {
+  creer_facture,
+  obtenir_facture
+} = require('./src/controleurs/factures.controleur');
 
 const base_de_donnees = creer_base_de_donnees();
 const port = Number(process.env.PORT || 4000);
@@ -143,6 +151,15 @@ function creer_serveur() {
         return controleur_sante(requete, reponse);
       }
 
+      if (requete.method === 'GET' && url.pathname === '/api/categories-frais') {
+        return lister_categories_frais(base_de_donnees, reponse);
+      }
+
+      if (requete.method === 'POST' && url.pathname === '/api/categories-frais') {
+        const corps = await lire_corps_requete(requete);
+        return creer_categorie_frais(base_de_donnees, corps, reponse);
+      }
+
       if (requete.method === 'GET' && url.pathname === '/api/classes') {
         return lister_classes(base_de_donnees, reponse);
       }
@@ -210,11 +227,24 @@ function creer_serveur() {
       }
 
       if (requete.method === 'GET' && url.pathname === '/api/journal') {
-        return obtenir_journal(base_de_donnees, reponse);
+        return obtenir_journal(base_de_donnees, reponse, url.searchParams);
+      }
+
+      if (requete.method === 'GET' && url.pathname === '/api/journal/synthese') {
+        return obtenir_journal_synthese(base_de_donnees, reponse, url.searchParams);
       }
 
       if (requete.method === 'GET' && url.pathname === '/api/recu') {
         return obtenir_recu(url.searchParams.get('numero'), reponse);
+      }
+
+      if (requete.method === 'POST' && url.pathname === '/api/factures') {
+        const corps = await lire_corps_requete(requete);
+        return creer_facture(base_de_donnees, corps, reponse);
+      }
+
+      if (requete.method === 'GET' && url.pathname.startsWith('/api/factures/')) {
+        return obtenir_facture(base_de_donnees, url.pathname.split('/').pop(), reponse);
       }
 
       if ((requete.method === 'POST' || requete.method === 'PUT') && url.pathname === '/api/taux') {

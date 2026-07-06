@@ -63,29 +63,18 @@
         </div>
 
         <div class="form-group">
-            <label>Type de frais</label>
-            <select id="frais-select" class="form-control">
-                <option value="">Sélectionner le type...</option>
-                <option value="Minerval">Minerval</option>
-                <option value="Inscription">Inscription</option>
-                <option value="Cantine">Cantine</option>
-                <option value="Autre">Autre</option>
+            <label>Devise de la facture</label>
+            <select id="devise-select" class="form-control">
+                <option value="USD">USD $</option>
+                <option value="CDF">CDF FC</option>
             </select>
         </div>
 
-        <div class="row-2">
-            <div class="form-group">
-                <label>Montant</label>
-                <input id="montant-input" type="number" class="form-control" placeholder="0.00" min="0">
-            </div>
-            <div class="form-group">
-                <label>Devise</label>
-                <select id="devise-select" class="form-control">
-                    <option value="USD">USD $</option>
-                    <option value="CDF">CDF FC</option>
-                </select>
-            </div>
+        <div id="operations-container">
+            <!-- Les lignes d'operations -->
         </div>
+
+        <button type="button" class="btn-skip" id="btn-ajouter-ligne" style="margin-bottom: 15px;">+ Ajouter une opération</button>
 
         <div class="form-group">
             <label>Date</label>
@@ -109,16 +98,51 @@
 
 <script>
 let tousLesEleves = [];
+let toutesLesCategories = [];
+
+function creerLigneOperation() {
+    const div = document.createElement('div');
+    div.className = 'row-2 operation-row';
+    div.style.marginBottom = '10px';
+    
+    let optionsCategories = '<option value="">Sélectionner...</option>';
+    toutesLesCategories.forEach(c => {
+        optionsCategories += `<option value="${c.id}">${c.libelle}</option>`;
+    });
+
+    div.innerHTML = `
+        <div class="form-group" style="margin-bottom: 0;">
+            <select class="form-control cat-select">${optionsCategories}</select>
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+            <input type="number" class="form-control montant-input" placeholder="0.00" min="0">
+        </div>
+        <button type="button" class="btn-supprimer-ligne" style="padding: 10px; background: #fef2f2; color: #b91c1c; border: none; border-radius: 12px; cursor: pointer;">X</button>
+    `;
+
+    div.querySelector('.btn-supprimer-ligne').addEventListener('click', () => {
+        if (document.querySelectorAll('.operation-row').length > 1) {
+            div.remove();
+        }
+    });
+
+    document.getElementById('operations-container').appendChild(div);
+}
+
+document.getElementById('btn-ajouter-ligne').addEventListener('click', creerLigneOperation);
 
 async function chargerDonnees() {
-    const [classesRes, elevesRes] = await Promise.all([
+    const [classesRes, elevesRes, categoriesRes] = await Promise.all([
         fetch('/api/classes'),
-        fetch('/api/eleves')
+        fetch('/api/eleves'),
+        fetch('/api/categories-frais')
     ]);
     const classesData = await classesRes.json();
     const elevesData = await elevesRes.json();
+    const categoriesData = await categoriesRes.json();
     
     tousLesEleves = elevesData.donnees || [];
+    toutesLesCategories = categoriesData.donnees || [];
     
     const selectClasses = document.getElementById('classe-select');
     (classesData.donnees || []).forEach(c => {
@@ -128,6 +152,7 @@ async function chargerDonnees() {
         selectClasses.appendChild(opt);
     });
 
+    creerLigneOperation();
     remplirEleves(tousLesEleves);
     document.getElementById('date-input').value = new Date().toISOString().slice(0, 10);
 }
@@ -151,13 +176,23 @@ function filtrerEleves() {
 
 document.getElementById('btn-valider-paiement').addEventListener('click', async function() {
     const eleve_id = Number(document.getElementById('eleve-select').value);
-    const libelle = document.getElementById('frais-select').value;
-    const montant = Number(document.getElementById('montant-input').value);
     const devise = document.getElementById('devise-select').value;
     const paye_le = document.getElementById('date-input').value || new Date().toISOString().slice(0, 10);
 
-    if (!eleve_id || !libelle || !(montant > 0)) {
-        alert('Veuillez sélectionner un élève, un type de frais et un montant valide.');
+    const operations = [];
+    let totalMontant = 0;
+    document.querySelectorAll('.operation-row').forEach(row => {
+        const cat = row.querySelector('.cat-select').value;
+        const libelle = row.querySelector('.cat-select').selectedOptions[0]?.text || '';
+        const montant = Number(row.querySelector('.montant-input').value);
+        if (cat && montant > 0) {
+            operations.push({ categorie_frais_id: cat, libelle, montant });
+            totalMontant += montant;
+        }
+    });
+
+    if (!eleve_id || operations.length === 0) {
+        alert('Veuillez sélectionner un élève et ajouter au moins une opération valide.');
         return;
     }
 
@@ -165,32 +200,22 @@ document.getElementById('btn-valider-paiement').addEventListener('click', async 
     this.textContent = 'Enregistrement...';
     
     try {
-        const res = await fetch('/api/paiements', {
+        const res = await fetch('/api/factures', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ eleve_id, libelle, montant, devise, paye_le })
+            body: JSON.stringify({ eleve_id, operations, devise, paye_le })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.erreur || 'Erreur');
 
-        const paiement = data.donnees;
+        const facture = data.donnees;
         const eleveNom = document.getElementById('eleve-select').selectedOptions[0]?.text || '';
         const symbole = devise === 'CDF' ? 'FC' : '$';
         
-        document.getElementById('success-details').textContent =
-            `${eleveNom.split('(')[0].trim()} — ${libelle} — ${montant.toFixed(2)} ${symbole}`;
+        document.getElementById('success-details').innerHTML =
+            `${eleveNom.split('(')[0].trim()}<br>Facture ${facture.numero_facture} — <b>${totalMontant.toFixed(2)} ${symbole}</b>`;
         
-        // Préparer le lien vers la facture
-        const params = new URLSearchParams({
-            id: paiement.id,
-            numero: paiement.numero_recu,
-            nom: eleveNom.split('(')[0].trim(),
-            libelle,
-            montant,
-            devise,
-            date: paye_le
-        });
-        document.getElementById('btn-voir-facture').href = `facture.html?${params.toString()}`;
+        document.getElementById('btn-voir-facture').href = `facture.html?numero=${facture.numero_facture}`;
         document.getElementById('success-overlay').style.display = 'flex';
     } catch (err) {
         alert('Erreur : ' + err.message);

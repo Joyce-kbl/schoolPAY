@@ -188,18 +188,18 @@ Travail realise :
 - stabilisation de la suppression d'un eleve avec ses paiements associes ;
 - validation avec `npm run test:e2e`.
 
-Etat apres nettoyage :
+Etat apres nettoyage et implementation du 2026-07-06 18:40 :
 
 - le backend est pret pour les ajouts fonctionnels ;
-- les categories de frais ne sont pas encore implementees ;
+- les categories de frais sont implémentées et exposées via l'API ;
+- la generation automatique de matricule est intégrée au backend (Stratégie A) ;
+- le frontend nécessite une mise à jour pour consommer les catégories (menu déroulant) ;
 - les factures multi-operations ne sont pas encore implementees ;
-- la generation automatique de matricule doit encore etre deplacee cote backend ;
 - le journal ne possede pas encore de vraie synthese par categorie.
 
 Prochaine phase recommandee :
 
-1. creer la table `categories_frais` ;
-2. ajouter le lien entre `paiements` et `categories_frais` ;
-3. exposer `GET /api/categories-frais` ;
-4. remplacer le champ libre `libelle` par une selection de categorie dans le frontend ;
-5. ajouter la generation automatique du matricule dans `POST /api/eleves`.
+~~1. remplacer le champ libre `libelle` par une selection de categorie dans le frontend (paiement.html) ;~~ (Fait)
+~~2. intégrer l'affichage du matricule généré dans le frontend ;~~ (Fait)
+~~3. implémenter la facture multi-opérations ;~~ (Fait)
+~~4. ajouter la synthèse par catégorie dans le journal de caisse.~~ (Fait)

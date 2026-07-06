@@ -174,13 +174,13 @@ async function ajouterEleve() {
   if (!nom_complet || !sexe || !classe_id) {
     return notifier('Veuillez remplir le nom, le sexe et la classe.', false);
   }
-  const matricule = `${new Date().getFullYear()}-SP-${Math.floor(Math.random() * 900 + 100)}`;
+  
   try {
-    await apiFetch('/api/eleves', {
+    const reponse = await apiFetch('/api/eleves', {
       method: 'POST',
-      body: JSON.stringify({ nom_complet, sexe, classe_id, matricule })
+      body: JSON.stringify({ nom_complet, sexe, classe_id })
     });
-    notifier('Élève ajouté avec succès.');
+    notifier(`Élève ajouté avec succès. Matricule : ${reponse.donnees.matricule}`);
     await chargerClassesEtEleves();
   } catch (erreur) {
     notifier(`Impossible d'ajouter l'élève : ${erreur.message}`, false);

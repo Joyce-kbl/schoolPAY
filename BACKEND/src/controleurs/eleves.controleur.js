@@ -30,7 +30,7 @@ function rechercher_eleves(base_de_donnees, terme_recherche, reponse) {
 
 function obtenir_fiche_eleve(base_de_donnees, id, reponse) {
   const eleve = base_de_donnees.prepare(`
-    SELECT e.id, e.nom_complet, e.sexe, e.matricule, c.nom AS nom_classe, c.montant_frais
+    SELECT e.id, e.nom_complet, e.sexe, e.matricule, e.classe_id, c.nom AS nom_classe, c.montant_frais
     FROM eleves e
     LEFT JOIN classes c ON c.id = e.classe_id
     WHERE e.id = ?
@@ -41,18 +41,40 @@ function obtenir_fiche_eleve(base_de_donnees, id, reponse) {
   }
 
   const paiements = base_de_donnees.prepare(`
-    SELECT id, numero_recu, libelle, montant, devise, paye_le
+    SELECT id, numero_recu, categorie_frais_id, libelle, montant, devise, paye_le
     FROM paiements
     WHERE eleve_id = ?
     ORDER BY paye_le DESC
   `).all(id);
+  
+  const attendus = base_de_donnees.prepare(`
+    SELECT f.categorie_frais_id, c.libelle, f.montant, f.devise
+    FROM frais_attendus_classe f
+    INNER JOIN categories_frais c ON c.id = f.categorie_frais_id
+    WHERE f.classe_id = ?
+  `).all(eleve.classe_id || 0);
+
+  const soldes = attendus.map(a => {
+    const paye = paiements
+        .filter(p => p.categorie_frais_id === a.categorie_frais_id || p.libelle.toLowerCase() === a.libelle.toLowerCase())
+        .reduce((sum, p) => sum + Number(p.montant), 0);
+    return {
+        categorie: a.libelle,
+        attendu: Number(a.montant),
+        paye: paye,
+        reste: Math.max(0, Number(a.montant) - paye),
+        devise: a.devise
+    };
+  });
+
   const total_paye = paiements.reduce((somme, paiement) => somme + Number(paiement.montant || 0), 0);
-  const frais_total = Number(eleve.montant_frais || 0);
+  const frais_total = attendus.reduce((somme, a) => somme + Number(a.montant || 0), 0);
 
   envoyer_json(reponse, 200, {
     donnees: {
       eleve,
       paiements,
+      soldes,
       total_paye,
       frais_total,
       reste: Math.max(0, frais_total - total_paye)
@@ -64,7 +86,25 @@ function creer_eleve(base_de_donnees, corps, reponse) {
   const nom_complet = String(corps.nom_complet || '').trim();
   const sexe = String(corps.sexe || '').trim() || null;
   const classe_id = corps.classe_id ? Number(corps.classe_id) : null;
-  const matricule = String(corps.matricule || '').trim() || null;
+  let matricule = String(corps.matricule || '').trim() || null;
+
+  if (!matricule) {
+    const annee = new Date().getFullYear();
+    const dernier_eleve = base_de_donnees.prepare(`
+      SELECT matricule FROM eleves
+      WHERE matricule LIKE ?
+      ORDER BY id DESC LIMIT 1
+    `).get(`${annee}-SP-%`);
+
+    let prochain_numero = 1;
+    if (dernier_eleve && dernier_eleve.matricule) {
+      const parties = dernier_eleve.matricule.split('-');
+      if (parties.length === 3) {
+        prochain_numero = parseInt(parties[2], 10) + 1;
+      }
+    }
+    matricule = `${annee}-SP-${String(prochain_numero).padStart(3, '0')}`;
+  }
 
   if (!nom_complet) {
     return envoyer_json(reponse, 400, { erreur: 'nom_complet est obligatoire' });

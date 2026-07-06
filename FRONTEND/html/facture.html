@@ -92,12 +92,11 @@
                 <span class="recu-val" id="r1-nom">—</span>
             </div>
             <div class="recu-row">
-                <span class="recu-key">Type de frais</span>
-                <span class="recu-val" id="r1-libelle">—</span>
-            </div>
-            <div class="recu-row">
                 <span class="recu-key">Date</span>
                 <span class="recu-val" id="r1-date">—</span>
+            </div>
+            <div id="r1-operations" style="margin-top: 15px; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+                <!-- Operations listed here -->
             </div>
         </div>
         <div class="recu-footer">
@@ -135,12 +134,11 @@
                 <span class="recu-val" id="r2-nom">—</span>
             </div>
             <div class="recu-row">
-                <span class="recu-key">Type de frais</span>
-                <span class="recu-val" id="r2-libelle">—</span>
-            </div>
-            <div class="recu-row">
                 <span class="recu-key">Date</span>
                 <span class="recu-val" id="r2-date">—</span>
+            </div>
+            <div id="r2-operations" style="margin-top: 15px; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+                <!-- Operations listed here -->
             </div>
         </div>
         <div class="recu-footer">
@@ -201,34 +199,54 @@ function remplirRecu(suffix, data) {
     const symbole = data.devise === 'CDF' ? 'FC' : '$';
     document.getElementById(`${suffix}-numero`).textContent = `N° ${data.numero}`;
     document.getElementById(`${suffix}-nom`).textContent = data.nom;
-    document.getElementById(`${suffix}-libelle`).textContent = data.libelle;
     document.getElementById(`${suffix}-date`).textContent = formatDate(data.date);
     document.getElementById(`${suffix}-montant`).textContent = `${Number(data.montant).toFixed(2)} ${symbole}`;
     document.getElementById(`${suffix}-lettres`).textContent = nombreEnLettres(Number(data.montant), data.devise);
+    
+    const container = document.getElementById(`${suffix}-operations`);
+    container.innerHTML = '<div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Détail des opérations</div>';
+    
+    if (data.operations && data.operations.length > 0) {
+        data.operations.forEach(op => {
+            container.innerHTML += `
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                <span>• ${op.libelle}</span>
+                <span style="font-weight: 600;">${Number(op.montant).toFixed(2)} ${symbole}</span>
+            </div>`;
+        });
+    } else if (data.libelle) {
+        // Fallback pour les anciens reçus
+        container.innerHTML += `
+        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+            <span>• ${data.libelle}</span>
+            <span style="font-weight: 600;">${Number(data.montant).toFixed(2)} ${symbole}</span>
+        </div>`;
+    }
 }
 
-// Charger depuis URL params OU depuis l'API si seulement l'id est fourni
+// Charger depuis URL params OU depuis l'API si seulement numero est fourni
 const params = new URLSearchParams(window.location.search);
-const id = params.get('id');
+const numero = params.get('numero');
 
 async function chargerFacture() {
-    let data = {};
-    if (params.get('numero')) {
-        data = {
-            numero: params.get('numero'),
-            nom: params.get('nom'),
-            libelle: params.get('libelle'),
-            montant: params.get('montant'),
-            devise: params.get('devise'),
-            date: params.get('date')
-        };
-    } else if (id) {
+    let data = { numero: '—', nom: '—', montant: 0, devise: 'USD', date: '', operations: [] };
+    
+    if (numero) {
         try {
-            const res = await fetch(`/api/paiements/${id}`);
+            const res = await fetch(`/api/factures/${numero}`);
             const json = await res.json();
-            const p = json.donnees;
-            data = { numero: p.numero_recu, nom: p.nom_eleve, libelle: p.libelle, montant: p.montant, devise: p.devise, date: p.paye_le };
-        } catch(e) { data = { numero: '—', nom: '—', libelle: '—', montant: 0, devise: 'USD', date: '' }; }
+            if (json.donnees) {
+                const f = json.donnees;
+                data = { 
+                    numero: f.numero_facture, 
+                    nom: f.nom_eleve, 
+                    montant: f.total, 
+                    devise: f.devise, 
+                    date: f.paye_le,
+                    operations: f.operations
+                };
+            }
+        } catch(e) { console.error(e); }
     }
     remplirRecu('r1', data);
     remplirRecu('r2', data);

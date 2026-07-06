@@ -87,9 +87,38 @@
         </div>
 
         <div class="card no-print">
-            <div class="card-title">📅 Filtrer par date</div>
-            <label>Date</label>
-            <input type="date" id="filtre-date" oninput="filtrerParDate()">
+            <div class="card-title">🔍 Filtrage Avancé</div>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <div style="flex: 1;">
+                    <label>Date Début</label>
+                    <input type="date" id="filtre-date-debut">
+                </div>
+                <div style="flex: 1;">
+                    <label>Date Fin</label>
+                    <input type="date" id="filtre-date-fin">
+                </div>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <label>Catégorie de Frais</label>
+                <select id="filtre-categorie" style="width: 100%; padding: 11px 13px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; background: white;">
+                    <option value="">Toutes les catégories</option>
+                </select>
+            </div>
+            <button onclick="chargerJournal()" style="width: 100%; background: #8b0000; color: white; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">Appliquer les filtres</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 Synthèse par Catégorie</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Catégorie</th>
+                        <th style="text-align: right;">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="body-synthese">
+                </tbody>
+            </table>
         </div>
 
         <div class="card">
@@ -185,15 +214,65 @@ function formatDate(dateStr) {
     return isNaN(d) ? dateStr : d.toLocaleDateString('fr-FR');
 }
 
-async function chargerJournal() {
+async function chargerFiltresCategories() {
     try {
-        const res = await fetch('/api/journal');
+        const res = await fetch('/api/categories-frais');
         const data = await res.json();
+        const select = document.getElementById('filtre-categorie');
+        (data.donnees || []).forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = c.libelle;
+            select.appendChild(opt);
+        });
+    } catch(e) {}
+}
+
+async function chargerJournal() {
+    const debut = document.getElementById('filtre-date-debut').value;
+    const fin = document.getElementById('filtre-date-fin').value;
+    const cat = document.getElementById('filtre-categorie').value;
+
+    const params = new URLSearchParams();
+    if (debut) params.append('date_debut', debut);
+    if (fin) params.append('date_fin', fin);
+    if (cat) params.append('categorie_id', cat);
+
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+
+    try {
+        const [res, resSynthese] = await Promise.all([
+            fetch(`/api/journal${queryString}`),
+            fetch(`/api/journal/synthese${queryString}`)
+        ]);
+        const data = await res.json();
+        const dataSynthese = await resSynthese.json();
+        
         tousLesPaiements = data.donnees || [];
         afficherPaiements(tousLesPaiements);
+        afficherSynthese(dataSynthese.donnees || []);
     } catch(e) {
         document.getElementById('body-releve-ventes').innerHTML = '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:20px">Erreur de chargement</td></tr>';
     }
+}
+
+function afficherSynthese(synthese) {
+    const corps = document.getElementById('body-synthese');
+    corps.innerHTML = '';
+    
+    if (synthese.length === 0) {
+        corps.innerHTML = '<tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:20px">Aucune donnée</td></tr>';
+        return;
+    }
+
+    synthese.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${s.categorie || 'Autre'}</td>
+            <td style="text-align:right;font-weight:700;color:#8b0000;">${formatMonnaie(s.total, s.devise)}</td>
+        `;
+        corps.appendChild(tr);
+    });
 }
 
 function afficherPaiements(paiements) {
@@ -222,21 +301,16 @@ function afficherPaiements(paiements) {
     document.getElementById('total-recettes').textContent = formatMonnaie(total);
 }
 
-function filtrerParDate() {
-    const filtre = document.getElementById('filtre-date').value;
-    if (!filtre) return afficherPaiements(tousLesPaiements);
-    const filtres = tousLesPaiements.filter(p => (p.paye_le || '').startsWith(filtre));
-    afficherPaiements(filtres);
-}
-
 function imprimerRapport() {
-    const filtre = document.getElementById('filtre-date').value;
-    const paiements = filtre
-        ? tousLesPaiements.filter(p => (p.paye_le || '').startsWith(filtre))
-        : tousLesPaiements;
+    const debut = document.getElementById('filtre-date-debut').value;
+    const fin = document.getElementById('filtre-date-fin').value;
+    const paiements = tousLesPaiements;
 
     // Remplir le rapport
-    const dateAffichee = filtre ? new Date(filtre).toLocaleDateString('fr-FR') : 'Tous les jours';
+    let dateAffichee = 'Toutes les périodes';
+    if (debut && fin) dateAffichee = `Du ${formatDate(debut)} au ${formatDate(fin)}`;
+    else if (debut) dateAffichee = `À partir du ${formatDate(debut)}`;
+    else if (fin) dateAffichee = `Jusqu'au ${formatDate(fin)}`;
     document.getElementById('rpt-date').textContent = dateAffichee;
     document.getElementById('rpt-print-date').textContent = new Date().toLocaleDateString('fr-FR');
 
@@ -271,6 +345,7 @@ function exporterCloud() {
     alert('Fonction Cloud non disponible dans cette version.');
 }
 
+chargerFiltresCategories();
 chargerJournal();
 </script>
 </body>

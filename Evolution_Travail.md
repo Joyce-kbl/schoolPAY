@@ -388,3 +388,40 @@ La prochaine etape technique recommandee est maintenant :
 1. ajouter les categories de frais demandees par le client ;
 2. generer les matricules cote backend ;
 3. preparer les factures multi-operations.
+
+### 2026-07-06 18:40 - Implémentation des catégories et matricules
+
+Actions réalisées :
+- **Catégories de frais** : intégration des routes de gestion des catégories (`GET /api/categories-frais` et `POST /api/categories-frais`) dans `BACKEND/app.js`.
+- **Paiements** : modification de `BACKEND/src/controleurs/paiements.controleur.js` pour accepter `categorie_frais_id` lors de la création et modification d'un paiement, et récupérer automatiquement le libellé correspondant depuis la base de données.
+- **Matricules** : implémentation de la génération automatique du matricule (stratégie A : `YYYY-SP-XXX`) dans `BACKEND/src/controleurs/eleves.controleur.js` lors de la création d'un élève si aucun n'est fourni.
+
+### 2026-07-06 18:47 - Intégration Frontend et Synthèse du Journal
+
+Actions réalisées :
+- **Frontend Paiement** : remplacement du champ libre par un menu déroulant dynamique (`<select>`) alimenté par `GET /api/categories-frais` dans `FRONTEND/html/paiement.html`. Le backend reçoit désormais directement l'identifiant de la catégorie de frais.
+- **Frontend Matricule** : suppression de la génération aléatoire du matricule côté frontend dans `app.js`. L'application affiche désormais une notification avec le matricule généré officiellement par le backend.
+- **Synthèse Journal** :
+  - Création du endpoint `GET /api/journal/synthese` dans `journal.controleur.js`.
+  - Intégration visuelle dans `journal de caisse.html` sous forme d'une nouvelle carte "📊 Synthèse par Catégorie".
+
+### 2026-07-06 18:52 - Implémentation de la Facture Multi-Opérations
+
+Actions réalisées :
+- **Base de données** : Création de la table `factures` et ajout de la clé étrangère `facture_id` sur la table `paiements` (`BACKEND/src/base_de_donnees/base_de_donnees.js`).
+- **Backend API** : Ajout d'un contrôleur `factures.controleur.js` pour gérer la création simultanée d'une facture et de ses opérations associées en une seule transaction SQL. Intégration dans `app.js`.
+- **Frontend Paiement** : Refonte de l'interface `paiement.html` pour permettre l'ajout dynamique de plusieurs lignes d'opérations avant validation, et envoi du panier vers la nouvelle route `POST /api/factures`.
+- **Frontend Reçu** : Refonte de `facture.html` pour afficher le détail en tableau des différentes opérations incluses dans la facture et le calcul global.
+
+Toutes les demandes du client de la phase 1 sont désormais intégrées dans l'application.
+
+### 2026-07-06 19:02 - Suivi du Solde et Filtrage Avancé
+
+Actions réalisées :
+- **Base de données** : Création de la table `frais_attendus_classe` pour stocker les montants attendus par catégorie de frais pour chaque classe, remplaçant ainsi l'ancien système de montant global unique.
+- **Backend API (Fiche Élève)** : Refonte de `obtenir_fiche_eleve` pour calculer dynamiquement ce qui a été payé par catégorie et calculer le solde (reste à payer) par ligne.
+- **Frontend Fiche Élève** : Modification de `fiche_eleve.html` pour afficher le tableau des "Soldes à payer", détaillant le solde attendu pour chaque catégorie (ex: Frais scolaires).
+- **Backend API (Journal)** : Ajout du support des query parameters `date_debut`, `date_fin` et `categorie_id` sur les requêtes SQL dans `journal.controleur.js`.
+- **Frontend Journal** : Ajout d'une interface de filtrage avancée dans `journal de caisse.html` permettant de filtrer à la fois par période (début/fin) et par catégorie de frais.
+
+L'intégralité des fonctionnalités listées dans le document `PLAN_MISES_A_JOUR_CLIENT.md` a été livrée.

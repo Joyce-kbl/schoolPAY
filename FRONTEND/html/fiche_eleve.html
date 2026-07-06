@@ -89,7 +89,7 @@ async function chargerFiche() {
         if (!res.ok) throw new Error('Élève introuvable');
         const data = (await res.json()).donnees;
 
-        const { eleve, paiements, totalPaye, fraisTotal, reste } = data;
+        const { eleve, paiements, soldes, totalPaye, fraisTotal, reste } = data;
         const pct = fraisTotal > 0 ? Math.min(100, (totalPaye / fraisTotal) * 100) : 0;
         const initiales = eleve.nom_complet.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
         const sexeLabel = eleve.sexe === 'M' ? '👦 Masculin' : eleve.sexe === 'F' ? '👧 Féminin' : '—';
@@ -108,6 +108,20 @@ async function chargerFiche() {
                 </tr>
             `).join('');
 
+        const soldesHTML = (!soldes || soldes.length === 0)
+            ? '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:20px;">Aucun frais attendu défini pour cette classe</td></tr>'
+            : soldes.map(s => {
+                const isPayed = s.reste <= 0;
+                const statusColor = isPayed ? 'var(--success)' : 'var(--danger)';
+                return `
+                <tr>
+                    <td style="font-weight:600; color:#1e293b;">${s.categorie}</td>
+                    <td>${formatMonnaie(s.attendu, s.devise)}</td>
+                    <td style="color:var(--success);">${formatMonnaie(s.paye, s.devise)}</td>
+                    <td style="text-align:right;font-weight:700;color:${statusColor};">${formatMonnaie(s.reste, s.devise)}</td>
+                </tr>`;
+            }).join('');
+
         container.innerHTML = `
             <div class="profile-card">
                 <div class="profile-avatar">${initiales}</div>
@@ -119,24 +133,17 @@ async function chargerFiche() {
                 </div>
             </div>
 
-            <div class="grid-stats">
-                <div class="stat-card">
-                    <span class="stat-value" style="color:#1e293b;">${formatMonnaie(fraisTotal)}</span>
-                    <span class="stat-label">Frais total</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-value" style="color:var(--success);">${formatMonnaie(totalPaye)}</span>
-                    <span class="stat-label">Payé</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-value" style="color:var(--danger);">${formatMonnaie(reste)}</span>
-                    <span class="stat-label">Reste</span>
-                </div>
+            <div class="table-card" style="margin-bottom: 20px;">
+                <div class="table-title">💰 Soldes à payer</div>
+                <table>
+                    <thead><tr><th>Catégorie</th><th>Attendu</th><th>Payé</th><th style="text-align:right;">Reste</th></tr></thead>
+                    <tbody>${soldesHTML}</tbody>
+                </table>
             </div>
 
             <div class="progress-card">
                 <div class="progress-label">
-                    <span>Avancement du paiement</span>
+                    <span>Paiement global (${formatMonnaie(totalPaye)} / ${formatMonnaie(fraisTotal)})</span>
                     <span style="color:${pct >= 80 ? 'var(--success)' : pct >= 40 ? 'var(--warning)' : 'var(--danger)'};">${pct.toFixed(0)}%</span>
                 </div>
                 <div class="progress-bar">

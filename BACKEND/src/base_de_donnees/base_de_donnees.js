@@ -11,6 +11,59 @@ function verifier_fichier_base_de_donnees() {
   }
 }
 
+function colonne_existe(base_de_donnees, table, colonne) {
+  return base_de_donnees
+    .prepare(`PRAGMA table_info(${table})`)
+    .all()
+    .some((description_colonne) => description_colonne.name === colonne);
+}
+
+function inserer_categories_frais(base_de_donnees) {
+  const categories = [
+    ['78000', 'FRAIS SCOLAIRES'],
+    ['78101', 'INSCRIPTION'],
+    ['78102', 'FOURNITURE SCOL'],
+    ['78104', 'TABLIERS'],
+    ['78105', 'UNIFORMES'],
+    ['78106', 'MACARON'],
+    ['78107', 'PARASCOLAIRES'],
+    ['78109', 'AUTRES RECETTES'],
+    ['78200', 'ACTIVITES DIVERSES'],
+    ['78500', 'RECETTES EXTRAORDINAIRES']
+  ];
+
+  const inserer_categorie = base_de_donnees.prepare(`
+    INSERT OR IGNORE INTO categories_frais (code, libelle)
+    VALUES (?, ?)
+  `);
+
+  for (const [code, libelle] of categories) {
+    inserer_categorie.run(code, libelle);
+  }
+}
+
+function synchroniser_categories_paiements(base_de_donnees) {
+  const correspondances = [
+    ['INSCRIPTION', '%inscription%'],
+    ['FRAIS SCOLAIRES', '%minerval%'],
+    ['FRAIS SCOLAIRES', '%frais%'],
+    ['AUTRES RECETTES', '%cantine%']
+  ];
+
+  for (const [libelle_categorie, motif] of correspondances) {
+    const categorie = base_de_donnees
+      .prepare('SELECT id FROM categories_frais WHERE libelle = ?')
+      .get(libelle_categorie);
+    if (!categorie) continue;
+
+    base_de_donnees.prepare(`
+      UPDATE paiements
+      SET categorie_frais_id = ?
+      WHERE categorie_frais_id IS NULL AND lower(libelle) LIKE lower(?)
+    `).run(categorie.id, motif);
+  }
+}
+
 function creer_base_de_donnees() {
   verifier_fichier_base_de_donnees();
   const base_de_donnees = new DatabaseSync(chemin_base_de_donnees);
@@ -22,6 +75,13 @@ function creer_base_de_donnees() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       nom TEXT NOT NULL UNIQUE,
       montant_frais REAL NOT NULL DEFAULT 0,
+      cree_le TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS categories_frais (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT NOT NULL UNIQUE,
+      libelle TEXT NOT NULL UNIQUE,
       cree_le TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -46,7 +106,39 @@ function creer_base_de_donnees() {
       cree_le TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (eleve_id) REFERENCES eleves(id)
     );
+
+    CREATE TABLE IF NOT EXISTS factures (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      numero_facture TEXT NOT NULL UNIQUE,
+      eleve_id INTEGER NOT NULL,
+      total REAL NOT NULL,
+      devise TEXT NOT NULL CHECK (devise IN ('USD', 'CDF')),
+      paye_le TEXT NOT NULL,
+      cree_le TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (eleve_id) REFERENCES eleves(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS frais_attendus_classe (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      classe_id INTEGER NOT NULL,
+      categorie_frais_id INTEGER NOT NULL,
+      montant REAL NOT NULL,
+      devise TEXT NOT NULL DEFAULT 'USD',
+      FOREIGN KEY (classe_id) REFERENCES classes(id),
+      FOREIGN KEY (categorie_frais_id) REFERENCES categories_frais(id),
+      UNIQUE(classe_id, categorie_frais_id)
+    );
   `);
+
+  if (!colonne_existe(base_de_donnees, 'paiements', 'categorie_frais_id')) {
+    base_de_donnees.exec('ALTER TABLE paiements ADD COLUMN categorie_frais_id INTEGER');
+  }
+  if (!colonne_existe(base_de_donnees, 'paiements', 'facture_id')) {
+    base_de_donnees.exec('ALTER TABLE paiements ADD COLUMN facture_id INTEGER REFERENCES factures(id)');
+  }
+
+  inserer_categories_frais(base_de_donnees);
+  synchroniser_categories_paiements(base_de_donnees);
 
   const classes_count = base_de_donnees.prepare('SELECT COUNT(*) AS total FROM classes').get().total;
   if (classes_count === 0) {
@@ -64,6 +156,17 @@ function creer_base_de_donnees() {
     );
     inserer_classe.run('M1 Gestion', 160);
     inserer_classe.run('M2 Gestion', 155);
+  }
+
+  const count_frais = base_de_donnees.prepare('SELECT COUNT(*) AS total FROM frais_attendus_classe').get().total;
+  if (count_frais === 0) {
+    const categorie_scolaire = base_de_donnees.prepare("SELECT id FROM categories_frais WHERE libelle = 'FRAIS SCOLAIRES'").get();
+    if (categorie_scolaire) {
+      base_de_donnees.exec(`
+        INSERT OR IGNORE INTO frais_attendus_classe (classe_id, categorie_frais_id, montant)
+        SELECT id, ${categorie_scolaire.id}, montant_frais FROM classes WHERE montant_frais > 0
+      `);
+    }
   }
 
   const eleves_count = base_de_donnees.prepare('SELECT COUNT(*) AS total FROM eleves').get().total;

@@ -26,10 +26,19 @@ function creer_classe(base_de_donnees, corps, reponse) {
       'INSERT INTO classes (nom, montant_frais) VALUES (?, ?)'
     );
     const resultat = insertion.run(nom, montant_frais);
+    const id = resultat.lastInsertRowid;
+
+    // Synchroniser avec la nouvelle table de frais attendus
+    const cat_scolaire = base_de_donnees.prepare("SELECT id FROM categories_frais WHERE libelle = 'FRAIS SCOLAIRES'").get();
+    if (cat_scolaire) {
+      base_de_donnees.prepare(
+        'INSERT INTO frais_attendus_classe (classe_id, categorie_frais_id, montant) VALUES (?, ?, ?)'
+      ).run(id, cat_scolaire.id, montant_frais);
+    }
 
     envoyer_json(reponse, 201, {
       donnees: {
-        id: resultat.lastInsertRowid,
+        id,
         nom,
         montant_frais
       }
@@ -58,6 +67,16 @@ function modifier_classe(base_de_donnees, id, corps, reponse) {
     base_de_donnees.prepare(
       'UPDATE classes SET nom = ?, montant_frais = ? WHERE id = ?'
     ).run(nom, montant_frais, id);
+
+    // Synchroniser avec la nouvelle table de frais attendus
+    const cat_scolaire = base_de_donnees.prepare("SELECT id FROM categories_frais WHERE libelle = 'FRAIS SCOLAIRES'").get();
+    if (cat_scolaire) {
+      base_de_donnees.prepare(`
+        INSERT INTO frais_attendus_classe (classe_id, categorie_frais_id, montant) 
+        VALUES (?, ?, ?)
+        ON CONFLICT(classe_id, categorie_frais_id) DO UPDATE SET montant = excluded.montant
+      `).run(id, cat_scolaire.id, montant_frais);
+    }
 
     envoyer_json(reponse, 200, { donnees: { id, nom, montant_frais } });
   } catch (erreur) {

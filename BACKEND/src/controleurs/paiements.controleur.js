@@ -19,10 +19,17 @@ function lister_paiements(base_de_donnees, reponse) {
 
 function creer_paiement(base_de_donnees, corps, reponse) {
   const eleve_id = Number(corps.eleve_id);
-  const libelle = String(corps.libelle || '').trim();
+  const categorie_frais_id = corps.categorie_frais_id ? Number(corps.categorie_frais_id) : null;
+  let libelle = String(corps.libelle || '').trim();
   const montant = Number(corps.montant);
   const devise = String(corps.devise || 'USD').toUpperCase();
   const paye_le = String(corps.paye_le || new Date().toISOString()).slice(0, 10);
+
+  if (categorie_frais_id) {
+    const categorie = base_de_donnees.prepare('SELECT libelle FROM categories_frais WHERE id = ?').get(categorie_frais_id);
+    if (!categorie) return envoyer_json(reponse, 400, { erreur: 'Categorie de frais invalide' });
+    libelle = categorie.libelle;
+  }
 
   if (!eleve_id || !libelle || !Number.isFinite(montant) || montant <= 0) {
     return envoyer_json(reponse, 400, {
@@ -40,11 +47,11 @@ function creer_paiement(base_de_donnees, corps, reponse) {
   }
 
   const insertion = base_de_donnees.prepare(`
-    INSERT INTO paiements (numero_recu, eleve_id, libelle, montant, devise, paye_le)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO paiements (numero_recu, eleve_id, categorie_frais_id, libelle, montant, devise, paye_le)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
   const numero_temporaire = `TMP-${Date.now()}`;
-  const resultat = insertion.run(numero_temporaire, eleve_id, libelle, montant, devise, paye_le);
+  const resultat = insertion.run(numero_temporaire, eleve_id, categorie_frais_id, libelle, montant, devise, paye_le);
   const numero_recu = construire_numero_recu(resultat.lastInsertRowid);
 
   base_de_donnees
@@ -56,6 +63,7 @@ function creer_paiement(base_de_donnees, corps, reponse) {
       id: resultat.lastInsertRowid,
       numero_recu,
       eleve_id,
+      categorie_frais_id,
       libelle,
       montant,
       devise,
@@ -89,12 +97,21 @@ function modifier_paiement(base_de_donnees, id, corps, reponse) {
   const eleve_id = Object.prototype.hasOwnProperty.call(corps, 'eleve_id')
     ? Number(corps.eleve_id)
     : paiement.eleve_id;
-  const libelle = String(corps.libelle || paiement.libelle || '').trim();
+  const categorie_frais_id = Object.prototype.hasOwnProperty.call(corps, 'categorie_frais_id')
+    ? Number(corps.categorie_frais_id)
+    : paiement.categorie_frais_id;
+  let libelle = String(corps.libelle || paiement.libelle || '').trim();
   const montant = Object.prototype.hasOwnProperty.call(corps, 'montant')
     ? Number(corps.montant)
     : Number(paiement.montant);
   const devise = String(corps.devise || paiement.devise || 'USD').toUpperCase();
   const paye_le = String(corps.paye_le || paiement.paye_le || new Date().toISOString()).slice(0, 10);
+
+  if (categorie_frais_id) {
+    const categorie = base_de_donnees.prepare('SELECT libelle FROM categories_frais WHERE id = ?').get(categorie_frais_id);
+    if (!categorie) return envoyer_json(reponse, 400, { erreur: 'Categorie de frais invalide' });
+    libelle = categorie.libelle;
+  }
 
   if (!eleve_id || !libelle || !Number.isFinite(montant) || montant <= 0) {
     return envoyer_json(reponse, 400, {
@@ -113,14 +130,15 @@ function modifier_paiement(base_de_donnees, id, corps, reponse) {
 
   base_de_donnees.prepare(`
     UPDATE paiements
-    SET eleve_id = ?, libelle = ?, montant = ?, devise = ?, paye_le = ?
+    SET eleve_id = ?, categorie_frais_id = ?, libelle = ?, montant = ?, devise = ?, paye_le = ?
     WHERE id = ?
-  `).run(eleve_id, libelle, montant, devise, paye_le, id);
+  `).run(eleve_id, categorie_frais_id, libelle, montant, devise, paye_le, id);
 
   envoyer_json(reponse, 200, {
     donnees: {
       id,
       eleve_id,
+      categorie_frais_id,
       libelle,
       montant,
       devise,
