@@ -49,15 +49,30 @@
 
         /* === IMPRESSION === */
         @media print {
+            @page {
+                size: A5 portrait;
+                margin: 8mm;
+            }
             .no-print { display: none !important; }
             body { background: white; }
-            .page-wrapper { padding: 0; max-width: 100%; }
-            .recu-sheet { border-radius: 0; box-shadow: none; margin-bottom: 0; border: 1px solid #ccc; }
-            .recu-sheet:last-of-type { border-top: 2px dashed #999; }
+            .page-wrapper { padding: 0; max-width: 100%; margin: 0; }
+            .recu-sheet { 
+                border-radius: 0; 
+                box-shadow: none; 
+                margin-bottom: 0; 
+                border: 1px solid #cbd5e1; 
+                page-break-after: always;
+                height: 190mm; 
+                display: flex;
+                flex-direction: column;
+            }
+            .recu-body {
+                flex: 1;
+            }
+            .recu-sheet:last-of-type { 
+                page-break-after: avoid; 
+            }
             .separator { display: none; }
-            
-            /* Force deux reçus sur une page A4 */
-            .print-area { page-break-after: avoid; }
         }
     </style>
 </head>

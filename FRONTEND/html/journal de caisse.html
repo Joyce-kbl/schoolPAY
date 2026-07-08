@@ -82,7 +82,8 @@
 
     <div class="container">
         <div class="kpi-row">
-            <div class="kpi-card"><div class="kpi-label">Montant du jour</div><div id="montant-jour" class="kpi-value">0,00 $</div></div>
+            <div class="kpi-card"><div class="kpi-label">Total en Dollars</div><div id="montant-jour-usd" class="kpi-value">0,00 $</div></div>
+            <div class="kpi-card"><div class="kpi-label">Total en CDF</div><div id="montant-jour-cdf" class="kpi-value">0,00 FC</div></div>
             <div class="kpi-card"><div class="kpi-label">Nb Transactions</div><div id="nb-transactions" class="kpi-value" style="color: #8b0000;">0</div></div>
         </div>
 
@@ -113,7 +114,8 @@
                 <thead>
                     <tr>
                         <th>Catégorie</th>
-                        <th style="text-align: right;">Total</th>
+                        <th style="text-align: right;">Total USD</th>
+                        <th style="text-align: right;">Total CDF</th>
                     </tr>
                 </thead>
                 <tbody id="body-synthese">
@@ -134,9 +136,15 @@
                 </thead>
                 <tbody id="body-releve-ventes"></tbody>
             </table>
-            <div class="total-box">
-                <span>TOTAL DES RECETTES</span>
-                <span id="total-recettes">0,00 $</span>
+            <div class="total-box" style="flex-direction: column; gap: 5px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>TOTAL EN DOLLARS</span>
+                    <span id="total-recettes-usd">0,00 $</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>TOTAL CDF</span>
+                    <span id="total-recettes-cdf">0,00 FC</span>
+                </div>
             </div>
         </div>
 
@@ -182,8 +190,12 @@
         <tbody id="rpt-body"></tbody>
         <tfoot>
             <tr>
-                <td colspan="3" style="text-align: right;" class="rpt-total">TOTAL DES RECETTES :</td>
-                <td class="rpt-total" style="text-align: right;" id="rpt-total">0,00 $</td>
+                <td colspan="3" style="text-align: right;" class="rpt-total">TOTAL EN DOLLARS :</td>
+                <td class="rpt-total" style="text-align: right;" id="rpt-total-usd">0,00 $</td>
+            </tr>
+            <tr>
+                <td colspan="3" style="text-align: right;" class="rpt-total" style="border-top: none !important;">TOTAL CDF :</td>
+                <td class="rpt-total" style="text-align: right; border-top: none !important;" id="rpt-total-cdf">0,00 FC</td>
             </tr>
         </tfoot>
     </table>
@@ -261,15 +273,24 @@ function afficherSynthese(synthese) {
     corps.innerHTML = '';
     
     if (synthese.length === 0) {
-        corps.innerHTML = '<tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:20px">Aucune donnée</td></tr>';
+        corps.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:20px">Aucune donnée</td></tr>';
         return;
     }
 
+    const map = {};
     synthese.forEach(s => {
+        const cat = s.categorie || 'Autre';
+        if (!map[cat]) map[cat] = { usd: 0, cdf: 0 };
+        if (s.devise === 'CDF') map[cat].cdf += Number(s.total || 0);
+        else map[cat].usd += Number(s.total || 0);
+    });
+
+    Object.keys(map).forEach(cat => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${s.categorie || 'Autre'}</td>
-            <td style="text-align:right;font-weight:700;color:#8b0000;">${formatMonnaie(s.total, s.devise)}</td>
+            <td>${cat}</td>
+            <td style="text-align:right;font-weight:700;color:#8b0000;">${formatMonnaie(map[cat].usd, 'USD')}</td>
+            <td style="text-align:right;font-weight:700;color:#8b0000;">${formatMonnaie(map[cat].cdf, 'CDF')}</td>
         `;
         corps.appendChild(tr);
     });
@@ -278,13 +299,16 @@ function afficherSynthese(synthese) {
 function afficherPaiements(paiements) {
     const corps = document.getElementById('body-releve-ventes');
     corps.innerHTML = '';
-    let total = 0;
+    let totalUsd = 0;
+    let totalCdf = 0;
 
     if (paiements.length === 0) {
         corps.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:20px">Aucune transaction</td></tr>';
     } else {
         paiements.forEach(p => {
-            total += Number(p.montant || 0);
+            if (p.devise === 'CDF') totalCdf += Number(p.montant || 0);
+            else totalUsd += Number(p.montant || 0);
+            
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td style="font-size:11px;color:#8b0000;font-weight:700;">${p.numero_recu}</td>
@@ -296,9 +320,11 @@ function afficherPaiements(paiements) {
         });
     }
 
-    document.getElementById('montant-jour').textContent = formatMonnaie(total);
+    document.getElementById('montant-jour-usd').textContent = formatMonnaie(totalUsd, 'USD');
+    document.getElementById('montant-jour-cdf').textContent = formatMonnaie(totalCdf, 'CDF');
     document.getElementById('nb-transactions').textContent = paiements.length;
-    document.getElementById('total-recettes').textContent = formatMonnaie(total);
+    document.getElementById('total-recettes-usd').textContent = formatMonnaie(totalUsd, 'USD');
+    document.getElementById('total-recettes-cdf').textContent = formatMonnaie(totalCdf, 'CDF');
 }
 
 function imprimerRapport() {
@@ -316,9 +342,11 @@ function imprimerRapport() {
 
     const rptBody = document.getElementById('rpt-body');
     rptBody.innerHTML = '';
-    let total = 0;
+    let totalUsd = 0;
+    let totalCdf = 0;
     paiements.forEach(p => {
-        total += Number(p.montant || 0);
+        if (p.devise === 'CDF') totalCdf += Number(p.montant || 0);
+        else totalUsd += Number(p.montant || 0);
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${p.numero_recu}</td>
@@ -328,7 +356,8 @@ function imprimerRapport() {
         `;
         rptBody.appendChild(tr);
     });
-    document.getElementById('rpt-total').textContent = formatMonnaie(total);
+    document.getElementById('rpt-total-usd').textContent = formatMonnaie(totalUsd, 'USD');
+    document.getElementById('rpt-total-cdf').textContent = formatMonnaie(totalCdf, 'CDF');
 
     // Activer le rapport, masquer l'écran, imprimer
     document.querySelector('.screen-only').style.display = 'none';
