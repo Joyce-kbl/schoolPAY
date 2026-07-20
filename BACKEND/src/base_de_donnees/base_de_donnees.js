@@ -235,7 +235,7 @@ function creer_base_de_donnees() {
   synchroniser_categories_paiements(base_de_donnees);
 
   const parametres_defaut = [
-    ['nom_ecole', 'ÉCOLE FATIMA'],
+    ['nom_ecole', 'ÉCOLE MATERNELLE FATIMA'],
     ['adresse_ecole', 'Kinshasa, République Démocratique du Congo']
   ];
   const inserer_parametre = base_de_donnees.prepare(
