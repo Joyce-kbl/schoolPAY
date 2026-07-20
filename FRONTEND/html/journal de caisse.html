@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal de Caisse - SchoolPAY</title>
+    <link rel="icon" href="/img/logoFat.jpeg" type="image/jpeg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f8fafc; padding-bottom: 90px; }
+
+        header { background: white; padding: 15px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .back-btn { text-decoration: none; color: #8b0000; font-size: 22px; font-weight: bold; padding: 4px 8px; border-radius: 8px; }
+        .logo-circle { width: 42px; height: 42px; background: #8b0000; color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; font-size: 13px; }
+
+        .container { padding: 20px; }
+
+        .kpi-row { display: flex; gap: 10px; margin-bottom: 20px; }
+        .kpi-card { flex: 1; background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; text-align: center; }
+        .kpi-label { font-size: 9px; color: #64748b; text-transform: uppercase; font-weight: 700; }
+        .kpi-value { font-size: 18px; font-weight: 800; color: #0f172a; margin-top: 4px; }
+
+        .card { background: #ffffff; border-radius: 16px; padding: 18px; margin-bottom: 16px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+        .card-title { font-size: 13px; color: #0f172a; margin-bottom: 14px; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
+
+        label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        input[type="date"] { width: 100%; padding: 11px 13px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; }
+        input[type="date"]:focus { border-color: #8b0000; }
+
+        table { width: 100%; font-size: 12px; border-collapse: collapse; }
+        th { text-align: left; color: #64748b; border-bottom: 2px solid #f1f5f9; padding: 10px 6px; font-size: 11px; text-transform: uppercase; }
+        td { padding: 11px 6px; border-bottom: 1px solid #f8fafc; }
+        tr:last-child td { border-bottom: none; }
+
+        .total-box { margin-top: 15px; padding: 12px 0 0; border-top: 2px dashed #8b0000; font-size: 15px; font-weight: 800; color: #b91c1c; display: flex; justify-content: space-between; }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 5px; }
+        .btn-action { flex: 1; padding: 13px 10px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; color: white; font-size: 13px; }
+        .btn-cloud { background-color: #3b82f6; }
+        .btn-print { background-color: #8b0000; }
+
+        .nav-bottom { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: white; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .nav-link { text-decoration: none; color: #64748b; font-size: 11px; font-weight: 600; text-align: center; }
+        .home-icon-circle { width: 60px; height: 60px; background: #8b0000; color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 24px; box-shadow: 0 4px 10px rgba(139,0,0,0.4); margin-top: -30px; border: 4px solid #f8fafc; }
+
+        /* === IMPRESSION RAPPORT === */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; }
+            .container { padding: 0; }
+            .print-report { display: block !important; }
+            .screen-only { display: none !important; }
+        }
+
+        .print-report { display: none; padding: 30px; font-family: Arial, sans-serif; color: #000; }
+        /* Conteneur scrollable horizontal pour les tableaux sur petits écrans (téléphones) */
+        .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .rpt-header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 18px; margin-bottom: 25px; align-items: flex-start; }
+        .rpt-logo-box { display: flex; gap: 14px; align-items: center; }
+        .rpt-logo { width: 70px; height: 70px; background: #8b0000; color: white; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 20px; border-radius: 8px; }
+        .rpt-school { font-size: 18px; font-weight: 800; color: #8b0000; }
+        .rpt-info { font-size: 12px; color: #444; margin-top: 3px; }
+        .rpt-meta { text-align: right; font-size: 13px; }
+        .rpt-meta strong { display: block; font-size: 16px; color: #8b0000; margin-bottom: 5px; }
+
+        .rpt-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 13px; }
+        .rpt-table th { border-bottom: 2px solid #000; padding: 10px 8px; text-align: left; }
+        .rpt-table td { border-bottom: 1px solid #ccc; padding: 9px 8px; }
+        .rpt-total { font-weight: bold; border-top: 2px solid #000 !important; border-bottom: none !important; font-size: 14px; }
+        /* Par défaut, les navigateurs répètent le <tfoot> sur CHAQUE page imprimée
+           quand un tableau déborde sur plusieurs pages. On force ici son affichage
+           comme un simple groupe de lignes afin que le TOTAL n'apparaisse
+           qu'une seule fois, à la toute dernière page du rapport. */
+        .rpt-table tfoot { display: table-row-group; }
+
+        .rpt-signatures { display: flex; justify-content: space-between; margin-top: 50px; }
+        .rpt-sig-box { text-align: center; width: 180px; }
+        .rpt-sig-line { border-top: 1px solid #000; margin-top: 55px; padding-top: 8px; font-size: 12px; color: #555; }
+
+        /* === Adaptation écrans de téléphone (petits mobiles) === */
+        @media (max-width: 380px) {
+            .container { padding: 14px; }
+            .card { padding: 14px; }
+            .kpi-value { font-size: 15px; }
+            table { font-size: 11px; }
+            th, td { padding: 8px 4px; }
+        }
+    </style>
+</head>
+<body>
+<script src="/js/auth.js"></script>
+
+<!-- Page Journal de Caisse : synthèse des recettes, filtres et actions d'impression -->
+<!-- Section écran avec le contenu interactif visible en navigation normale -->
+<div class="screen-only">
+    <header class="no-print">
+        <a href="index.html" class="back-btn">←</a>
+        <img src="/img/logoFat.jpeg" alt="Logo école" class="logo-circle">
+        <div><h2 style="color: #8b0000; font-size: 16px;">Journal de Caisse</h2></div>
+    </header>
+
+    <div class="container">
+        <!-- Filtrage par période : les données financières restent masquées tant que les deux dates ne sont pas renseignées -->
+        <div class="card no-print">
+            <div class="card-title">🔍 Filtrage Avancé</div>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <div style="flex: 1;">
+                    <label>Date Début</label>
+                    <input type="date" id="filtre-date-debut">
+                </div>
+                <div style="flex: 1;">
+                    <label>Date Fin</label>
+                    <input type="date" id="filtre-date-fin">
+                </div>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <label>Catégorie de Frais</label>
+                <select id="filtre-categorie" style="width: 100%; padding: 11px 13px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; background: white;">
+                    <option value="">Toutes les catégories</option>
+                </select>
+            </div>
+            <button onclick="chargerJournal()" style="width: 100%; background: #8b0000; color: white; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">Appliquer les filtres</button>
+        </div>
+
+        <!-- Message affiché tant que les données sensibles (montants, synthèse, détails) sont masquées -->
+        <div class="card no-print" id="zone-masquee">
+            <div style="text-align:center; padding: 10px 6px; color:#64748b;">
+                <div style="font-size: 30px; margin-bottom: 8px;">🔒</div>
+                <div style="font-weight:700; color:#1e293b; margin-bottom:4px;">Données masquées</div>
+                <div style="font-size: 13px;">Sélectionnez une <strong>date de début</strong> et une <strong>date de fin</strong>, puis cliquez sur « Appliquer les filtres » pour afficher le montant, le nombre de transactions, la synthèse et le détail des opérations.</div>
+            </div>
+        </div>
+
+        <!-- Zone contenant les données sensibles : reste cachée (display:none) tant que les dates ne sont pas fournies -->
+        <div id="zone-donnees" style="display:none;">
+        <div class="kpi-row">
+            <div class="kpi-card"><div class="kpi-label">Total en USD</div><div id="montant-jour" class="kpi-value">0,00 $</div></div>
+            <div class="kpi-card"><div class="kpi-label">Nb Transactions</div><div id="nb-transactions" class="kpi-value" style="color: #8b0000;">0</div></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 Synthèse par Catégorie</div>
+            <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Catégorie</th>
+                        <th style="text-align: right;">Total $</th>
+                    </tr>
+                </thead>
+                <tbody id="body-synthese">
+                </tbody>
+            </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📋 Détails des transactions</div>
+            <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>N° Reçu</th>
+                        <th>Élève</th>
+                        <th>Libellé</th>
+                        <th>Caissier(e)</th>
+                        <th style="text-align: right;">Montant</th>
+                    </tr>
+                </thead>
+                <tbody id="body-releve-ventes"></tbody>
+            </table>
+            </div>
+            <div class="total-box" style="flex-direction: column; gap: 5px;">
+                <div class="summary-item" style="border-top: 2px solid #e2e8f0; padding-top: 10px; margin-top: 10px;">
+                    <span>TOTAL $</span>
+                    <strong id="total-recettes" style="color:#8b0000; font-size:18px;">0,00 $</strong>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <div class="btn-group no-print">
+            <button class="btn-action btn-cloud" onclick="exporterCloud()">☁️ Cloud</button>
+            <button class="btn-action btn-print" onclick="imprimerRapport()">🖨️ Imprimer Rapport</button>
+        </div>
+    </div>
+
+    <nav class="nav-bottom no-print">
+        <a href="journal de caisse.html" class="nav-link" style="color: #8b0000;"><span style="font-size: 26px;">📒</span><br>Journal</a>
+        <a href="index.html"><div class="home-icon-circle">🏠</div></a>
+        <a href="modifier.html" class="nav-link"><span style="font-size: 26px;">⚙️</span><br>Paramètre</a>
+    </nav>
+</div>
+
+<!-- Section imprimable du rapport : utilisée uniquement lors de l'impression -->
+<!-- Le contenu ci-dessous est mis en forme pour l'impression et caché à l'écran -->
+<div class="print-report" id="print-report">
+    <div class="rpt-header">
+        <div class="rpt-logo-box">
+            <img src="/img/logoFat.jpeg" alt="Logo" class="rpt-logo" style="background:none;">
+            <div>
+                <div class="rpt-school" id="rpt-ecole">ÉCOLE FATIMA</div>
+                <div class="rpt-info" id="rpt-adresse">Kinshasa, République Démocratique du Congo</div>
+            </div>
+        </div>
+        <div class="rpt-meta">
+            <strong>Rapport Journalier de Caisse</strong>
+            <div>Date : <span id="rpt-date">—</span></div>
+            <div>Imprimé le : <span id="rpt-print-date">—</span></div>
+        </div>
+    </div>
+
+    <div style="font-weight: bold; font-size: 13px; margin-bottom: 8px; color: #8b0000;">SYNTHÈSE PAR CATÉGORIE</div>
+    <table class="rpt-table">
+        <thead>
+            <tr>
+                <th>Catégorie</th>
+                <th style="text-align: right;">Total $</th>
+            </tr>
+        </thead>
+        <tbody id="rpt-synthese-body"></tbody>
+    </table>
+
+    <div style="font-weight: bold; font-size: 13px; margin-bottom: 8px; color: #8b0000;">DÉTAIL DES TRANSACTIONS</div>
+    <table class="rpt-table">
+        <thead>
+            <tr>
+                <th>N° Reçu</th>
+                <th>Nom de l'élève</th>
+                <th>Libellé</th>
+                <th>Caissier(e)</th>
+                <th style="text-align: right;">Montant</th>
+            </tr>
+        </thead>
+        <tbody id="rpt-body"></tbody>
+    </table>
+
+    <!-- Le total est volontairement placé hors du tableau (et non dans un <tfoot>) :
+         un <tfoot> est répété par le navigateur sur chaque page imprimée, alors que
+         ce bloc, lui, ne s'affiche qu'une seule fois, à la toute dernière page. -->
+    <div class="rpt-total-bloc" style="display: flex; justify-content: flex-end; border-top: 2px solid #000; padding-top: 10px; margin-top: -1px; margin-bottom: 20px; page-break-inside: avoid;">
+        <div style="display:flex; justify-content: space-between; width: 260px; font-weight: bold; font-size: 14px;">
+            <span>TOTAL $ :</span>
+            <strong id="rpt-total-usd">0,00 $</strong>
+        </div>
+    </div>
+
+    <div class="rpt-signatures">
+        <div class="rpt-sig-box">
+            <p style="font-weight: bold;">Le Caissier</p>
+            <div class="rpt-sig-line">Nom & Signature</div>
+        </div>
+        <div class="rpt-sig-box">
+            <p style="font-weight: bold;">L'Économe</p>
+            <div class="rpt-sig-line">Nom & Signature</div>
+        </div>
+    </div>
+</div>
+
+<script>
+let tousLesPaiements = [];
+
+function formatMonnaie(val) {
+    const s = '$';
+    return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val) + ' ' + s;
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    return isNaN(d) ? dateStr : d.toLocaleDateString('fr-FR');
+}
+
+async function chargerFiltresCategories() {
+    try {
+        const res = await fetch('/api/categories-frais');
+        const data = await res.json();
+        const select = document.getElementById('filtre-categorie');
+        (data.donnees || []).forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = c.libelle;
+            select.appendChild(opt);
+        });
+    } catch(e) {}
+}
+
+/**
+ * Charge le journal de caisse pour la période choisie.
+ * Par sécurité/confidentialité, les montants, le nombre de transactions,
+ * la synthèse et le détail des opérations restent masqués tant que
+ * l'utilisateur n'a pas renseigné à la fois une date de début et une date de fin.
+ */
+async function chargerJournal() {
+    const debut = document.getElementById('filtre-date-debut').value;
+    const fin = document.getElementById('filtre-date-fin').value;
+    const cat = document.getElementById('filtre-categorie').value;
+
+    const zoneMasquee = document.getElementById('zone-masquee');
+    const zoneDonnees = document.getElementById('zone-donnees');
+
+    // Tant que les deux bornes de date ne sont pas fournies, on garde les données cachées.
+    if (!debut || !fin) {
+        zoneDonnees.style.display = 'none';
+        zoneMasquee.style.display = 'block';
+        return;
+    }
+
+    const params = new URLSearchParams();
+    params.append('date_debut', debut);
+    params.append('date_fin', fin);
+    if (cat) params.append('categorie_id', cat);
+
+    const queryString = `?${params.toString()}`;
+
+    try {
+        const [res, resSynthese] = await Promise.all([
+            fetch(`/api/journal${queryString}`),
+            fetch(`/api/journal/synthese${queryString}`)
+        ]);
+        const data = await res.json();
+        const dataSynthese = await resSynthese.json();
+        
+        tousLesPaiements = data.donnees || [];
+        afficherPaiements(tousLesPaiements);
+        afficherSynthese(dataSynthese.donnees || []);
+
+        // Dates renseignées et données chargées avec succès : on démasque l'écran.
+        zoneMasquee.style.display = 'none';
+        zoneDonnees.style.display = 'block';
+    } catch(e) {
+        document.getElementById('body-releve-ventes').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px">Erreur de chargement</td></tr>';
+        zoneMasquee.style.display = 'none';
+        zoneDonnees.style.display = 'block';
+    }
+}
+
+let dernieresSyntheseDonnees = [];
+
+function construireLignesSynthese(synthese) {
+    const map = {};
+    synthese.forEach(s => {
+        const cat = s.categorie || 'Autre';
+        if (!map[cat]) map[cat] = { total: 0 };
+        map[cat].total += Number(s.total || 0);
+    });
+
+    return Object.keys(map).map(cat => `
+        <tr>
+            <td>${cat}</td>
+            <td style="text-align:right;font-weight:700;color:#8b0000;">${formatMonnaie(map[cat].total)}</td>
+        </tr>
+    `).join('');
+}
+
+function afficherSynthese(synthese) {
+    dernieresSyntheseDonnees = synthese;
+    const corps = document.getElementById('body-synthese');
+
+    if (synthese.length === 0) {
+        corps.innerHTML = '<tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:20px">Aucune donnée</td></tr>';
+        return;
+    }
+
+    corps.innerHTML = construireLignesSynthese(synthese);
+}
+
+function afficherPaiements(paiements) {
+    const corps = document.getElementById('body-releve-ventes');
+    corps.innerHTML = '';
+    let totalUsd = 0;
+
+    if (paiements.length === 0) {
+        corps.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px">Aucune transaction</td></tr>';
+    } else {
+        paiements.forEach(p => {
+            totalUsd += Number(p.montant || 0);
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="font-size:11px;color:#8b0000;font-weight:700;">${p.numero_recu}</td>
+                <td>${p.nom_eleve || '—'}</td>
+                <td>${p.libelle}</td>
+                <td style="font-size:11px;color:#64748b;">${p.caissier || '—'}</td>
+                <td style="text-align:right;font-weight:700;">${formatMonnaie(p.montant)}</td>
+            `;
+            corps.appendChild(tr);
+        });
+    }
+
+    document.getElementById('montant-jour').textContent = formatMonnaie(totalUsd);
+    document.getElementById('nb-transactions').textContent = paiements.length;
+    document.getElementById('total-recettes').textContent = formatMonnaie(totalUsd);
+}
+
+function imprimerRapport() {
+    const debut = document.getElementById('filtre-date-debut').value;
+    const fin = document.getElementById('filtre-date-fin').value;
+
+    // On empêche l'impression si les données sont encore masquées (aucune période choisie).
+    if (!debut || !fin) {
+        alert('Veuillez d\'abord sélectionner une date de début et une date de fin, puis appliquer les filtres.');
+        return;
+    }
+    const paiements = tousLesPaiements;
+
+    // Remplir le rapport
+    let dateAffichee = 'Toutes les périodes';
+    if (debut && fin) dateAffichee = `Du ${formatDate(debut)} au ${formatDate(fin)}`;
+    else if (debut) dateAffichee = `À partir du ${formatDate(debut)}`;
+    else if (fin) dateAffichee = `Jusqu'au ${formatDate(fin)}`;
+    document.getElementById('rpt-date').textContent = dateAffichee;
+    document.getElementById('rpt-print-date').textContent = new Date().toLocaleDateString('fr-FR');
+    document.getElementById('rpt-synthese-body').innerHTML = construireLignesSynthese(dernieresSyntheseDonnees);
+
+    const rptBody = document.getElementById('rpt-body');
+    rptBody.innerHTML = '';
+    let totalUsd = 0;
+    paiements.forEach(p => {
+        totalUsd += Number(p.montant || 0);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${p.numero_recu}</td>
+            <td>${p.nom_eleve || '—'}</td>
+            <td>${p.libelle}</td>
+            <td>${p.caissier || '—'}</td>
+            <td style="text-align:right;">${formatMonnaie(p.montant)}</td>
+        `;
+        rptBody.appendChild(tr);
+    });
+    document.getElementById('rpt-total-usd').textContent = formatMonnaie(totalUsd);
+
+    // Activer le rapport, masquer l'écran, imprimer
+    document.querySelector('.screen-only').style.display = 'none';
+    document.getElementById('print-report').style.display = 'block';
+    window.print();
+    // Après impression, revenir à l'écran
+    setTimeout(() => {
+        document.querySelector('.screen-only').style.display = '';
+        document.getElementById('print-report').style.display = 'none';
+    }, 500);
+}
+
+function exporterCloud() {
+    alert('Fonction Cloud non disponible dans cette version.');
+}
+
+async function chargerParametresEcole() {
+    try {
+        const res = await fetch('/api/parametres');
+        const json = await res.json();
+        if (json.donnees?.nom_ecole) document.getElementById('rpt-ecole').textContent = json.donnees.nom_ecole;
+        if (json.donnees?.adresse_ecole) document.getElementById('rpt-adresse').textContent = json.donnees.adresse_ecole;
+    } catch (e) { /* on garde les valeurs par defaut */ }
+}
+
+// Raccourci Ctrl+P : bascule automatiquement vers le rapport imprimable avant d'imprimer.
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        imprimerRapport();
+    }
+});
+
+chargerParametresEcole();
+chargerFiltresCategories();
+chargerJournal();
+</script>
+</body>
+</html>

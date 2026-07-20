@@ -1,0 +1,24 @@
+UPDATE SchoolPAY 
+• Journal de Caisse - 
+Ajouter en bas, la synthèse des recettes du jour (regroupé par type de paiement), donc avoir 
+le resumé des transactions journalières - 
+Ajouter l’option du solde de chaque élève à la fin de l’année ou trimestre 
+• Facture - 
+- Ajouter l’option de valider plusieurs opérations en une seule facture -  - 
+- Ajouter l’option $ en franc Congolais 
+• Bdd - 
+Ajouter les catégories de frais avec leur code respectifs : 
+Code	Catégorie
+78000	FRAIS SCOLAIRES
+78101	INSCRIPTION
+78102	FOURNITURE SCOL
+78104	TABLIERS
+78105	UNIFORMES
+78106	MACARON
+78107	PARASCOLAIRES
+78109	AUTRES RECETTES
+78200	ACTIVITES DIVERSES
+78500	RECETTES EXTRAORDINAIRES
+
+• Paramètre - 
+Après l’enregistrement des élèves, générer un matricule unique pour l’élève (propose moi 2 manière intuitive de créer les matricules)

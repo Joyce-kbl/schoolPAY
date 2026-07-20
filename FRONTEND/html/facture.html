@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reçu de Paiement - SchoolPAY</title>
+    <link rel="icon" href="/img/logoFat.jpeg" type="image/svg+xml">
+    <style>
+        :root { --primary: #8b0000; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8fafc; }
+
+        /* === NAVIGATION (hors impression) === */
+        .no-print { }
+        .top-nav { background: white; padding: 14px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .back-btn { text-decoration: none; color: var(--primary); font-size: 22px; font-weight: bold; padding: 4px 8px; border-radius: 8px; }
+        .nav-title { color: var(--primary); font-size: 16px; font-weight: 700; }
+
+        .page-wrapper { padding: 20px; max-width: 520px; margin: 0 auto; }
+
+        /* === DESIGN REÇU === */
+        .recu-sheet { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 16px; }
+        
+        .recu-header { background: var(--primary); color: white; padding: 22px 24px; display: flex; align-items: center; gap: 16px; }
+        .recu-logo { width: 52px; height: 52px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--primary); font-size: 16px; }
+        .recu-school { font-size: 18px; font-weight: 800; }
+        .recu-subtitle { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+        .recu-numero-badge { margin-left: auto; background: rgba(255,255,255,0.2); border-radius: 10px; padding: 6px 12px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+
+        .recu-body { padding: 22px 24px; }
+        .recu-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+        .recu-row:last-child { border-bottom: none; }
+        .recu-key { font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700; }
+        .recu-val { font-size: 14px; color: #1e293b; font-weight: 600; text-align: right; max-width: 60%; }
+        
+        .montant-highlight { background: #fef2f2; border-radius: 12px; padding: 16px 24px; margin: 16px 0; text-align: center; }
+        .montant-highlight .label { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; }
+        .montant-highlight .valeur { font-size: 28px; font-weight: 900; color: var(--primary); margin-top: 4px; }
+        .montant-highlight .lettres { font-size: 12px; color: #64748b; margin-top: 4px; font-style: italic; }
+
+        .recu-footer { padding: 18px 24px; background: #f8fafc; display: flex; justify-content: space-between; gap: 20px; }
+        .sig-block { flex: 1; text-align: center; }
+        .sig-label { font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 35px; }
+        .sig-line { border-top: 1.5px solid #cbd5e1; padding-top: 6px; font-size: 11px; color: #94a3b8; }
+
+        .separator { text-align: center; color: #94a3b8; font-size: 12px; padding: 8px 0; letter-spacing: 4px; }
+
+        .btn-print-main { background: var(--primary); color: white; padding: 16px; border-radius: 14px; border: none; font-weight: bold; width: 100%; cursor: pointer; font-size: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-secondary { background: #f1f5f9; color: #475569; padding: 13px; border-radius: 14px; border: none; font-weight: 600; width: 100%; cursor: pointer; font-size: 14px; text-decoration: none; display: block; text-align: center; }
+
+        /* === IMPRESSION === */
+/* ===================== IMPRESSION ===================== */
+        @media print {
+
+            @page {
+                size: A5 portrait;
+                margin: 8mm;
+            }
+
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            html,
+            body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                background: #fff;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .page-wrapper {
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            /* ===== Chaque reçu = 45 % de la feuille ===== */
+
+            .recu-sheet {
+                width: 100%;
+                height: 45vh;
+                min-height: 45vh;
+                max-height: 45vh;
+
+                border: 1px solid #cbd5e1;
+                border-radius: 0;
+                box-shadow: none;
+
+                display: flex;
+                flex-direction: column;
+
+                page-break-inside: avoid;
+                break-inside: avoid;
+
+                page-break-after: avoid;
+                break-after: avoid;
+
+                overflow: hidden;
+            }
+
+            /* ===== Zone centrale extensible ===== */
+
+            .recu-body {
+                flex: 1;
+                overflow: hidden;
+                padding: 10px 14px;
+            }
+
+            /* ===== En-tête ===== */
+
+            .recu-header {
+                padding: 10px 14px;
+            }
+
+            .recu-logo {
+                width: 38px;
+                height: 38px;
+            }
+
+            .recu-school {
+                font-size: 15px;
+            }
+
+            .recu-subtitle {
+                font-size: 9px;
+            }
+
+            .recu-numero-badge {
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+
+            /* ===== Montant ===== */
+
+            .montant-highlight {
+                margin: 8px 0;
+                padding: 8px;
+            }
+
+            .montant-highlight .label {
+                font-size: 9px;
+            }
+
+            .montant-highlight .valeur {
+                font-size: 18px;
+            }
+
+            .montant-highlight .lettres {
+                font-size: 9px;
+            }
+
+            /* ===== Lignes ===== */
+
+            .recu-row {
+                padding: 4px 0;
+            }
+
+            .recu-key {
+                font-size: 9px;
+            }
+
+            .recu-val {
+                font-size: 11px;
+            }
+
+            /* ===== Pied ===== */
+
+            .recu-footer {
+                padding: 10px 14px;
+            }
+
+            .sig-label {
+                font-size: 9px;
+                margin-bottom: 20px;
+            }
+
+            .sig-line {
+                font-size: 9px;
+            }
+
+            /* ===== Ligne de découpe ===== */
+
+            .separator {
+                height: 10%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 10px;
+                letter-spacing: 3px;
+            }
+
+            /* ===== Détails ===== */
+
+            #r1-operations,
+            #r2-operations,
+            #r1-situation,
+            #r2-situation {
+                font-size: 10px;
+                margin-top: 6px !important;
+                padding-top: 6px !important;
+            }
+
+            #r1-operations div,
+            #r2-operations div,
+            #r1-situation div,
+            #r2-situation div {
+                margin-bottom: 2px !important;
+            }
+
+        }
+        /* === Adaptation écrans de téléphone (petits mobiles), hors impression === */
+        @media (max-width: 380px) {
+            .page-wrapper { padding: 14px; }
+            .recu-header { padding: 16px 18px; }
+            .recu-body { padding: 16px 18px; }
+        }
+    </style>
+</head>
+<body>
+<script src="/js/auth.js"></script>
+
+<!-- Page d'impression du reçu, avec une copie au format imprimable -->
+<div class="no-print">
+    <!-- Navigation écran non imprimable -->
+    <div class="top-nav">
+        <a href="index.html" class="back-btn">←</a>
+        <span class="nav-title">Reçu de Paiement</span>
+    </div>
+</div>
+
+<div class="page-wrapper">
+    <!-- Reçu #1 (original) -->
+    <div class="recu-sheet print-area" id="recu1">
+        <div class="recu-header">
+            <img class="recu-logo" src="/img/logoFat.jpeg" alt="Logo">
+            <div>
+                <div class="recu-school" id="r1-ecole">ÉCOLE FATIMA</div>
+                <div class="recu-subtitle">Reçu de Paiement Scolaire</div>
+            </div>
+            <div class="recu-numero-badge" id="r1-numero">N° ...</div>
+        </div>
+        <div class="recu-body">
+            <div class="montant-highlight">
+                <div class="label">Montant reçu</div>
+                <div class="valeur" id="r1-montant">—</div>
+                <div class="lettres" id="r1-lettres">—</div>
+            </div>
+            <div class="recu-row">
+                <span class="recu-key">Élève</span>
+                <span class="recu-val" id="r1-nom">—</span>
+            </div>
+            <div class="recu-row">
+                <span class="recu-key">Date</span>
+                <span class="recu-val" id="r1-date">—</span>
+            </div>
+            <div class="recu-row">
+                <span class="recu-key">Caissier(e)</span>
+                <span class="recu-val" id="r1-caissier">—</span>
+            </div>
+            <div id="r1-operations" style="margin-top: 15px; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+                <!-- Operations listed here -->
+            </div>
+            <!-- Zone affichant la situation de l'élève (attendu/payé/reste), remplie dynamiquement par construireSituationHtml() -->
+            <div id="r1-situation" style="margin-top: 12px; border-top: 1px solid #f1f5f9; padding-top: 10px;"></div>
+        </div>
+        <div class="recu-footer">
+            <div class="sig-block">
+                <div class="sig-label">Caissier(e)</div>
+                <div class="sig-line" id="r1-sig-caissier">Signature</div>
+            </div>
+            <div class="sig-block">
+                <div class="sig-label">Parent / Tuteur</div>
+                <div class="sig-line">Signature</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="separator">✂─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ COPIE ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─✂</div>
+
+    <!-- Reçu #2 (copie) -->
+    <div class="recu-sheet print-area" id="recu2">
+        <div class="recu-header">
+            <img class="recu-logo" src="/img/logoFat.jpeg" alt="Logo">
+            <div>
+                <div class="recu-school" id="r2-ecole">ÉCOLE FATIMA</div>
+                <div class="recu-subtitle">Reçu de Paiement Scolaire — COPIE</div>
+            </div>
+            <div class="recu-numero-badge" id="r2-numero">N° ...</div>
+        </div>
+        <div class="recu-body">
+            <div class="montant-highlight">
+                <div class="label">Montant reçu</div>
+                <div class="valeur" id="r2-montant">—</div>
+                <div class="lettres" id="r2-lettres">—</div>
+            </div>
+            <div class="recu-row">
+                <span class="recu-key">Élève</span>
+                <span class="recu-val" id="r2-nom">—</span>
+            </div>
+            <div class="recu-row">
+                <span class="recu-key">Date</span>
+                <span class="recu-val" id="r2-date">—</span>
+            </div>
+            <div class="recu-row">
+                <span class="recu-key">Caissier(e)</span>
+                <span class="recu-val" id="r2-caissier">—</span>
+            </div>
+            <div id="r2-operations" style="margin-top: 15px; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+                <!-- Operations listed here -->
+            </div>
+            <!-- Zone affichant la situation de l'élève (attendu/payé/reste), remplie dynamiquement par construireSituationHtml() -->
+            <div id="r2-situation" style="margin-top: 12px; border-top: 1px solid #f1f5f9; padding-top: 10px;"></div>
+        </div>
+        <div class="recu-footer">
+            <div class="sig-block">
+                <div class="sig-label">Caissier(e)</div>
+                <div class="sig-line" id="r2-sig-caissier">Signature</div>
+            </div>
+            <div class="sig-block">
+                <div class="sig-label">Parent / Tuteur</div>
+                <div class="sig-line">Signature</div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Boutons -->
+    <div style="margin-top: 20px;" class="no-print">
+        <button class="btn-print-main" onclick="window.print()">🖨️ Imprimer le Reçu</button>
+        <a href="index.html" class="btn-secondary">← Retour à l'accueil</a>
+    </div>
+</div>
+
+<script>
+function nombreEnLettres(n) {
+    // Conversion simplifiée
+    const unites = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf',
+        'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf'];
+    const dizaines = ['', '', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante', 'quatre-vingt', 'quatre-vingt'];
+    
+    const entier = Math.floor(n);
+    const cents = Math.round((n - entier) * 100);
+    
+    function convertir(nb) {
+        if (nb === 0) return 'zéro';
+        if (nb < 20) return unites[nb];
+        if (nb < 100) {
+            const d = Math.floor(nb / 10);
+            const u = nb % 10;
+            if (d === 7 || d === 9) return dizaines[d] + (u === 1 ? '-et-' : '-') + unites[10 + u];
+            return dizaines[d] + (u > 0 ? (u === 1 && d !== 8 ? '-et-un' : '-' + unites[u]) : (d === 8 ? 's' : ''));
+        }
+        if (nb < 1000) return unites[Math.floor(nb/100)] + ' cent' + (nb % 100 > 0 ? ' ' + convertir(nb % 100) : 's');
+        return convertir(Math.floor(nb/1000)) + ' mille' + (nb % 1000 > 0 ? ' ' + convertir(nb % 1000) : '');
+    }
+    
+    const symb = 'Dollar(s)';
+    let result = convertir(entier) + ' ' + symb;
+    if (cents > 0) result += ' et ' + convertir(cents) + ' centime(s)';
+    return result.charAt(0).toUpperCase() + result.slice(1);
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return '—';
+    const [y, m, d] = dateStr.split('-');
+    return `${d}/${m}/${y}`;
+}
+
+function remplirRecu(suffix, data) {
+    const symbole = '$';
+    document.getElementById(`${suffix}-numero`).textContent = `N° ${data.numero}`;
+    document.getElementById(`${suffix}-nom`).textContent = data.nom;
+    document.getElementById(`${suffix}-date`).textContent = formatDate(data.date);
+    document.getElementById(`${suffix}-montant`).textContent = `${Number(data.montant).toFixed(2)} ${symbole}`;
+    document.getElementById(`${suffix}-lettres`).textContent = nombreEnLettres(Number(data.montant));
+    document.getElementById(`${suffix}-caissier`).textContent = data.caissier || '—';
+    document.getElementById(`${suffix}-sig-caissier`).textContent = data.caissier || 'Signature';
+    
+    const container = document.getElementById(`${suffix}-operations`);
+    container.innerHTML = '<div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Détail des opérations</div>';
+    
+    if (data.operations && data.operations.length > 0) {
+        data.operations.forEach(op => {
+            container.innerHTML += `
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                <span>• ${op.libelle}</span>
+                <span style="font-weight: 600;">${Number(op.montant).toFixed(2)} ${symbole}</span>
+            </div>`;
+        });
+    } else if (data.libelle) {
+        // Fallback pour les anciens reçus
+        container.innerHTML += `
+        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+            <span>• ${data.libelle}</span>
+            <span style="font-weight: 600;">${Number(data.montant).toFixed(2)} ${symbole}</span>
+        </div>`;
+    }
+
+    // Affiche la situation de l'élève (frais scolaires attendus / payés / restants)
+    // Cette zone est mise à jour séparément par afficherSituation() une fois la fiche
+    // de l'élève récupérée depuis l'API (voir chargerSituationEleve).
+    const zoneSituation = document.getElementById(`${suffix}-situation`);
+    if (zoneSituation) {
+        zoneSituation.innerHTML = '<div style="font-size: 11px; color: #94a3b8;">Chargement de la situation…</div>';
+    }
+}
+
+/**
+ * Construit le HTML de la situation de l'élève (attendu / payé / reste)
+ * à partir des données renvoyées par /api/eleves/:id/fiche.
+ */
+function construireSituationHtml(fiche) {
+    const symbole = '$';
+    const attendu = Number(fiche.frais_total || 0);
+    const paye = Number(fiche.total_paye || 0);
+    const reste = Number(fiche.reste || 0);
+    const couleurReste = reste > 0 ? '#dc2626' : '#059669';
+    const statut = reste > 0 ? `Reste à payer : ${paye.toFixed(2)} / ${attendu.toFixed(2)}` : 'Frais scolaires soldés';
+    return `
+        <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-bottom: 6px;">Situation de l'élève</div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px;">
+            <span>Frais scolaires attendus</span>
+            <span style="font-weight: 600;">${attendu.toFixed(2)} ${symbole}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px;">
+            <span>Déjà payé (total)</span>
+            <span style="font-weight: 600; color:#059669;">${paye.toFixed(2)} ${symbole}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; color: ${couleurReste};">
+            <span>Reste à payer</span>
+            <span>${reste.toFixed(2)} ${symbole}</span>
+        </div>
+    `;
+}
+
+/**
+ * Récupère la fiche complète de l'élève (via son eleve_id) et affiche sa
+ * situation de paiement sur les deux copies du reçu. Reste silencieux en cas
+ * d'échec pour ne pas bloquer l'impression du reçu lui-même.
+ */
+async function chargerSituationEleve(eleve_id) {
+    const cibleR1 = document.getElementById('r1-situation');
+    const cibleR2 = document.getElementById('r2-situation');
+    if (!eleve_id) {
+        if (cibleR1) cibleR1.innerHTML = '';
+        if (cibleR2) cibleR2.innerHTML = '';
+        return;
+    }
+    try {
+        const res = await fetch(`/api/eleves/${eleve_id}/fiche`);
+        const json = await res.json();
+        if (json.donnees) {
+            const html = construireSituationHtml(json.donnees);
+            if (cibleR1) cibleR1.innerHTML = html;
+            if (cibleR2) cibleR2.innerHTML = html;
+        }
+    } catch (e) {
+        if (cibleR1) cibleR1.innerHTML = '';
+        if (cibleR2) cibleR2.innerHTML = '';
+    }
+}
+
+// Charger depuis URL params OU depuis l'API si seulement numero est fourni
+const params = new URLSearchParams(window.location.search);
+const numero = params.get('numero');
+
+async function chargerParametresEcole() {
+    try {
+        const res = await fetch('/api/parametres');
+        const json = await res.json();
+        const nomEcole = json.donnees?.nom_ecole;
+        if (nomEcole) {
+            document.getElementById('r1-ecole').textContent = nomEcole;
+            document.getElementById('r2-ecole').textContent = nomEcole;
+        }
+    } catch (e) { /* on garde le nom par defaut */ }
+}
+
+async function chargerFacture() {
+    let data = { numero: '—', nom: '—', montant: 0, devise: 'USD', date: '', operations: [], caissier: '' };
+    let eleve_id = null;
+
+    if (numero) {
+        try {
+            const res = await fetch(`/api/factures/${numero}`);
+            const json = await res.json();
+            if (json.donnees) {
+                const f = json.donnees;
+                data = { 
+                    numero: f.numero_facture, 
+                    nom: f.nom_eleve, 
+                    montant: f.total, 
+                    devise: f.devise, 
+                    date: f.paye_le,
+                    operations: f.operations,
+                    caissier: f.caissier
+                };
+                eleve_id = f.eleve_id;
+            }
+        } catch(e) { console.error(e); }
+    }
+    remplirRecu('r1', data);
+    remplirRecu('r2', data);
+    chargerSituationEleve(eleve_id);
+}
+
+chargerParametresEcole();
+chargerFacture();
+
+// Raccourci Ctrl+P (ou Cmd+P sur Mac) pour imprimer directement le reçu.
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        window.print();
+    }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Situation Générale - SchoolPAY</title>
+    <link rel="icon" href="/img/logoFat.jpeg" type="image/jpeg">
+    <style>
+        :root { --primary: #8b0000; --bg: #f8fafc; --white: #ffffff; --success: #059669; --danger: #dc2626; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        body { background-color: var(--bg); padding-bottom: 40px; }
+
+        header { background: var(--white); padding: 15px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .back-btn { text-decoration: none; color: var(--primary); font-size: 22px; font-weight: bold; padding: 4px 8px; border-radius: 8px; }
+
+        .container { padding: 20px; max-width: 720px; margin: 0 auto; }
+        .card { background: var(--white); border-radius: 16px; padding: 18px; margin-bottom: 16px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+        .card-title { font-size: 13px; color: #0f172a; margin-bottom: 14px; font-weight: 700; }
+
+        label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        select, input { width: 100%; padding: 11px 13px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; background: white; margin-bottom: 12px; }
+        select:focus, input:focus { border-color: var(--primary); }
+
+        .btn-action { background: var(--primary); color: white; padding: 13px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; font-size: 14px; }
+
+        table { width: 100%; font-size: 12px; border-collapse: collapse; }
+        th { text-align: left; color: #64748b; border-bottom: 2px solid #f1f5f9; padding: 8px 6px; font-size: 10px; text-transform: uppercase; }
+        td { padding: 9px 6px; border-bottom: 1px solid #f8fafc; }
+        .classe-heading { background: #fef2f2; color: var(--primary); font-weight: 800; padding: 10px 8px; font-size: 13px; }
+        .sous-total-row td { font-weight: 800; background: #f8fafc; border-top: 1.5px solid #e2e8f0; }
+        /* Chaque ligne d'élève est cliquable et renvoie vers sa fiche individuelle (historique complet) */
+        .ligne-eleve { cursor: pointer; }
+        .ligne-eleve:hover td { background: #fef7f7; }
+        .ligne-eleve td:first-child { color: var(--primary); font-weight: 700; text-decoration: underline; text-decoration-color: transparent; }
+        .ligne-eleve:hover td:first-child { text-decoration-color: var(--primary); }
+        /* Conteneur scrollable pour éviter que le tableau ne déborde sur petits écrans (téléphones) */
+        .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .grand-total-box { margin-top: 16px; padding: 14px; background: #0f172a; color: white; border-radius: 12px; display: flex; justify-content: space-between; font-weight: 800; }
+
+        .loading, .empty-state { text-align: center; padding: 40px; color: #94a3b8; }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; }
+            .container { padding: 0; max-width: 100%; }
+            .card { border: none; box-shadow: none; padding: 0; }
+            .ligne-eleve { cursor: default; }
+            .ligne-eleve td:first-child { text-decoration: none; }
+        }
+        .print-header { display: none; }
+        @media print {
+            .print-header { display: flex; align-items: center; gap: 14px; border-bottom: 2px solid #000; padding-bottom: 16px; margin-bottom: 20px; }
+            .print-header img { width: 60px; height: 60px; }
+            .print-header .ecole-nom { font-size: 17px; font-weight: 800; color: #8b0000; }
+            .print-header .periode-info { margin-left: auto; text-align: right; font-size: 12px; }
+        }
+
+        /* === Adaptation écrans de téléphone (petits mobiles) === */
+        @media (max-width: 400px) {
+            .container { padding: 12px; }
+            .card { padding: 14px; border-radius: 12px; }
+            table { font-size: 11px; }
+            th, td { padding: 7px 4px; }
+            .grand-total-box { flex-direction: column; gap: 6px; text-align: center; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+<script src="/js/auth.js"></script>
+
+<!-- Page de situation générale, synthèse globale des paiements par classe -->
+<!-- Cette page affiche un rapport synthétique des paiements par classe et par période -->
+<header class="no-print">
+    <a href="modifier.html" class="back-btn">←</a>
+    <h2 style="color: var(--primary); font-size: 16px;">Situation Générale des Élèves</h2>
+</header>
+
+<div class="container">
+    <div class="print-header">
+        <img src="/img/logoFat.jpeg" alt="Logo école" class="logo-circle">
+        <div>
+            <div class="ecole-nom" id="ph-ecole">ÉCOLE FATIMA</div>
+            <div style="font-size:11px;color:#444;" id="ph-adresse">Kinshasa, RDC</div>
+        </div>
+        <div class="periode-info">
+            <strong>Situation Générale des Paiements</strong><br>
+            <span id="ph-periode">—</span><br>
+            Imprimé le <span id="ph-date-impression">—</span>
+        </div>
+    </div>
+
+    <!-- Bloc filtre visible seulement sur écran : permet de générer le rapport selon classe, période et année -->
+    <div class="card no-print">
+        <div class="card-title">🔎 Filtres</div>
+        <label>Classe</label>
+        <select id="filtre-classe">
+            <option value="all">Toutes les classes</option>
+        </select>
+        <label>Période</label>
+        <select id="filtre-periode">
+            <option value="annuel">Année scolaire complète</option>
+            <option value="trimestre1">1er trimestre</option>
+            <option value="trimestre2">2e trimestre</option>
+            <option value="trimestre3">3e trimestre</option>
+        </select>
+        <label>Année scolaire (début, ex: 2026 pour 2026-2027)</label>
+        <input type="number" id="filtre-annee" placeholder="2026">
+        <button class="btn-action" onclick="chargerSituation()">Générer le rapport</button>
+    </div>
+
+    <!-- Zone de résultats du rapport généré, remplacée dynamiquement par les données renvoyées par l'API -->
+    <div id="resultats" class="card">
+        <div class="loading">Sélectionnez vos filtres puis générez le rapport.</div>
+    </div>
+
+    <!-- Bouton d'impression de la situation générale visible uniquement à l'écran -->
+    <div class="no-print" style="display:flex; gap:10px;">
+        <button class="btn-action" style="background:#1e293b;" onclick="window.print()">🖨️ Imprimer la situation générale</button>
+    </div>
+</div>
+
+<script>
+function formatMonnaie(v) {
+    return `${Number(v || 0).toFixed(2).replace('.', ',')} $`;
+}
+
+async function chargerClasses() {
+    try {
+        const res = await fetch('/api/classes');
+        const data = await res.json();
+        const select = document.getElementById('filtre-classe');
+        (data.donnees || []).forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = c.nom;
+            select.appendChild(opt);
+        });
+    } catch (e) {}
+}
+
+async function chargerParametresEcole() {
+    try {
+        const res = await fetch('/api/parametres');
+        const json = await res.json();
+        if (json.donnees?.nom_ecole) document.getElementById('ph-ecole').textContent = json.donnees.nom_ecole;
+        if (json.donnees?.adresse_ecole) document.getElementById('ph-adresse').textContent = json.donnees.adresse_ecole;
+    } catch (e) {}
+}
+
+const libellesPeriode = {
+    annuel: 'Année scolaire complète',
+    trimestre1: '1er trimestre',
+    trimestre2: '2e trimestre',
+    trimestre3: '3e trimestre'
+};
+
+async function chargerSituation() {
+    const classe_id = document.getElementById('filtre-classe').value;
+    const periode = document.getElementById('filtre-periode').value;
+    const annee = document.getElementById('filtre-annee').value;
+    const conteneur = document.getElementById('resultats');
+    conteneur.innerHTML = '<div class="loading">Chargement...</div>';
+
+    const params = new URLSearchParams({ classe_id, periode });
+    if (annee) params.append('annee', annee);
+
+    try {
+        const res = await fetch(`/api/rapports/situation?${params.toString()}`);
+        const json = await res.json();
+        const d = json.donnees;
+
+        document.getElementById('ph-periode').textContent = libellesPeriode[periode] || periode;
+        document.getElementById('ph-date-impression').textContent = new Date().toLocaleDateString('fr-FR');
+
+        if (!d.classes || d.classes.length === 0) {
+            conteneur.innerHTML = '<div class="empty-state">Aucune donnée pour ces filtres.</div>';
+            return;
+        }
+
+        let html = '<div class="table-scroll"><table><thead><tr><th>Élève</th><th>Matricule</th><th style="text-align:right;">Attendu</th><th style="text-align:right;">Payé</th><th style="text-align:right;">Reste</th></tr></thead><tbody>';
+
+        d.classes.forEach(c => {
+            html += `<tr><td colspan="5" class="classe-heading">${c.classe.nom} (${c.eleves.length} élève${c.eleves.length > 1 ? 's' : ''})</td></tr>`;
+            if (c.eleves.length === 0) {
+                html += '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:14px;">Aucun élève dans cette classe</td></tr>';
+            } else {
+                c.eleves.forEach(e => {
+                    const couleurReste = e.reste > 0 ? 'var(--danger)' : 'var(--success)';
+                    // Chaque ligne est cliquable (attribut data-eleve-id) et ouvre la fiche complète
+                    // de l'élève (profil + historique détaillé) pour un rapport plus riche et exploitable.
+                    html += `<tr class="ligne-eleve" data-eleve-id="${e.id}">
+                        <td>${e.nom_complet}</td>
+                        <td style="color:#64748b;">${e.matricule || '—'}</td>
+                        <td style="text-align:right;">${formatMonnaie(e.attendu)}</td>
+                        <td style="text-align:right;color:var(--success);">${formatMonnaie(e.paye)}</td>
+                        <td style="text-align:right;font-weight:700;color:${couleurReste};">${formatMonnaie(e.reste)}</td>
+                    </tr>`;
+                });
+            }
+            html += `<tr class="sous-total-row">
+                <td colspan="2">Sous-total ${c.classe.nom}</td>
+                <td style="text-align:right;">${formatMonnaie(c.sous_total.attendu)}</td>
+                <td style="text-align:right;">${formatMonnaie(c.sous_total.paye)}</td>
+                <td style="text-align:right;">${formatMonnaie(c.sous_total.reste)}</td>
+            </tr>`;
+        });
+
+        html += '</tbody></table></div>';
+        html += `<div class="grand-total-box">
+            <span>TOTAL GÉNÉRAL</span>
+            <span>Attendu ${formatMonnaie(d.grand_total.attendu)} · Payé ${formatMonnaie(d.grand_total.paye)} · Reste ${formatMonnaie(d.grand_total.reste)}</span>
+        </div>`;
+
+        conteneur.innerHTML = html;
+
+        // Active le clic sur chaque ligne d'élève : redirige vers sa fiche individuelle
+        // (fiche_eleve.html) qui contient l'historique détaillé de ses paiements.
+        conteneur.querySelectorAll('.ligne-eleve').forEach((ligne) => {
+            ligne.addEventListener('click', () => {
+                window.location.href = `fiche_eleve.html?id=${ligne.dataset.eleveId}`;
+            });
+        });
+    } catch (e) {
+        conteneur.innerHTML = '<div class="empty-state">Erreur lors du chargement du rapport.</div>';
+    }
+}
+
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        window.print();
+    }
+});
+
+chargerParametresEcole();
+chargerClasses();
+</script>
+</body>
+</html>
