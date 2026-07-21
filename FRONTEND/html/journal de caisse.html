@@ -34,10 +34,11 @@
 
         .total-box { margin-top: 15px; padding: 12px 0 0; border-top: 2px dashed #8b0000; font-size: 15px; font-weight: 800; color: #b91c1c; display: flex; justify-content: space-between; }
 
-        .btn-group { display: flex; gap: 10px; margin-top: 5px; }
-        .btn-action { flex: 1; padding: 13px 10px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; color: white; font-size: 13px; }
-        .btn-cloud { background-color: #3b82f6; }
-        .btn-print { background-color: #8b0000; }
+        .btn-group { display: flex; gap: 8px; margin-top: 5px; }
+        .btn-action { flex: 1; padding: 12px 8px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; color: white; font-size: 12px; }
+        .btn-print-synthese { background-color: #6366f1; }
+        .btn-print-details { background-color: #0891b2; }
+        .btn-print-all { background-color: #8b0000; }
 
         .tabs { display: flex; gap: 10px; margin-bottom: 14px; }
         .tab-btn { flex: 1; border: 1px solid #e2e8f0; background: white; color: #64748b; border-radius: 999px; padding: 10px 12px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
@@ -49,41 +50,43 @@
         .nav-link { text-decoration: none; color: #64748b; font-size: 11px; font-weight: 600; text-align: center; }
         .home-icon-circle { width: 60px; height: 60px; background: #8b0000; color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 24px; box-shadow: 0 4px 10px rgba(139,0,0,0.4); margin-top: -30px; border: 4px solid #f8fafc; }
 
-        /* === IMPRESSION RAPPORT === */
+        .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+        /* === RAPPORT IMPRIMABLE === */
+        .print-report { display: none; padding: 25px 30px; font-family: Arial, sans-serif; color: #000; }
+        .rpt-header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 14px; margin-bottom: 20px; align-items: flex-start; }
+        .rpt-logo-box { display: flex; gap: 12px; align-items: center; }
+        .rpt-logo { width: 60px; height: 60px; background: #8b0000; color: white; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; border-radius: 8px; }
+        .rpt-school { font-size: 16px; font-weight: 800; color: #8b0000; }
+        .rpt-info { font-size: 11px; color: #444; margin-top: 2px; }
+        .rpt-meta { text-align: right; font-size: 12px; }
+        .rpt-meta strong { display: block; font-size: 14px; color: #8b0000; margin-bottom: 4px; }
+
+        .rpt-section-title { font-weight: bold; font-size: 12px; margin-bottom: 6px; color: #8b0000; }
+
+        .rpt-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+        .rpt-table th { border-bottom: 2px solid #000; padding: 8px 6px; text-align: left; font-size: 10px; text-transform: uppercase; }
+        .rpt-table td { border-bottom: 1px solid #ccc; padding: 7px 6px; }
+        .rpt-table tfoot { display: table-row-group; }
+
+        .rpt-total-bloc { display: flex; justify-content: flex-end; border-top: 2px solid #000; padding-top: 8px; margin-top: -1px; margin-bottom: 16px; page-break-inside: avoid; }
+        .rpt-total-inner { display: flex; justify-content: space-between; width: 240px; font-weight: bold; font-size: 13px; }
+
+        .rpt-signatures { display: flex; justify-content: space-between; margin-top: 40px; page-break-inside: avoid; }
+        .rpt-sig-box { text-align: center; width: 170px; }
+        .rpt-sig-line { border-top: 1px solid #000; margin-top: 45px; padding-top: 6px; font-size: 11px; color: #555; }
+
+        /* Masquer les sections inactives pendant l'impression */
+        .print-hide { display: none !important; }
+
         @media print {
             .no-print { display: none !important; }
             body { background: white; padding: 0; }
             .container { padding: 0; }
-            .print-report { display: block !important; }
             .screen-only { display: none !important; }
+            .print-report { display: block !important; }
         }
 
-        .print-report { display: none; padding: 30px; font-family: Arial, sans-serif; color: #000; }
-        /* Conteneur scrollable horizontal pour les tableaux sur petits écrans (téléphones) */
-        .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .rpt-header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 18px; margin-bottom: 25px; align-items: flex-start; }
-        .rpt-logo-box { display: flex; gap: 14px; align-items: center; }
-        .rpt-logo { width: 70px; height: 70px; background: #8b0000; color: white; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 20px; border-radius: 8px; }
-        .rpt-school { font-size: 18px; font-weight: 800; color: #8b0000; }
-        .rpt-info { font-size: 12px; color: #444; margin-top: 3px; }
-        .rpt-meta { text-align: right; font-size: 13px; }
-        .rpt-meta strong { display: block; font-size: 16px; color: #8b0000; margin-bottom: 5px; }
-
-        .rpt-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 13px; }
-        .rpt-table th { border-bottom: 2px solid #000; padding: 10px 8px; text-align: left; }
-        .rpt-table td { border-bottom: 1px solid #ccc; padding: 9px 8px; }
-        .rpt-total { font-weight: bold; border-top: 2px solid #000 !important; border-bottom: none !important; font-size: 14px; }
-        /* Par défaut, les navigateurs répètent le <tfoot> sur CHAQUE page imprimée
-           quand un tableau déborde sur plusieurs pages. On force ici son affichage
-           comme un simple groupe de lignes afin que le TOTAL n'apparaisse
-           qu'une seule fois, à la toute dernière page du rapport. */
-        .rpt-table tfoot { display: table-row-group; }
-
-        .rpt-signatures { display: flex; justify-content: space-between; margin-top: 50px; }
-        .rpt-sig-box { text-align: center; width: 180px; }
-        .rpt-sig-line { border-top: 1px solid #000; margin-top: 55px; padding-top: 8px; font-size: 12px; color: #555; }
-
-        /* === Adaptation écrans de téléphone (petits mobiles) === */
         @media (max-width: 380px) {
             .container { padding: 14px; }
             .card { padding: 14px; }
@@ -96,8 +99,6 @@
 <body>
 <script src="/js/auth.js"></script>
 
-<!-- Page Journal de Caisse : synthèse des recettes, filtres et actions d'impression -->
-<!-- Section écran avec le contenu interactif visible en navigation normale -->
 <div class="screen-only">
     <header class="no-print">
         <a href="index.html" class="back-btn">←</a>
@@ -106,9 +107,8 @@
     </header>
 
     <div class="container">
-        <!-- Filtrage par période : les données financières restent masquées tant que les deux dates ne sont pas renseignées -->
         <div class="card no-print">
-            <div class="card-title">🔍 Filtrage Avancé</div>
+            <div class="card-title">Filtrage Avancé</div>
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                 <div style="flex: 1;">
                     <label>Date Début</label>
@@ -128,16 +128,14 @@
             <button onclick="chargerJournal()" style="width: 100%; background: #8b0000; color: white; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">Appliquer les filtres</button>
         </div>
 
-        <!-- Message affiché tant que les données sensibles (montants, synthèse, détails) sont masquées -->
         <div class="card no-print" id="zone-masquee">
             <div style="text-align:center; padding: 10px 6px; color:#64748b;">
                 <div style="font-size: 30px; margin-bottom: 8px;">🔒</div>
                 <div style="font-weight:700; color:#1e293b; margin-bottom:4px;">Données masquées</div>
-                <div style="font-size: 13px;">Sélectionnez une <strong>date de début</strong> et une <strong>date de fin</strong>, puis cliquez sur « Appliquer les filtres » pour afficher le montant, le nombre de transactions, la synthèse et le détail des opérations.</div>
+                <div style="font-size: 13px;">Sélectionnez une <strong>date de début</strong> et une <strong>date de fin</strong>, puis cliquez sur « Appliquer les filtres ».</div>
             </div>
         </div>
 
-        <!-- Zone contenant les données sensibles : reste cachée (display:none) tant que les dates ne sont pas fournies -->
         <div id="zone-donnees" style="display:none;">
         <div class="kpi-row">
             <div class="kpi-card"><div class="kpi-label">Total en USD</div><div id="montant-jour" class="kpi-value">0,00 $</div></div>
@@ -145,13 +143,13 @@
         </div>
 
         <div class="tabs no-print" id="journal-tabs" style="display:none;">
-            <button type="button" class="tab-btn active" data-tab="synthese">📊 Synthèse par Catégorie</button>
-            <button type="button" class="tab-btn" data-tab="details">📋 Détails des transactions</button>
+            <button type="button" class="tab-btn active" data-tab="synthese">Synthèse par Catégorie</button>
+            <button type="button" class="tab-btn" data-tab="details">Détails des transactions</button>
         </div>
 
         <div class="tab-panel active" id="panel-synthese">
             <div class="card">
-                <div class="card-title">📊 Synthèse par Catégorie</div>
+                <div class="card-title">Synthèse par Catégorie</div>
                 <div class="table-scroll">
                 <table>
                     <thead>
@@ -169,7 +167,7 @@
 
         <div class="tab-panel" id="panel-details">
             <div class="card">
-                <div class="card-title">📋 Détails des transactions</div>
+                <div class="card-title">Détails des transactions</div>
                 <div class="table-scroll">
                 <table>
                     <thead>
@@ -195,20 +193,20 @@
         </div>
 
         <div class="btn-group no-print">
-            <button class="btn-action btn-cloud" onclick="exporterCloud()">☁️ Cloud</button>
-            <button class="btn-action btn-print" onclick="imprimerRapport()">🖨️ Imprimer Rapport</button>
+            <button class="btn-action btn-print-synthese" onclick="imprimerRapport('synthese')">Imprimmer le Rapport Synthétisé</button>
+            <button class="btn-action btn-print-details" onclick="imprimerRapport('details')">Imprimer le Rapport Détaillé</button>
+            <button class="btn-action btn-print-all" onclick="imprimerRapport('complet')">Imprimer le Rapport Complet</button>
         </div>
     </div>
 
-    <nav class="nav-bottom no-print">
+    <nav class="nav-bottom no-print"
         <a href="journal de caisse.html" class="nav-link" style="color: #8b0000;"><span style="font-size: 26px;">📒</span><br>Journal</a>
         <a href="index.html"><div class="home-icon-circle">🏠</div></a>
         <a href="modifier.html" class="nav-link"><span style="font-size: 26px;">⚙️</span><br>Paramètre</a>
     </nav>
 </div>
 
-<!-- Section imprimable du rapport : utilisée uniquement lors de l'impression -->
-<!-- Le contenu ci-dessous est mis en forme pour l'impression et caché à l'écran -->
+<!-- RAPPORT IMPRIMABLE -->
 <div class="print-report" id="print-report">
     <div class="rpt-header">
         <div class="rpt-logo-box">
@@ -219,48 +217,53 @@
             </div>
         </div>
         <div class="rpt-meta">
-            <strong>Rapport Journalier de Caisse</strong>
-            <div>Date : <span id="rpt-date">—</span></div>
+            <strong id="rpt-titre-rapport">Rapport Journalier de Caisse</strong>
+            <div>Période : <span id="rpt-date">—</span></div>
             <div>Imprimé le : <span id="rpt-print-date">—</span></div>
         </div>
     </div>
 
-    <div style="font-weight: bold; font-size: 13px; margin-bottom: 8px; color: #8b0000;">SYNTHÈSE PAR CATÉGORIE</div>
-    <table class="rpt-table">
-        <thead>
-            <tr>
-                <th>Catégorie</th>
-                <th style="text-align: right;">Total $</th>
-            </tr>
-        </thead>
-        <tbody id="rpt-synthese-body"></tbody>
-    </table>
+    <!-- SECTION SYNTHÈSE -->
+    <div id="rpt-section-synthese">
+        <div class="rpt-section-title">SYNTHÈSE PAR CATÉGORIE</div>
+        <table class="rpt-table">
+            <thead>
+                <tr>
+                    <th>Catégorie</th>
+                    <th style="text-align: right;">Total $</th>
+                </tr>
+            </thead>
+            <tbody id="rpt-synthese-body"></tbody>
+        </table>
+    </div>
 
-    <div style="font-weight: bold; font-size: 13px; margin-bottom: 8px; color: #8b0000;">DÉTAIL DES TRANSACTIONS</div>
-    <table class="rpt-table">
-        <thead>
-            <tr>
-                <th>N° Reçu</th>
-                <th>Nom de l'élève</th>
-                <th>Libellé</th>
-                <th>Caissier(e)</th>
-                <th style="text-align: right;">Montant</th>
-            </tr>
-        </thead>
-        <tbody id="rpt-body"></tbody>
-    </table>
+    <!-- SECTION DÉTAILS -->
+    <div id="rpt-section-details">
+        <div class="rpt-section-title">DÉTAIL DES TRANSACTIONS</div>
+        <table class="rpt-table">
+            <thead>
+                <tr>
+                    <th>N° Reçu</th>
+                    <th>Nom de l'élève</th>
+                    <th>Libellé</th>
+                    <th>Caissier(e)</th>
+                    <th style="text-align: right;">Montant</th>
+                </tr>
+            </thead>
+            <tbody id="rpt-body"></tbody>
+        </table>
+    </div>
 
-    <!-- Le total est volontairement placé hors du tableau (et non dans un <tfoot>) :
-         un <tfoot> est répété par le navigateur sur chaque page imprimée, alors que
-         ce bloc, lui, ne s'affiche qu'une seule fois, à la toute dernière page. -->
-    <div class="rpt-total-bloc" style="display: flex; justify-content: flex-end; border-top: 2px solid #000; padding-top: 10px; margin-top: -1px; margin-bottom: 20px; page-break-inside: avoid;">
-        <div style="display:flex; justify-content: space-between; width: 260px; font-weight: bold; font-size: 14px;">
+    <!-- TOTAL -->
+    <div class="rpt-total-bloc" id="rpt-total-bloc">
+        <div class="rpt-total-inner">
             <span>TOTAL $ :</span>
             <strong id="rpt-total-usd">0,00 $</strong>
         </div>
     </div>
 
-    <div class="rpt-signatures">
+    <!-- SIGNATURES -->
+    <div class="rpt-signatures" id="rpt-signatures">
         <div class="rpt-sig-box">
             <p style="font-weight: bold;">Le Caissier</p>
             <div class="rpt-sig-line">Nom & Signature</div>
@@ -278,39 +281,38 @@ let ongletActifJournal = 'synthese';
 
 function afficherOngletJournal(onglet) {
     ongletActifJournal = onglet;
-    document.querySelectorAll('.tab-btn').forEach((bouton) => {
+    document.querySelectorAll('.tab-btn').forEach(function(bouton) {
         bouton.classList.toggle('active', bouton.dataset.tab === onglet);
     });
-    document.querySelectorAll('.tab-panel').forEach((panel) => {
-        panel.classList.toggle('active', panel.id === `panel-${onglet}`);
+    document.querySelectorAll('.tab-panel').forEach(function(panel) {
+        panel.classList.toggle('active', panel.id === 'panel-' + onglet);
     });
 }
 
 function initialiserOngletsJournal() {
-    document.querySelectorAll('.tab-btn').forEach((bouton) => {
-        bouton.addEventListener('click', () => afficherOngletJournal(bouton.dataset.tab));
+    document.querySelectorAll('.tab-btn').forEach(function(bouton) {
+        bouton.addEventListener('click', function() { afficherOngletJournal(bouton.dataset.tab); });
     });
     afficherOngletJournal(ongletActifJournal);
 }
 
 function formatMonnaie(val) {
-    const s = '$';
-    return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val) + ' ' + s;
+    return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val) + ' $';
 }
 
 function formatDate(dateStr) {
     if (!dateStr) return '—';
-    const d = new Date(dateStr);
+    var d = new Date(dateStr);
     return isNaN(d) ? dateStr : d.toLocaleDateString('fr-FR');
 }
 
 async function chargerFiltresCategories() {
     try {
-        const res = await fetch('/api/categories-frais');
-        const data = await res.json();
-        const select = document.getElementById('filtre-categorie');
-        (data.donnees || []).forEach(c => {
-            const opt = document.createElement('option');
+        var res = await fetch('/api/categories-frais');
+        var data = await res.json();
+        var select = document.getElementById('filtre-categorie');
+        (data.donnees || []).forEach(function(c) {
+            var opt = document.createElement('option');
             opt.value = c.id;
             opt.textContent = c.libelle;
             select.appendChild(opt);
@@ -318,22 +320,15 @@ async function chargerFiltresCategories() {
     } catch(e) {}
 }
 
-/**
- * Charge le journal de caisse pour la période choisie.
- * Par sécurité/confidentialité, les montants, le nombre de transactions,
- * la synthèse et le détail des opérations restent masqués tant que
- * l'utilisateur n'a pas renseigné à la fois une date de début et une date de fin.
- */
 async function chargerJournal() {
-    const debut = document.getElementById('filtre-date-debut').value;
-    const fin = document.getElementById('filtre-date-fin').value;
-    const cat = document.getElementById('filtre-categorie').value;
+    var debut = document.getElementById('filtre-date-debut').value;
+    var fin = document.getElementById('filtre-date-fin').value;
+    var cat = document.getElementById('filtre-categorie').value;
 
-    const zoneMasquee = document.getElementById('zone-masquee');
-    const zoneDonnees = document.getElementById('zone-donnees');
-    const journalTabs = document.getElementById('journal-tabs');
+    var zoneMasquee = document.getElementById('zone-masquee');
+    var zoneDonnees = document.getElementById('zone-donnees');
+    var journalTabs = document.getElementById('journal-tabs');
 
-    // Tant que les deux bornes de date ne sont pas fournies, on garde les données cachées.
     if (!debut || !fin) {
         zoneDonnees.style.display = 'none';
         zoneMasquee.style.display = 'block';
@@ -341,26 +336,23 @@ async function chargerJournal() {
         return;
     }
 
-    const params = new URLSearchParams();
+    var params = new URLSearchParams();
     params.append('date_debut', debut);
     params.append('date_fin', fin);
     if (cat) params.append('categorie_id', cat);
 
-    const queryString = `?${params.toString()}`;
+    var queryString = '?' + params.toString();
 
     try {
-        const [res, resSynthese] = await Promise.all([
-            fetch(`/api/journal${queryString}`),
-            fetch(`/api/journal/synthese${queryString}`)
-        ]);
-        const data = await res.json();
-        const dataSynthese = await resSynthese.json();
+        var res = await fetch('/api/journal' + queryString);
+        var resSynthese = await fetch('/api/journal/synthese' + queryString);
+        var data = await res.json();
+        var dataSynthese = await resSynthese.json();
         
         tousLesPaiements = data.donnees || [];
         afficherPaiements(tousLesPaiements);
         afficherSynthese(dataSynthese.donnees || []);
 
-        // Dates renseignées et données chargées avec succès : on démasque l'écran.
         zoneMasquee.style.display = 'none';
         zoneDonnees.style.display = 'block';
         if (journalTabs) {
@@ -378,27 +370,24 @@ async function chargerJournal() {
     }
 }
 
-let dernieresSyntheseDonnees = [];
+var dernieresSyntheseDonnees = [];
 
 function construireLignesSynthese(synthese) {
-    const map = {};
-    synthese.forEach(s => {
-        const cat = s.categorie || 'Autre';
+    var map = {};
+    synthese.forEach(function(s) {
+        var cat = s.categorie || 'Autre';
         if (!map[cat]) map[cat] = { total: 0 };
         map[cat].total += Number(s.total || 0);
     });
 
-    return Object.keys(map).map(cat => `
-        <tr>
-            <td>${cat}</td>
-            <td style="text-align:right;font-weight:700;color:#8b0000;">${formatMonnaie(map[cat].total)}</td>
-        </tr>
-    `).join('');
+    return Object.keys(map).map(function(cat) {
+        return '<tr><td>' + cat + '</td><td style="text-align:right;font-weight:700;color:#8b0000;">' + formatMonnaie(map[cat].total) + '</td></tr>';
+    }).join('');
 }
 
 function afficherSynthese(synthese) {
     dernieresSyntheseDonnees = synthese;
-    const corps = document.getElementById('body-synthese');
+    var corps = document.getElementById('body-synthese');
 
     if (synthese.length === 0) {
         corps.innerHTML = '<tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:20px">Aucune donnée</td></tr>';
@@ -409,24 +398,21 @@ function afficherSynthese(synthese) {
 }
 
 function afficherPaiements(paiements) {
-    const corps = document.getElementById('body-releve-ventes');
+    var corps = document.getElementById('body-releve-ventes');
     corps.innerHTML = '';
-    let totalUsd = 0;
+    var totalUsd = 0;
 
     if (paiements.length === 0) {
         corps.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px">Aucune transaction</td></tr>';
     } else {
-        paiements.forEach(p => {
+        paiements.forEach(function(p) {
             totalUsd += Number(p.montant || 0);
-            
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="font-size:11px;color:#8b0000;font-weight:700;">${p.numero_recu}</td>
-                <td>${p.nom_eleve || '—'}</td>
-                <td>${p.libelle}</td>
-                <td style="font-size:11px;color:#64748b;">${p.caissier || '—'}</td>
-                <td style="text-align:right;font-weight:700;">${formatMonnaie(p.montant)}</td>
-            `;
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td style="font-size:11px;color:#8b0000;font-weight:700;">' + p.numero_recu + '</td>' +
+                '<td>' + (p.nom_eleve || '—') + '</td>' +
+                '<td>' + p.libelle + '</td>' +
+                '<td style="font-size:11px;color:#64748b;">' + (p.caissier || '—') + '</td>' +
+                '<td style="text-align:right;font-weight:700;">' + formatMonnaie(p.montant) + '</td>';
             corps.appendChild(tr);
         });
     }
@@ -438,72 +424,98 @@ function afficherPaiements(paiements) {
 
 initialiserOngletsJournal();
 
-function imprimerRapport() {
-    const debut = document.getElementById('filtre-date-debut').value;
-    const fin = document.getElementById('filtre-date-fin').value;
+/**
+ * Prépare et lance l'impression du rapport dans le mode demandé.
+ * @param {'synthese'|'details'|'complet'} mode
+ */
+function imprimerRapport(mode) {
+    var debut = document.getElementById('filtre-date-debut').value;
+    var fin = document.getElementById('filtre-date-fin').value;
 
-    // On empêche l'impression si les données sont encore masquées (aucune période choisie).
     if (!debut || !fin) {
         alert('Veuillez d\'abord sélectionner une date de début et une date de fin, puis appliquer les filtres.');
         return;
     }
-    const paiements = tousLesPaiements;
 
-    // Remplir le rapport
-    let dateAffichee = 'Toutes les périodes';
-    if (debut && fin) dateAffichee = `Du ${formatDate(debut)} au ${formatDate(fin)}`;
-    else if (debut) dateAffichee = `À partir du ${formatDate(debut)}`;
-    else if (fin) dateAffichee = `Jusqu'au ${formatDate(fin)}`;
+    // Dates
+    var dateAffichee = 'Du ' + formatDate(debut) + ' au ' + formatDate(fin);
     document.getElementById('rpt-date').textContent = dateAffichee;
     document.getElementById('rpt-print-date').textContent = new Date().toLocaleDateString('fr-FR');
-    document.getElementById('rpt-synthese-body').innerHTML = construireLignesSynthese(dernieresSyntheseDonnees);
 
-    const rptBody = document.getElementById('rpt-body');
-    rptBody.innerHTML = '';
-    let totalUsd = 0;
-    paiements.forEach(p => {
-        totalUsd += Number(p.montant || 0);
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${p.numero_recu}</td>
-            <td>${p.nom_eleve || '—'}</td>
-            <td>${p.libelle}</td>
-            <td>${p.caissier || '—'}</td>
-            <td style="text-align:right;">${formatMonnaie(p.montant)}</td>
-        `;
-        rptBody.appendChild(tr);
-    });
-    document.getElementById('rpt-total-usd').textContent = formatMonnaie(totalUsd);
+    // Titre selon le mode
+    var titres = {
+        synthese: 'Rapport de Caisse — Synthèse',
+        details: 'Rapport de Caisse — Détails',
+        complet: 'Rapport Journalier de Caisse'
+    };
+    document.getElementById('rpt-titre-rapport').textContent = titres[mode] || titres.complet;
 
-    // Activer le rapport, masquer l'écran, imprimer
+    // Synthèse
+    var sectionSynthese = document.getElementById('rpt-section-synthese');
+    if (mode === 'details') {
+        sectionSynthese.classList.add('print-hide');
+    } else {
+        sectionSynthese.classList.remove('print-hide');
+        document.getElementById('rpt-synthese-body').innerHTML = construireLignesSynthese(dernieresSyntheseDonnees);
+    }
+
+    // Détails
+    var sectionDetails = document.getElementById('rpt-section-details');
+    if (mode === 'synthese') {
+        sectionDetails.classList.add('print-hide');
+    } else {
+        sectionDetails.classList.remove('print-hide');
+        var rptBody = document.getElementById('rpt-body');
+        rptBody.innerHTML = '';
+        var totalUsd = 0;
+        tousLesPaiements.forEach(function(p) {
+            totalUsd += Number(p.montant || 0);
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td>' + p.numero_recu + '</td>' +
+                '<td>' + (p.nom_eleve || '—') + '</td>' +
+                '<td>' + p.libelle + '</td>' +
+                '<td>' + (p.caissier || '—') + '</td>' +
+                '<td style="text-align:right;">' + formatMonnaie(p.montant) + '</td>';
+            rptBody.appendChild(tr);
+        });
+        document.getElementById('rpt-total-usd').textContent = formatMonnaie(totalUsd);
+    }
+
+    // Total : visible sauf si mode synthèse seule (pas de total global dans ce cas)
+    var totalBloc = document.getElementById('rpt-total-bloc');
+    if (mode === 'synthese') {
+        totalBloc.classList.add('print-hide');
+    } else {
+        totalBloc.classList.remove('print-hide');
+    }
+
+    // Basculer vers le rapport, imprimer, revenir
     document.querySelector('.screen-only').style.display = 'none';
     document.getElementById('print-report').style.display = 'block';
     window.print();
-    // Après impression, revenir à l'écran
-    setTimeout(() => {
+    setTimeout(function() {
         document.querySelector('.screen-only').style.display = '';
         document.getElementById('print-report').style.display = 'none';
+        // Réinitialiser les sections pour la prochaine impression
+        sectionSynthese.classList.remove('print-hide');
+        sectionDetails.classList.remove('print-hide');
+        totalBloc.classList.remove('print-hide');
     }, 500);
-}
-
-function exporterCloud() {
-    alert('Fonction Cloud non disponible dans cette version.');
 }
 
 async function chargerParametresEcole() {
     try {
-        const res = await fetch('/api/parametres');
-        const json = await res.json();
-        if (json.donnees?.nom_ecole) document.getElementById('rpt-ecole').textContent = json.donnees.nom_ecole;
-        if (json.donnees?.adresse_ecole) document.getElementById('rpt-adresse').textContent = json.donnees.adresse_ecole;
-    } catch (e) { /* on garde les valeurs par defaut */ }
+        var res = await fetch('/api/parametres');
+        var json = await res.json();
+        if (json.donnees && json.donnees.nom_ecole) document.getElementById('rpt-ecole').textContent = json.donnees.nom_ecole;
+        if (json.donnees && json.donnees.adresse_ecole) document.getElementById('rpt-adresse').textContent = json.donnees.adresse_ecole;
+    } catch (e) {}
 }
 
-// Raccourci Ctrl+P : bascule automatiquement vers le rapport imprimable avant d'imprimer.
 document.addEventListener('keydown', function(e) {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
         e.preventDefault();
-        imprimerRapport();
+        imprimerRapport('complet');
     }
 });
 
