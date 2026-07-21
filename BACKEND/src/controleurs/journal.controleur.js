@@ -18,7 +18,7 @@ function obtenir_journal(base_de_donnees, reponse, params) {
   const whereClause = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
 
   const journal = base_de_donnees.prepare(`
-    SELECT p.numero_recu, e.nom_complet AS nom_eleve, p.libelle, p.montant, p.devise, p.paye_le, p.caissier
+    SELECT p.numero_recu, e.nom_complet AS nom_eleve, p.libelle, p.montant, p.devise, p.paye_le, p.caissier, p.deposant
     FROM paiements p
     INNER JOIN eleves e ON e.id = p.eleve_id
     ${whereClause}

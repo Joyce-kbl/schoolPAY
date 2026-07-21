@@ -228,6 +228,12 @@ function creer_base_de_donnees() {
   if (!colonne_existe(base_de_donnees, 'factures', 'caissier')) {
     base_de_donnees.exec('ALTER TABLE factures ADD COLUMN caissier TEXT');
   }
+  if (!colonne_existe(base_de_donnees, 'factures', 'deposant')) {
+    base_de_donnees.exec('ALTER TABLE factures ADD COLUMN deposant TEXT');
+  }
+  if (!colonne_existe(base_de_donnees, 'paiements', 'deposant')) {
+    base_de_donnees.exec('ALTER TABLE paiements ADD COLUMN deposant TEXT');
+  }
 
   // Insertion de la nomenclature comptable standard
   inserer_categories_frais(base_de_donnees);
