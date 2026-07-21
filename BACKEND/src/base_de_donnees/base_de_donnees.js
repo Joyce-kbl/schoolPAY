@@ -1,9 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { DatabaseSync } = require('node:sqlite');
+const DatabaseSync = require('better-sqlite3');
 
-const dossier_donnees = path.join(__dirname, '..', '..', 'donnees');
+const dossier_donnees = process.env.SCHOOLPAY_DB_DIR || path.join(__dirname, '..', '..', 'donnees');
 const chemin_base_de_donnees = path.join(dossier_donnees, 'schoolpay.sqlite');
 
 /**
@@ -134,7 +134,7 @@ function synchroniser_categories_paiements(base_de_donnees) {
  */
 function creer_base_de_donnees() {
   verifier_fichier_base_de_donnees();
-  const base_de_donnees = new DatabaseSync(chemin_base_de_donnees);
+  const base_de_donnees = DatabaseSync(chemin_base_de_donnees);
 
   // Exécution du schéma principal
   base_de_donnees.exec(`

@@ -1,0 +1,65 @@
+{
+  "name": "schoolpay",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SchoolPAY - Système de Gestion de Caisse Scolaire",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "electron .",
+    "build": "electron-builder --win",
+    "rebuild": "electron-rebuild",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.9.1"
+  },
+  "devDependencies": {
+    "electron": "^35.7.0",
+    "electron-builder": "^26.0.12",
+    "@electron/rebuild": "^3.7.2"
+  },
+  "build": {
+    "appId": "fatimco.schoolpay",
+    "productName": "SchoolPAY",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/**/*",
+      "node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "BACKEND",
+        "to": "BACKEND"
+      },
+      {
+        "from": "FRONTEND",
+        "to": "FRONTEND"
+      }
+    ],
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**/*"
+    ],
+    "win": {
+      "icon": "FRONTEND/img/icone_desktop.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "FRONTEND/img/icone_desktop.ico",
+      "uninstallerIcon": "FRONTEND/img/icone_desktop.ico",
+      "shortcutName": "SchoolPAY",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "menuCategory": "SchoolPAY"
+    }
+  }
+}

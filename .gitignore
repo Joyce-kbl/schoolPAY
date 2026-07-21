@@ -1,0 +1,21 @@
+# SchoolPAY - .gitignore
+
+# Dépendances Node.js
+node_modules/
+package-lock.json
+
+# Base de données locale (fichier utilisateur)
+BACKEND/donnees/*.sqlite
+
+# Fichiers temporaires
+*.tmp
+*.log
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+out/
+release/

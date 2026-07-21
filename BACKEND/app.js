@@ -343,28 +343,36 @@ function creer_serveur() {
 function demarrer_serveur(port_a_tenter, tentatives_restantes = 3) {
   const serveur = creer_serveur();
 
-  serveur.on('error', (erreur) => {
-    if (erreur.code === 'EADDRINUSE' && tentatives_restantes > 0) {
-      const port_suivant = port_a_tenter + 1;
-      console.warn(`Port ${port_a_tenter} occupe, tentative sur le port ${port_suivant}...`);
-      setTimeout(() => demarrer_serveur(port_suivant, tentatives_restantes - 1), 100);
-      return;
-    }
+  return new Promise((resolve, reject) => {
+    serveur.on('error', (erreur) => {
+      if (erreur.code === 'EADDRINUSE' && tentatives_restantes > 0) {
+        const port_suivant = port_a_tenter + 1;
+        console.warn(`Port ${port_a_tenter} occupe, tentative sur le port ${port_suivant}...`);
+        demarrer_serveur(port_suivant, tentatives_restantes - 1).then(resolve, reject);
+        return;
+      }
 
-    if (erreur.code === 'EADDRINUSE') {
-      console.error(`Erreur : le port ${port_a_tenter} est deja utilise.`);
-      console.error('Verifiez si une autre instance est en cours d execution ou definissez PORT.');
-      process.exit(1);
-    }
+      if (erreur.code === 'EADDRINUSE') {
+        console.error(`Erreur : le port ${port_a_tenter} est deja utilise.`);
+        console.error('Verifiez si une autre instance est en cours d execution ou definissez PORT.');
+        reject(erreur);
+        return;
+      }
 
-    console.error('Erreur serveur non geree :', erreur);
-    process.exit(1);
-  });
+      console.error('Erreur serveur non geree :', erreur);
+      reject(erreur);
+    });
 
-  serveur.listen(port_a_tenter, () => {
-    console.log(`Backend SchoolPAY demarre sur http://localhost:${port_a_tenter}`);
-    console.log(`Base SQLite: ${chemin_base_de_donnees}`);
+    serveur.listen(port_a_tenter, () => {
+      console.log(`Backend SchoolPAY demarre sur http://localhost:${port_a_tenter}`);
+      console.log(`Base SQLite: ${chemin_base_de_donnees}`);
+      resolve({ serveur, port: port_a_tenter });
+    });
   });
 }
 
-demarrer_serveur(port);
+module.exports = { demarrer_serveur, creer_serveur, creer_base_de_donnees, chemin_base_de_donnees };
+
+if (require.main === module) {
+  demarrer_serveur(port);
+}
