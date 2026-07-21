@@ -64,6 +64,7 @@ function creer_facture(base_de_donnees, corps, reponse) {
   const devise = 'USD'; // Devise figée pour toute l'application
   const paye_le = String(corps.paye_le || new Date().toISOString()).slice(0, 10);
   const caissier = String(corps.caissier || '').trim() || null;
+  const deposant = String(corps.deposant || '').trim() || null;
   const operations = corps.operations;
 
   // Validation de base
@@ -97,13 +98,13 @@ function creer_facture(base_de_donnees, corps, reponse) {
     base_de_donnees.exec('BEGIN TRANSACTION');
 
     const inserer_facture = base_de_donnees.prepare(`
-      INSERT INTO factures (numero_facture, eleve_id, total, devise, paye_le, caissier)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO factures (numero_facture, eleve_id, total, devise, paye_le, caissier, deposant)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `);
     
     // On insère avec un numéro temporaire car le vrai numéro dépend de l'ID généré
     const num_tmp = `F-TMP-${Date.now()}`;
-    const res_facture = inserer_facture.run(num_tmp, eleve_id, total, devise, paye_le, caissier);
+    const res_facture = inserer_facture.run(num_tmp, eleve_id, total, devise, paye_le, caissier, deposant);
     const facture_id = res_facture.lastInsertRowid;
     
     // Génération du vrai numéro de facture (ex: F-0012)
@@ -111,8 +112,8 @@ function creer_facture(base_de_donnees, corps, reponse) {
     base_de_donnees.prepare('UPDATE factures SET numero_facture = ? WHERE id = ?').run(numero_facture, facture_id);
 
     const inserer_paiement = base_de_donnees.prepare(`
-      INSERT INTO paiements (numero_recu, eleve_id, facture_id, categorie_frais_id, libelle, montant, devise, paye_le, caissier)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO paiements (numero_recu, eleve_id, facture_id, categorie_frais_id, libelle, montant, devise, paye_le, caissier, deposant)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     // Enregistrement individuel de chaque opération (ligne de la facture)
@@ -130,7 +131,7 @@ function creer_facture(base_de_donnees, corps, reponse) {
       
       // Sous-numéro de reçu (ex: F-0012-1, F-0012-2)
       const numero_recu = `${numero_facture}-${i + 1}`;
-      inserer_paiement.run(numero_recu, eleve_id, facture_id, categorie_frais_id, libelle, montant, devise, paye_le, caissier);
+      inserer_paiement.run(numero_recu, eleve_id, facture_id, categorie_frais_id, libelle, montant, devise, paye_le, caissier, deposant);
     }
 
     // Validation finale de la transaction
@@ -145,6 +146,7 @@ function creer_facture(base_de_donnees, corps, reponse) {
         devise,
         paye_le,
         caissier,
+        deposant,
         operations
       }
     });
@@ -165,7 +167,7 @@ function creer_facture(base_de_donnees, corps, reponse) {
  */
 function obtenir_facture(base_de_donnees, numero_facture, reponse) {
   const facture = base_de_donnees.prepare(`
-    SELECT f.id, f.numero_facture, f.eleve_id, f.total, f.devise, f.paye_le, f.caissier,
+    SELECT f.id, f.numero_facture, f.eleve_id, f.total, f.devise, f.paye_le, f.caissier, f.deposant,
            e.nom_complet AS nom_eleve, e.matricule
     FROM factures f
     INNER JOIN eleves e ON e.id = f.eleve_id

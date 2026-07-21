@@ -23,7 +23,7 @@
         
         .recu-header { background: var(--primary); color: white; padding: 22px 24px; display: flex; align-items: center; gap: 16px; }
         .recu-logo { width: 52px; height: 52px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--primary); font-size: 16px; }
-        .recu-school { font-size: 18px; font-weight: 800; }
+        .recu-school { font-size: 15px; font-weight: 800; }
         .recu-subtitle { font-size: 11px; opacity: 0.85; margin-top: 2px; }
         .recu-numero-badge { margin-left: auto; background: rgba(255,255,255,0.2); border-radius: 10px; padding: 6px 12px; font-size: 12px; font-weight: 700; white-space: nowrap; }
 
@@ -47,178 +47,88 @@
 
         .btn-print-main { background: var(--primary); color: white; padding: 16px; border-radius: 14px; border: none; font-weight: bold; width: 100%; cursor: pointer; font-size: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-secondary { background: #f1f5f9; color: #475569; padding: 13px; border-radius: 14px; border: none; font-weight: 600; width: 100%; cursor: pointer; font-size: 14px; text-decoration: none; display: block; text-align: center; }
-
         /* === IMPRESSION === */
-/* ===================== IMPRESSION ===================== */
-        @media print {
-
-            @page {
-                size: A5 portrait;
-                margin: 8mm;
-            }
-
-            * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            html,
-            body {
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 0;
-                background: #fff;
-            }
-
-            .no-print {
-                display: none !important;
-            }
-
-            .page-wrapper {
-                width: 100%;
-                height: 100%;
-                padding: 0;
-                margin: 0;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-            }
-
-            /* ===== Chaque reçu = 45 % de la feuille ===== */
-
-            .recu-sheet {
-                width: 100%;
-                height: 45vh;
-                min-height: 45vh;
-                max-height: 45vh;
-
-                border: 1px solid #cbd5e1;
-                border-radius: 0;
-                box-shadow: none;
-
-                display: flex;
-                flex-direction: column;
-
-                page-break-inside: avoid;
-                break-inside: avoid;
-
-                page-break-after: avoid;
-                break-after: avoid;
-
-                overflow: hidden;
-            }
-
-            /* ===== Zone centrale extensible ===== */
-
-            .recu-body {
-                flex: 1;
-                overflow: hidden;
-                padding: 10px 14px;
-            }
-
-            /* ===== En-tête ===== */
-
-            .recu-header {
-                padding: 10px 14px;
-            }
-
-            .recu-logo {
-                width: 38px;
-                height: 38px;
-            }
-
-            .recu-school {
-                font-size: 15px;
-            }
-
-            .recu-subtitle {
-                font-size: 9px;
-            }
-
-            .recu-numero-badge {
-                font-size: 10px;
-                padding: 4px 8px;
-            }
-
-            /* ===== Montant ===== */
-
-            .montant-highlight {
-                margin: 8px 0;
-                padding: 8px;
-            }
-
-            .montant-highlight .label {
-                font-size: 9px;
-            }
-
-            .montant-highlight .valeur {
-                font-size: 18px;
-            }
-
-            .montant-highlight .lettres {
-                font-size: 9px;
-            }
-
-            /* ===== Lignes ===== */
-
-            .recu-row {
-                padding: 4px 0;
-            }
-
-            .recu-key {
-                font-size: 9px;
-            }
-
-            .recu-val {
-                font-size: 11px;
-            }
-
-            /* ===== Pied ===== */
-
-            .recu-footer {
-                padding: 10px 14px;
-            }
-
-            .sig-label {
-                font-size: 9px;
-                margin-bottom: 20px;
-            }
-
-            .sig-line {
-                font-size: 9px;
-            }
-
-            /* ===== Ligne de découpe ===== */
-
-            .separator {
-                height: 10%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                font-size: 10px;
-                letter-spacing: 3px;
-            }
-
-            /* ===== Détails ===== */
-
-            #r1-operations,
-            #r2-operations,
-            #r1-situation,
-            #r2-situation {
-                font-size: 10px;
-                margin-top: 6px !important;
-                padding-top: 6px !important;
-            }
-
-            #r1-operations div,
-            #r2-operations div,
-            #r1-situation div,
-            #r2-situation div {
-                margin-bottom: 2px !important;
-            }
-
+    @media print {
+        @page {
+            size: A5 portrait;
+            margin: 5mm;
         }
+
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: white;
+        }
+
+        .no-print { display: none !important; }
+
+        .page-wrapper {
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* === REÇU === */
+        .recu-sheet {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 0;
+            box-shadow: none;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .recu-header {
+            padding: 4px 8px;
+            gap: 6px;
+        }
+
+        .recu-logo { width: 24px; height: 24px; }
+        .recu-school { font-size: 9px; }
+        .recu-subtitle { font-size: 7px; }
+        .recu-numero-badge { font-size: 7px; padding: 2px 4px; }
+
+        .recu-body { padding: 3px 8px; }
+
+        .recu-row { padding: 1px 0; }
+        .recu-key { font-size: 7px; }
+        .recu-val { font-size: 8px; }
+
+        .montant-highlight { display: none !important; }
+
+        .montant-print-row { padding: 2px 0 !important; border-bottom: 1px solid #f1f5f9; }
+        .montant-print-val { font-size: 10px !important; font-weight: 800 !important; color: #8b0000 !important; }
+        .montant-lettres-print { font-size: 6px !important; color: #64748b; text-align: right; font-style: italic; margin-top: 1px; }
+
+        #r1-operations, #r2-operations { margin-top: 2px !important; padding-top: 2px !important; font-size: 7px !important; }
+        #r1-operations div, #r2-operations div { margin-bottom: 0 !important; line-height: 1 !important; }
+
+        #r1-situation, #r2-situation { margin-top: 2px !important; padding-top: 2px !important; font-size: 7px !important; }
+        #r1-situation div, #r2-situation div { font-size: 7px !important; margin-bottom: 0 !important; line-height: 1 !important; }
+
+        .recu-footer { padding: 3px 8px; }
+        .sig-label { font-size: 7px; margin-bottom: 10px; }
+        .sig-line { font-size: 7px; }
+
+        .separator {
+            height: auto;
+            padding: 2px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 8px;
+            letter-spacing: 2px;
+        }
+    }
         /* === Adaptation écrans de téléphone (petits mobiles), hors impression === */
         @media (max-width: 380px) {
             .page-wrapper { padding: 14px; }
@@ -251,10 +161,9 @@
             <div class="recu-numero-badge" id="r1-numero">N° ...</div>
         </div>
         <div class="recu-body">
-            <div class="montant-highlight">
-                <div class="label">Montant reçu</div>
-                <div class="valeur" id="r1-montant">—</div>
-                <div class="lettres" id="r1-lettres">—</div>
+            <div class="recu-row montant-print-row">
+                <span class="recu-key">Montant payé</span>
+                <span class="recu-val montant-print-val" id="r1-montant">—</span>
             </div>
             <div class="recu-row">
                 <span class="recu-key">Élève</span>
@@ -267,6 +176,10 @@
             <div class="recu-row">
                 <span class="recu-key">Caissier(e)</span>
                 <span class="recu-val" id="r1-caissier">—</span>
+            </div>
+            <div class="recu-row">
+                <span class="recu-key">Déposant</span>
+                <span class="recu-val" id="r1-deposant">—</span>
             </div>
             <div id="r1-operations" style="margin-top: 15px; border-top: 1px solid #f1f5f9; padding-top: 10px;">
                 <!-- Operations listed here -->
@@ -302,7 +215,6 @@
             <div class="montant-highlight">
                 <div class="label">Montant reçu</div>
                 <div class="valeur" id="r2-montant">—</div>
-                <div class="lettres" id="r2-lettres">—</div>
             </div>
             <div class="recu-row">
                 <span class="recu-key">Élève</span>
@@ -315,6 +227,10 @@
             <div class="recu-row">
                 <span class="recu-key">Caissier(e)</span>
                 <span class="recu-val" id="r2-caissier">—</span>
+            </div>
+            <div class="recu-row">
+                <span class="recu-key">Déposant</span>
+                <span class="recu-val" id="r2-deposant">—</span>
             </div>
             <div id="r2-operations" style="margin-top: 15px; border-top: 1px solid #f1f5f9; padding-top: 10px;">
                 <!-- Operations listed here -->
@@ -386,6 +302,7 @@ function remplirRecu(suffix, data) {
     document.getElementById(`${suffix}-lettres`).textContent = nombreEnLettres(Number(data.montant));
     document.getElementById(`${suffix}-caissier`).textContent = data.caissier || '—';
     document.getElementById(`${suffix}-sig-caissier`).textContent = data.caissier || 'Signature';
+    document.getElementById(`${suffix}-deposant`).textContent = data.deposant || '—';
     
     const container = document.getElementById(`${suffix}-operations`);
     container.innerHTML = '<div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Détail des opérations</div>';
@@ -393,10 +310,18 @@ function remplirRecu(suffix, data) {
     if (data.operations && data.operations.length > 0) {
         data.operations.forEach(op => {
             container.innerHTML += `
-            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
-                <span>• ${op.libelle}</span>
-                <span style="font-weight: 600;">${Number(op.montant).toFixed(2)} ${symbole}</span>
-            </div>`;
+                <div style="
+                display:flex;
+                justify-content:space-between;
+                font-size:9px;
+                margin-bottom:1px;
+                line-height:1.1;
+                ">
+                    <span>• ${op.libelle}</span>
+                    <span style="font-weight:600;">
+                        ${Number(op.montant).toFixed(2)} ${symbole}
+                    </span>
+                </div>`;
         });
     } else if (data.libelle) {
         // Fallback pour les anciens reçus
@@ -504,7 +429,8 @@ async function chargerFacture() {
                     devise: f.devise, 
                     date: f.paye_le,
                     operations: f.operations,
-                    caissier: f.caissier
+                    caissier: f.caissier,
+                    deposant: f.deposant
                 };
                 eleve_id = f.eleve_id;
             }

@@ -90,6 +90,11 @@
             <input type="hidden" id="eleve-id-input">
         </div>
 
+        <div class="form-group">
+            <label>Déposant (qui paie pour l'élève)</label>
+            <input type="text" id="deposant-input" class="form-control" placeholder="Nom du parent ou tuteur...">
+        </div>
+
 
 
         <div id="operations-container">
@@ -370,6 +375,7 @@ document.getElementById('btn-valider-paiement').addEventListener('click', async 
 
     const session = window.SchoolPayAuth?.obtenirSession();
     const caissier = session?.nom_complet || '';
+    const deposant = document.getElementById('deposant-input').value.trim() || '';
 
     // Trouver l'opération Frais Scolaires
     let operationScolaire = null;
@@ -423,7 +429,7 @@ document.getElementById('btn-valider-paiement').addEventListener('click', async 
         const res = await fetch('/api/factures', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ eleve_id, operations, devise, paye_le, caissier })
+            body: JSON.stringify({ eleve_id, operations, devise, paye_le, caissier, deposant })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.erreur || 'Erreur');
