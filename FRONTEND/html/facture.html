@@ -67,36 +67,33 @@
 
             .recu-sheet { width: 100%; border: 1px solid #bbb; border-radius: 0; box-shadow: none; page-break-inside: avoid; break-inside: avoid; }
 
-            .recu-header { padding: 3px 6px; gap: 5px; }
-            .recu-logo { width: 22px; height: 22px; }
-            .recu-school { font-size: 8px; }
-            .recu-subtitle { font-size: 6px; }
-            .recu-numero-badge { font-size: 6px; padding: 1px 4px; }
+            .recu-header { padding: 5px 8px; gap: 6px; }
+            .recu-logo { width: 28px; height: 28px; }
+            .recu-school { font-size: 11px; }
+            .recu-subtitle { font-size: 8px; }
+            .recu-numero-badge { font-size: 8px; padding: 2px 5px; }
 
-            .recu-body { padding: 2px 6px; }
+            .recu-body { padding: 6px 10px; }
 
-            .recu-row { padding: 1px 0; }
-            .recu-key { font-size: 6px; }
-            .recu-val { font-size: 7px; }
+            .recu-row { padding: 2.5px 0; }
+            .recu-key { font-size: 8px; }
+            .recu-val { font-size: 10px; }
 
-            .recu-montant { padding: 3px 8px; margin: 2px 0; border-radius: 4px; }
-            .recu-montant .montant-label { font-size: 6px; }
-            .recu-montant .montant-valeur { font-size: 11px; }
-            .recu-montant .montant-lettres { font-size: 5.5px; margin-top: 1px; }
+            .recu-montant { padding: 5px 10px; margin: 3px 0; border-radius: 4px; }
+            .recu-montant .montant-label { font-size: 7px; }
+            .recu-montant .montant-valeur { font-size: 16px; }
+            .recu-montant .montant-lettres { font-size: 7px; margin-top: 2px; }
 
-            .recu-operations { margin-top: 2px; padding-top: 2px; }
-            .recu-operations-titre { font-size: 6px; margin-bottom: 2px; }
-            .recu-op-ligne { font-size: 6.5px; margin-bottom: 1px; line-height: 1.1; }
-            .recu-op-montant { font-size: 6.5px; }
+            .recu-operations { margin-top: 3px; padding-top: 3px; }
+            .recu-operations-titre { font-size: 7px; margin-bottom: 2px; }
+            .recu-op-ligne { font-size: 8px; margin-bottom: 1px; line-height: 1.2; }
+            .recu-op-montant { font-size: 8px; }
 
-            .recu-situation { margin-top: 2px; padding-top: 2px; }
-            .recu-situation-titre { font-size: 6px; margin-bottom: 2px; }
-            .recu-situation-ligne { font-size: 6.5px; margin-bottom: 1px; line-height: 1.1; }
-            .recu-situation-reste { font-size: 7px; }
+            .recu-situation { display: none !important; }
 
-            .recu-footer { padding: 2px 6px; }
-            .sig-label { font-size: 6px; margin-bottom: 8px; }
-            .sig-line { font-size: 6px; }
+            .recu-footer { padding: 6px 10px; }
+            .sig-label { font-size: 7px; margin-bottom: 10px; }
+            .sig-line { font-size: 7px; }
 
             .separator { padding: 1px 0; font-size: 7px; letter-spacing: 1px; }
         }
@@ -163,8 +160,10 @@
             <div class="recu-situation" id="r1-situation"></div>
         </div>
         <div class="recu-footer">
+            <br>
             <div class="sig-block">
                 <div class="sig-label">Caissier(e)</div>
+                
                 <div class="sig-line" id="r1-sig-caissie">Signature</div>
             </div>
             <div class="sig-block">
@@ -304,7 +303,7 @@ function remplirRecu(s, data) {
                     '</div>';
             });
             // Total line
-            opsHtml += '<div class="recu-op-ligne" style="font-weight:800;border-top:1px solid #e2e8f0;padding-top:3px;margin-top:3px;">' +
+            opsHtml += '<div class="recu-op-ligne" style="font-weight:800;border-top:1px solid #e2e8f0;padding-top:4px;margin-top:4px;">' +
                 '<span>TOTAL</span>' +
                 '<span class="recu-op-montant">' + montantNum.toFixed(2) + ' ' + symbole + '</span>' +
                 '</div>';
