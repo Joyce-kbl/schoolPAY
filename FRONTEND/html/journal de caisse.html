@@ -199,10 +199,10 @@
         </div>
     </div>
 
-    <nav class="nav-bottom no-print"
+    <nav class="nav-bottom no-print">
         <a href="journal de caisse.html" class="nav-link" style="color: #8b0000;"><span style="font-size: 26px;">📒</span><br>Journal</a>
         <a href="index.html"><div class="home-icon-circle">🏠</div></a>
-        <a href="modifier.html" class="nav-link"><span style="font-size: 26px;">⚙️</span><br>Paramètre</a>
+        <a href="modifier.html" class="nav-link"><span style="font-size: 26px;">⚙️</span><br>Paramètres</a>
     </nav>
 </div>
 
@@ -334,6 +334,12 @@ async function chargerJournal() {
         zoneMasquee.style.display = 'block';
         if (journalTabs) journalTabs.style.display = 'none';
         return;
+    }
+
+    // Sécurité : la date de début ne peut pas être après la date de fin
+    if (debut > fin) {
+        document.getElementById('filtre-date-fin').value = debut;
+        fin = debut;
     }
 
     var params = new URLSearchParams();
@@ -517,6 +523,24 @@ document.addEventListener('keydown', function(e) {
         e.preventDefault();
         imprimerRapport('complet');
     }
+});
+
+// === Validation des dates : la date de début ne peut pas être après la date de fin ===
+var filtreDebut = document.getElementById('filtre-date-debut');
+var filtreFin = document.getElementById('filtre-date-fin');
+
+filtreDebut.addEventListener('change', function() {
+    if (filtreDebut.value && filtreFin.value && filtreDebut.value > filtreFin.value) {
+        filtreFin.value = filtreDebut.value;
+    }
+    filtreFin.min = filtreDebut.value || '';
+});
+
+filtreFin.addEventListener('change', function() {
+    if (filtreDebut.value && filtreFin.value && filtreFin.value < filtreDebut.value) {
+        filtreDebut.value = filtreFin.value;
+    }
+    filtreDebut.max = filtreFin.value || '';
 });
 
 chargerParametresEcole();
