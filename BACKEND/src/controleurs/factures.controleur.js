@@ -168,9 +168,11 @@ function creer_facture(base_de_donnees, corps, reponse) {
 function obtenir_facture(base_de_donnees, numero_facture, reponse) {
   const facture = base_de_donnees.prepare(`
     SELECT f.id, f.numero_facture, f.eleve_id, f.total, f.devise, f.paye_le, f.caissier, f.deposant,
-           e.nom_complet AS nom_eleve, e.matricule
+           e.nom_complet AS nom_eleve, e.matricule,
+           cl.nom AS nom_classe
     FROM factures f
     INNER JOIN eleves e ON e.id = f.eleve_id
+    LEFT JOIN classes cl ON cl.id = e.classe_id
     WHERE f.numero_facture = ?
   `).get(numero_facture);
 
