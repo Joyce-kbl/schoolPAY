@@ -40,7 +40,8 @@ const {
   connecter_caissier,
   lister_caissiers,
   creer_caissier,
-  supprimer_caissier
+  supprimer_caissier,
+  exporter_base_de_donnees
 } = require('./src/controleurs/auth.controleur');
 const {
   lister_parametres,
@@ -205,6 +206,11 @@ function creer_serveur() {
 
       if (requete.method === 'DELETE' && url.pathname.startsWith('/api/caissiers/')) {
         return supprimer_caissier(base_de_donnees, obtenir_id_depuis_url(url), reponse);
+      }
+
+      if (requete.method === 'POST' && url.pathname === '/api/exporter-base') {
+        const corps = await lire_corps_requete(requete);
+        return exporter_base_de_donnees(base_de_donnees, corps, reponse);
       }
 
       if (requete.method === 'GET' && url.pathname === '/api/parametres') {

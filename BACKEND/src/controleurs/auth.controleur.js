@@ -143,9 +143,53 @@ function supprimer_caissier(base_de_donnees, id, reponse) {
   reponse.end();
 }
 
+/**
+ * Exporte la base de données après vérification du mot de passe de l'utilisateur connecté.
+ * Route: POST /api/exporter-base
+ * @param {DatabaseSync} base_de_donnees - Base de données
+ * @param {Object} corps - Body { nom_utilisateur, mot_de_passe }
+ * @param {http.ServerResponse} reponse - La réponse HTTP
+ */
+function exporter_base_de_donnees(base_de_donnees, corps, reponse) {
+  const fs = require('fs');
+  const { chemin_base_de_donnees } = require('../base_de_donnees/base_de_donnees');
+
+  const nom_utilisateur = String(corps.nom_utilisateur || '').trim().toLowerCase();
+  const mot_de_passe = String(corps.mot_de_passe || '');
+
+  if (!nom_utilisateur || !mot_de_passe) {
+    return envoyer_json(reponse, 400, { erreur: 'Identifiant et mot de passe requis' });
+  }
+
+  const caissier = base_de_donnees.prepare(`
+    SELECT id, nom_utilisateur, nom_complet, mot_de_passe_hash, mot_de_passe_sel, actif
+    FROM caissiers
+    WHERE lower(nom_utilisateur) = ?
+  `).get(nom_utilisateur);
+
+  if (!caissier || !caissier.actif || !verifier_mot_de_passe(mot_de_passe, caissier.mot_de_passe_sel, caissier.mot_de_passe_hash)) {
+    return envoyer_json(reponse, 401, { erreur: 'Mot de passe incorrect' });
+  }
+
+  if (!fs.existsSync(chemin_base_de_donnees)) {
+    return envoyer_json(reponse, 404, { erreur: 'Fichier de base de données introuvable' });
+  }
+
+  const fichier_taille = fs.statSync(chemin_base_de_donnees).size;
+  reponse.writeHead(200, {
+    'Content-Type': 'application/x-sqlite3',
+    'Content-Length': fichier_taille,
+    'Content-Disposition': 'attachment; filename="schoolpay.sqlite"'
+  });
+
+  const stream = fs.createReadStream(chemin_base_de_donnees);
+  stream.pipe(reponse);
+}
+
 module.exports = {
   connecter_caissier,
   lister_caissiers,
   creer_caissier,
-  supprimer_caissier
+  supprimer_caissier,
+  exporter_base_de_donnees
 };

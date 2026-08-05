@@ -200,7 +200,7 @@ async function ajouterEleve() {
   if (!nom_complet || !sexe || !classe_id) {
     return notifier('Veuillez remplir le nom, le sexe et la classe.', false);
   }
-  
+
   try {
     const reponse = await apiFetch('/api/eleves', {
       method: 'POST',
@@ -357,6 +357,76 @@ async function confirmerModaleAdmin() {
 }
 
 /**
+ * Ouvre la modale de confirmation de mot de passe pour l'exportation de la base de données.
+ */
+function ouvrirModaleExportDb() {
+  const modale = document.getElementById('modal-export-db');
+  if (!modale) return;
+  const inputMdp = document.getElementById('export-db-mdp');
+  if (inputMdp) inputMdp.value = '';
+  modale.style.display = 'flex';
+  if (inputMdp) inputMdp.focus();
+}
+
+/**
+ * Ferme la modale d'exportation de la base de données.
+ */
+function fermerModaleExportDb() {
+  const modale = document.getElementById('modal-export-db');
+  if (modale) modale.style.display = 'none';
+  const inputMdp = document.getElementById('export-db-mdp');
+  if (inputMdp) inputMdp.value = '';
+}
+
+/**
+ * Confirme le mot de passe utilisateur et télécharge le fichier schoolpay.sqlite.
+ */
+async function confirmerExportDb() {
+  const inputMdp = document.getElementById('export-db-mdp');
+  const mot_de_passe = inputMdp?.value;
+
+  if (!mot_de_passe) {
+    return notifier('Veuillez entrer votre mot de passe.', false);
+  }
+
+  const session = window.SchoolPayAuth?.obtenirSession();
+  const nom_utilisateur = session?.nom_utilisateur;
+
+  if (!nom_utilisateur) {
+    return notifier('Session introuvable. Veuillez vous reconnecter.', false);
+  }
+
+  try {
+    const reponse = await fetch('/api/exporter-base', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nom_utilisateur, mot_de_passe })
+    });
+
+    if (!reponse.ok) {
+      const data = await reponse.json().catch(() => null);
+      const message = data?.erreur || 'Mot de passe incorrect ou erreur d\'exportation';
+      return notifier(message, false);
+    }
+
+    const blob = await reponse.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'schoolpay.sqlite';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+
+    fermerModaleExportDb();
+    notifier('Base de données exportée avec succès.');
+  } catch (erreur) {
+    notifier(`Erreur lors de l'exportation : ${erreur.message}`, false);
+  }
+}
+
+/**
  * Affiche un message indiquant que la fonction Cloud n'est pas active.
  * Cette fonction sert de stub pour futures évolutions.
  */
@@ -394,6 +464,17 @@ function initialiserPage() {
     document.getElementById('btn-ajouter-caissier')?.addEventListener('click', () => ouvrirModaleAdmin('creer-caissier'));
     document.getElementById('btn-modal-confirmer')?.addEventListener('click', confirmerModaleAdmin);
     document.getElementById('btn-modal-annuler')?.addEventListener('click', fermerModaleAdmin);
+
+    // Exportation de la base de données avec confirmation par mot de passe
+    document.getElementById('btn-exporter-db')?.addEventListener('click', ouvrirModaleExportDb);
+    document.getElementById('btn-export-db-confirmer')?.addEventListener('click', confirmerExportDb);
+    document.getElementById('btn-export-db-annuler')?.addEventListener('click', fermerModaleExportDb);
+    document.getElementById('export-db-mdp')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        confirmerExportDb();
+      }
+    });
   }
 }
 
