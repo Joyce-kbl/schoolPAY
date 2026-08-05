@@ -163,9 +163,12 @@ function obtenir_recu(numero_recu, reponse) {
 
   const paiement = base_de_donnees.prepare(`
     SELECT p.id, p.numero_recu, p.libelle, p.montant, p.devise, p.paye_le,
-           e.nom_complet AS nom_eleve, e.matricule
+           p.caissier,
+           e.nom_complet AS nom_eleve, e.matricule,
+           c.nom AS nom_classe
     FROM paiements p
     INNER JOIN eleves e ON e.id = p.eleve_id
+    LEFT JOIN classes c ON c.id = e.classe_id
     WHERE p.numero_recu = ?
   `).get(numero_recu);
 

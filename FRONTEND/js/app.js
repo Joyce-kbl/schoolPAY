@@ -57,7 +57,7 @@ async function chargerTransactionsRecentes() {
 
     const lignes = (donnees.donnees || []).slice(0, 6);
     if (lignes.length === 0) {
-      tableau.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 20px; color: #64748b;">Aucune transaction enregistrée.</td></tr>';
+      tableau.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color: #64748b;">Aucune transaction enregistrée.</td></tr>';
       return;
     }
 
@@ -67,12 +67,30 @@ async function chargerTransactionsRecentes() {
         <td>${paiement.nom_eleve || '—'}</td>
         <td>${paiement.libelle}</td>
         <td style="text-align: right; font-weight:700;">${formatMonnaie(paiement.montant)}</td>
+        <td style="white-space:nowrap;">
+          <button type="button" class="btn-reimprimer-recu" data-numero="${paiement.numero_recu || ''}">Réimprimer le reçu</button>
+        </td>
       `;
       tableau.appendChild(tr);
     }
+
+    tableau.querySelectorAll('.btn-reimprimer-recu').forEach((bouton) => {
+      bouton.addEventListener('click', () => {
+        const numeroRecu = bouton.dataset.numero;
+        if (!numeroRecu) {
+          return notifier('Numéro de reçu introuvable.', false);
+        }
+        reimprimerRecu(numeroRecu);
+      });
+    });
   } catch (erreur) {
     notifier(`Impossible de charger les transactions : ${erreur.message}`, false);
   }
+}
+
+function reimprimerRecu(numeroRecu) {
+  const url = `recu.html?numero=${encodeURIComponent(numeroRecu)}&auto_print=1`;
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 /**
