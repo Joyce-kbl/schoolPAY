@@ -31,7 +31,23 @@
   /**
    * Détruit la session locale et redirige vers la page de connexion.
    */
-  function deconnecter() {
+  async function deconnecter() {
+    const session = obtenirSession();
+    if (session && session.nom_utilisateur) {
+      try {
+        await fetch('/api/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nom_utilisateur: session.nom_utilisateur,
+            action: 'deconnexion',
+            reference_action: '-'
+          })
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
     localStorage.removeItem(CLE_SESSION);
     window.location.href = 'login.html';
   }

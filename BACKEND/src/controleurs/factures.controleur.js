@@ -1,4 +1,5 @@
 const { construire_numero_recu } = require('../services/recu.service');
+const { enregistrer_log_par_nom } = require('./logs.controleur');
 
 /**
  * Utilitaire interne pour envoyer la réponse JSON.
@@ -136,6 +137,9 @@ function creer_facture(base_de_donnees, corps, reponse) {
 
     // Validation finale de la transaction
     base_de_donnees.exec('COMMIT');
+
+    // Log de chaque paiement créé dans la facture
+    enregistrer_log_par_nom(base_de_donnees, caissier, 'paiement', numero_facture);
 
     envoyer_json(reponse, 201, {
       donnees: {

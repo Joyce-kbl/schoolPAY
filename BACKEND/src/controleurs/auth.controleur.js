@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const { enregistrer_log, enregistrer_log_par_nom } = require('./logs.controleur');
 
 /**
  * Fonction utilitaire interne pour envoyer du JSON
@@ -65,6 +66,8 @@ function connecter_caissier(base_de_donnees, corps, reponse) {
   }
 
   // Succès: on renvoie un token/session basique (ici juste les infos pour le front)
+  enregistrer_log(base_de_donnees, caissier.id, 'connexion', '-');
+
   envoyer_json(reponse, 200, {
     donnees: {
       id: caissier.id,
@@ -117,6 +120,9 @@ function creer_caissier(base_de_donnees, corps, reponse) {
       VALUES (?, ?, ?, ?)
     `).run(nom_utilisateur, nom_complet, hash, sel);
 
+    // Log de la création du caissier (l'utilisateur connecté est passé via corps.caissier)
+    enregistrer_log_par_nom(base_de_donnees, corps.caissier, 'ajout_caissier', String(resultat.lastInsertRowid));
+
     envoyer_json(reponse, 201, {
       donnees: { id: resultat.lastInsertRowid, nom_utilisateur, nom_complet, actif: 1 }
     });
@@ -139,6 +145,10 @@ function supprimer_caissier(base_de_donnees, id, reponse) {
   }
   // Suppression logique : on met actif à 0 pour conserver la traçabilité des paiements de ce caissier
   base_de_donnees.prepare('UPDATE caissiers SET actif = 0 WHERE id = ?').run(id);
+
+  // Log de la suppression (le caissier_id de l'auteur est résolu via le query param)
+  // Note: le frontend enverra le log via POST /api/logs car DELETE n'a pas de body
+
   reponse.writeHead(204, { 'Content-Type': 'application/json; charset=utf-8' });
   reponse.end();
 }
@@ -181,6 +191,9 @@ function exporter_base_de_donnees(base_de_donnees, corps, reponse) {
     'Content-Length': fichier_taille,
     'Content-Disposition': 'attachment; filename="schoolpay.sqlite"'
   });
+
+  // Log de l'exportation de la base de données
+  enregistrer_log_par_nom(base_de_donnees, nom_utilisateur, 'export_base', '-');
 
   const stream = fs.createReadStream(chemin_base_de_donnees);
   stream.pipe(reponse);

@@ -1,3 +1,5 @@
+const { enregistrer_log_par_nom } = require('./logs.controleur');
+
 /**
  * Utilitaire interne pour envoyer la réponse JSON.
  * @param {http.ServerResponse} reponse - La réponse HTTP
@@ -55,6 +57,9 @@ function creer_classe(base_de_donnees, corps, reponse) {
         'INSERT INTO frais_attendus_classe (classe_id, categorie_frais_id, montant) VALUES (?, ?, ?)'
       ).run(id, cat_scolaire.id, montant_frais);
     }
+
+    // Log de la création de la classe (le caissier connecté est passé via corps.caissier)
+    enregistrer_log_par_nom(base_de_donnees, corps.caissier, 'ajout_classe', String(id));
 
     envoyer_json(reponse, 201, {
       donnees: {

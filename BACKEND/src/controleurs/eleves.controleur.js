@@ -1,3 +1,5 @@
+const { enregistrer_log_par_nom } = require('./logs.controleur');
+
 /**
  * Utilitaire interne pour envoyer la réponse JSON.
  * @param {http.ServerResponse} reponse - La réponse HTTP
@@ -164,6 +166,9 @@ function creer_eleve(base_de_donnees, corps, reponse) {
       VALUES (?, ?, ?, ?)
     `);
     const resultat = requete.run(nom_complet, sexe, classe_id, matricule);
+
+    // Log de la création d'élève (l'utilisateur connecté est passé via corps.caissier)
+    enregistrer_log_par_nom(base_de_donnees, corps.caissier, 'ajout_eleve', String(resultat.lastInsertRowid));
 
     envoyer_json(reponse, 201, {
       donnees: {

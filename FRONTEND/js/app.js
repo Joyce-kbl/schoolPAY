@@ -174,9 +174,11 @@ async function validerPaiement() {
   }
 
   try {
+    const session = window.SchoolPayAuth?.obtenirSession();
+    const caissier = session?.nom_utilisateur || '';
     await apiFetch('/api/paiements', {
       method: 'POST',
-      body: JSON.stringify({ eleve_id, libelle, montant, devise: 'USD', paye_le })
+      body: JSON.stringify({ eleve_id, libelle, montant, devise: 'USD', paye_le, caissier })
     });
     notifier('Le paiement a été enregistré avec succès.');
     window.location.href = 'journal de caisse.html';
@@ -202,9 +204,11 @@ async function ajouterEleve() {
   }
 
   try {
+    const session = window.SchoolPayAuth?.obtenirSession();
+    const caissier = session?.nom_utilisateur || '';
     const reponse = await apiFetch('/api/eleves', {
       method: 'POST',
-      body: JSON.stringify({ nom_complet, sexe, classe_id })
+      body: JSON.stringify({ nom_complet, sexe, classe_id, caissier })
     });
     notifier(`Élève ajouté avec succès. Matricule : ${reponse.donnees.matricule}`);
     // Le formulaire est vidé juste après l'enregistrement pour un rendu plus
@@ -270,9 +274,11 @@ async function ajouterCaissier() {
     return notifier('Veuillez renseigner l\'identifiant, le nom complet et le mot de passe.', false);
   }
   try {
+    const session = window.SchoolPayAuth?.obtenirSession();
+    const caissier = session?.nom_utilisateur || '';
     await apiFetch('/api/caissiers', {
       method: 'POST',
-      body: JSON.stringify({ nom_utilisateur, nom_complet, mot_de_passe })
+      body: JSON.stringify({ nom_utilisateur, nom_complet, mot_de_passe, caissier })
     });
     notifier('Caissier créé avec succès.');
     // NOTE : on ne vide volontairement pas le formulaire après la création.
@@ -347,6 +353,7 @@ async function confirmerModaleAdmin() {
   if (action === 'supprimer-caissier') {
     try {
       await apiFetch(`/api/caissiers/${idCible}`, { method: 'DELETE' });
+      await enregistrerLog('suppression_caissier', idCible);
       await chargerCaissiers();
     } catch (erreur) {
       notifier(`Impossible de retirer ce caissier : ${erreur.message}`, false);
@@ -427,6 +434,26 @@ async function confirmerExportDb() {
 }
 
 /**
+ * Envoie une requête de log au backend.
+ * @param {string} action - Le type d'action à journaliser
+ * @param {string} [reference_action='-'] - Référence contextuelle
+ */
+async function enregistrerLog(action, reference_action = '-') {
+  const session = window.SchoolPayAuth?.obtenirSession();
+  const nom_utilisateur = session?.nom_utilisateur;
+  if (!nom_utilisateur) return;
+  try {
+    await fetch('/api/logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nom_utilisateur, action, reference_action })
+    });
+  } catch (e) {
+    console.error('Erreur lors de la journalisation :', e);
+  }
+}
+
+/**
  * Affiche un message indiquant que la fonction Cloud n'est pas active.
  * Cette fonction sert de stub pour futures évolutions.
  */
@@ -474,6 +501,34 @@ function initialiserPage() {
         e.preventDefault();
         confirmerExportDb();
       }
+    });
+  }
+
+  // Intercepter les événements d'impression pour enregistrer les logs
+  if (chemin.endsWith('facture.html')) {
+    // Si on est sur la facture, log impression_recu
+    const params = new URLSearchParams(window.location.search);
+    const numero_recu = params.get('numero') || '-';
+    window.addEventListener('beforeprint', () => {
+      enregistrerLog('impression_recu', numero_recu);
+    });
+  } else if (chemin.endsWith('fiche_eleve.html')) {
+    // Si on est sur la fiche élève, log impression_releve
+    const params = new URLSearchParams(window.location.search);
+    const id_eleve = params.get('id') || '-';
+    window.addEventListener('beforeprint', () => {
+      enregistrerLog('impression_releve', id_eleve);
+    });
+  } else if (chemin.endsWith('rapport.html')) {
+    // Si on est sur un rapport
+    window.addEventListener('beforeprint', () => {
+      enregistrerLog('impression_rapport', 'journalier');
+    });
+  } else if (chemin.endsWith('situation_generale.html')) {
+    // Si on est sur la situation générale
+    window.addEventListener('beforeprint', () => {
+      const periode = document.getElementById('filtre-periode')?.value || 'annuel';
+      enregistrerLog('impression_rapport', `situation_${periode}`);
     });
   }
 }

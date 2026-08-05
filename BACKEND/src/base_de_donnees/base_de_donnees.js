@@ -212,6 +212,20 @@ function creer_base_de_donnees() {
       cle TEXT PRIMARY KEY,
       valeur TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS logs (
+      id               INTEGER PRIMARY KEY AUTOINCREMENT,
+      caissier_id      INTEGER NOT NULL,
+      horodatage       TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      action           TEXT NOT NULL CHECK (action IN (
+                         'connexion', 'deconnexion', 'paiement',
+                         'impression_recu', 'impression_rapport', 'impression_releve',
+                         'ajout_classe', 'ajout_eleve', 'ajout_caissier',
+                         'suppression_caissier', 'export_base'
+                       )),
+      reference_action TEXT NOT NULL DEFAULT '-',
+      FOREIGN KEY (caissier_id) REFERENCES caissiers(id)
+    );
   `);
 
   // ==== MIGRATIONS DYNAMIQUES ====

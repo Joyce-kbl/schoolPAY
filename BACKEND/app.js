@@ -48,6 +48,10 @@ const {
   mettre_a_jour_parametres
 } = require('./src/controleurs/parametres.controleur');
 const { obtenir_situation_generale } = require('./src/controleurs/rapports.controleur');
+const {
+  lister_logs,
+  creer_log_depuis_frontend
+} = require('./src/controleurs/logs.controleur');
 
 const base_de_donnees = creer_base_de_donnees();
 const port = Number(process.env.PORT || 4000);
@@ -188,6 +192,16 @@ function creer_serveur() {
       // ==== ROUTES DE SANTÉ ====
       if (requete.method === 'GET' && url.pathname === '/api/sante') {
         return controleur_sante(requete, reponse);
+      }
+
+      // ==== ROUTES DE LOGS ====
+      if (requete.method === 'GET' && url.pathname === '/api/logs') {
+        return lister_logs(base_de_donnees, reponse, url.searchParams);
+      }
+
+      if (requete.method === 'POST' && url.pathname === '/api/logs') {
+        const corps = await lire_corps_requete(requete);
+        return creer_log_depuis_frontend(base_de_donnees, corps, reponse);
       }
 
       if (requete.method === 'POST' && url.pathname === '/api/connexion') {

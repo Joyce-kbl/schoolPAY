@@ -1,4 +1,5 @@
 const { construire_numero_recu } = require('../services/recu.service');
+const { enregistrer_log_par_nom } = require('./logs.controleur');
 
 function envoyer_json(reponse, code_statut, contenu) {
   reponse.writeHead(code_statut, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -99,6 +100,9 @@ function creer_paiement(base_de_donnees, corps, reponse) {
   base_de_donnees
     .prepare('UPDATE paiements SET numero_recu = ? WHERE id = ?')
     .run(numero_recu, resultat.lastInsertRowid);
+
+  // Log du paiement (le caissier est passé par le frontend via corps.caissier)
+  enregistrer_log_par_nom(base_de_donnees, caissier, 'paiement', String(resultat.lastInsertRowid));
 
   envoyer_json(reponse, 201, {
     donnees: {

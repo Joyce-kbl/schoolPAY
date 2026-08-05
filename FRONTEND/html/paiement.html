@@ -63,6 +63,7 @@
 </head>
 <body>
 <script src="/js/auth.js"></script>
+<script src="/js/logs.js"></script>
 
 <!-- Page de création d'un paiement avec lignes d'opérations multiple -->
 <header>
@@ -374,7 +375,7 @@ document.getElementById('btn-valider-paiement').addEventListener('click', async 
     }
 
     const session = window.SchoolPayAuth?.obtenirSession();
-    const caissier = session?.nom_complet || '';
+    const caissier = session?.nom_utilisateur || '';  // nom_utilisateur pour la journalisation
     const deposant = document.getElementById('deposant-input').value.trim() || '';
 
     // Trouver l'opération Frais Scolaires
