@@ -26,6 +26,8 @@
     </style>
 </head>
 <body>
+<script src="/js/auth.js"></script>
+<script src="/js/logs.js"></script>
 
     <!-- En-tête -->
 <div class="header-print">
@@ -76,7 +78,7 @@
         </div>
     </div>
 
-    <button class="no-print" onclick="window.print()" style="padding: 10px 20px; cursor: pointer;">🖨️ Imprimer le Rapport</button>
+    <button class="no-print" onclick="if (window.enregistrerLog) { window.enregistrerLog('impression_rapport', 'detaille'); } window.print();" style="padding: 10px 20px; cursor: pointer;">🖨️ Imprimer le Rapport</button>
 
 </body>
 </html>

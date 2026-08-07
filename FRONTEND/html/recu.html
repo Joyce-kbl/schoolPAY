@@ -76,6 +76,7 @@
 </head>
 <body>
   <script src="/js/auth.js"></script>
+  <script src="/js/logs.js"></script>
   <div class="no-print">
     <div class="top-nav">
       <a href="index.html" class="back-btn">←</a>
@@ -168,6 +169,7 @@
     async function chargerRecu() {
       const params = new URLSearchParams(window.location.search);
       const numero = params.get('numero');
+      const source = params.get('source') || 'normal';
       const etat = document.getElementById('etat');
 
       if (!numero) {
@@ -195,6 +197,12 @@
         setTexte('caissier', data.caissier || '—');
         setTexte('sig-caissier', data.caissier || 'Signature');
         setTexte('sig-deposant', data.nom_eleve || 'Signature');
+
+        if (window.enregistrerLog) {
+          window.addEventListener('beforeprint', function () {
+            window.enregistrerLog('impression_recu', source === 'reimpression' ? 'reimpression:' + numero : numero);
+          }, { once: true });
+        }
 
         if (params.get('auto_print') === '1') {
           setTimeout(() => window.print(), 500);
