@@ -1,0 +1,54 @@
+:root { --primary: #8b0000; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8fafc; color: #1e293b; }
+.top-nav { background: white; padding: 14px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+.back-btn { text-decoration: none; color: var(--primary); font-size: 22px; font-weight: bold; padding: 4px 8px; border-radius: 8px; }
+.nav-title { color: var(--primary); font-size: 16px; font-weight: 700; }
+.page-wrapper { padding: 20px; max-width: 520px; margin: 0 auto; }
+.recu-sheet { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 12px; }
+.recu-header { background: var(--primary); color: white; padding: 16px 20px; display: flex; align-items: center; gap: 12px; }
+.recu-logo { width: 44px; height: 44px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--primary); font-size: 14px; flex-shrink: 0; }
+.recu-school { font-size: 14px; font-weight: 800; }
+.recu-subtitle { font-size: 10px; opacity: 0.85; margin-top: 1px; }
+.recu-numero-badge { margin-left: auto; background: rgba(255,255,255,0.2); border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.recu-body { padding: 14px 20px; }
+.recu-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
+.recu-row:last-child { border-bottom: none; }
+.recu-key { font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 700; }
+.recu-val { font-size: 13px; color: #1e293b; font-weight: 600; text-align: right; max-width: 60%; }
+.recu-montant { background: #fef2f2; border-radius: 10px; padding: 10px 16px; margin: 8px 0 12px; display: flex; justify-content: space-between; align-items: center; }
+.montant-label { font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 700; }
+.montant-valeur { font-size: 20px; font-weight: 900; color: var(--primary); }
+.montant-lettres { font-size: 9px; color: #64748b; font-style: italic; width: 100%; text-align: right; margin-top: 2px; }
+.recu-footer { padding: 12px 20px; background: #f8fafc; display: flex; justify-content: space-between; gap: 16px; }
+.sig-block { flex: 1; text-align: center; }
+.sig-label { font-size: 9px; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 28px; }
+.sig-line { border-top: 1.5px solid #cbd5e1; padding-top: 4px; font-size: 10px; color: #94a3b8; }
+.actions { margin-top: 20px; display: grid; gap: 10px; }
+.btn-print-main, .btn-secondary { width: 100%; border: none; border-radius: 14px; padding: 14px 16px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-print-main { background: var(--primary); color: #fff; }
+.btn-secondary { background: #f1f5f9; color: #475569; }
+.etat { margin: 12px 0 0; font-size: 13px; color: #64748b; min-height: 18px; }
+@media print {
+  @page { size: A5 portrait; margin: 4mm; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  .no-print { display: none !important; }
+  body { background: white; }
+  .page-wrapper { width: 100%; max-width: none; padding: 0; }
+  .recu-sheet { border-radius: 0; box-shadow: none; border: 1px solid #bbb; page-break-inside: avoid; break-inside: avoid; }
+  .recu-header { padding: 5px 8px; gap: 6px; }
+  .recu-logo { width: 28px; height: 28px; }
+  .recu-school { font-size: 11px; }
+  .recu-subtitle { font-size: 8px; }
+  .recu-numero-badge { font-size: 8px; padding: 2px 5px; }
+  .recu-body { padding: 6px 10px; }
+  .recu-row { padding: 2.5px 0; }
+  .recu-key { font-size: 8px; }
+  .recu-val { font-size: 10px; }
+  .recu-montant { padding: 5px 10px; margin: 3px 0 8px; border-radius: 4px; }
+  .montant-label { font-size: 7px; }
+  .montant-valeur { font-size: 16px; }
+  .montant-lettres { font-size: 7px; margin-top: 2px; }
+  .sig-label { font-size: 7px; margin-bottom: 10px; }
+  .sig-line { font-size: 7px; }
+}

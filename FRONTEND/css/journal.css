@@ -1,0 +1,55 @@
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+body { background-color: #f8fafc; padding-bottom: 90px; }
+header { background: white; padding: 15px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+.back-btn { text-decoration: none; color: #8b0000; font-size: 22px; font-weight: bold; padding: 4px 8px; border-radius: 8px; }
+.logo-circle { width: 42px; height: 42px; background: #8b0000; color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; font-size: 13px; }
+.container { padding: 20px; }
+.kpi-row { display: flex; gap: 10px; margin-bottom: 20px; }
+.kpi-card { flex: 1; background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; text-align: center; }
+.kpi-label { font-size: 9px; color: #64748b; text-transform: uppercase; font-weight: 700; }
+.kpi-value { font-size: 18px; font-weight: 800; color: #0f172a; margin-top: 4px; }
+.card { background: #ffffff; border-radius: 16px; padding: 18px; margin-bottom: 16px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+.card-title { font-size: 13px; color: #0f172a; margin-bottom: 14px; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
+label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 5px; }
+input[type="date"] { width: 100%; padding: 11px 13px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; }
+input[type="date"]:focus { border-color: #8b0000; }
+table { width: 100%; font-size: 12px; border-collapse: collapse; }
+th { text-align: left; color: #64748b; border-bottom: 2px solid #f1f5f9; padding: 10px 6px; font-size: 11px; text-transform: uppercase; }
+td { padding: 11px 6px; border-bottom: 1px solid #f8fafc; }
+tr:last-child td { border-bottom: none; }
+.total-box { margin-top: 15px; padding: 12px 0 0; border-top: 2px dashed #8b0000; font-size: 15px; font-weight: 800; color: #b91c1c; display: flex; justify-content: space-between; }
+.btn-group { display: flex; gap: 8px; margin-top: 5px; }
+.btn-action { flex: 1; padding: 12px 8px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; color: white; font-size: 12px; }
+.btn-print-synthese { background-color: #6366f1; }
+.btn-print-details { background-color: #0891b2; }
+.btn-print-all { background-color: #8b0000; }
+.tabs { display: flex; gap: 10px; margin-bottom: 14px; }
+.tab-btn { flex: 1; border: 1px solid #e2e8f0; background: white; color: #64748b; border-radius: 999px; padding: 10px 12px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
+.tab-btn.active { background: #8b0000; color: white; border-color: #8b0000; box-shadow: 0 4px 10px rgba(139, 0, 0, 0.16); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+.nav-bottom { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: white; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+.nav-link { text-decoration: none; color: #64748b; font-size: 11px; font-weight: 600; text-align: center; }
+.home-icon-circle { width: 60px; height: 60px; background: #8b0000; color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 24px; box-shadow: 0 4px 10px rgba(139,0,0,0.4); margin-top: -30px; border: 4px solid #f8fafc; }
+.table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.print-report { display: none; padding: 25px 30px; font-family: Arial, sans-serif; color: #000; }
+.rpt-header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 14px; margin-bottom: 20px; align-items: flex-start; }
+.rpt-logo-box { display: flex; gap: 12px; align-items: center; }
+.rpt-logo { width: 60px; height: 60px; background: #8b0000; color: white; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; border-radius: 8px; }
+.rpt-school { font-size: 16px; font-weight: 800; color: #8b0000; }
+.rpt-info { font-size: 11px; color: #444; margin-top: 2px; }
+.rpt-meta { text-align: right; font-size: 12px; }
+.rpt-meta strong { display: block; font-size: 14px; color: #8b0000; margin-bottom: 4px; }
+.rpt-section-title { font-weight: bold; font-size: 12px; margin-bottom: 6px; color: #8b0000; }
+.rpt-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+.rpt-table th { border-bottom: 2px solid #000; padding: 8px 6px; text-align: left; font-size: 10px; text-transform: uppercase; }
+.rpt-table td { border-bottom: 1px solid #ccc; padding: 7px 6px; }
+.rpt-table tfoot { display: table-row-group; }
+.rpt-total-bloc { display: flex; justify-content: flex-end; border-top: 2px solid #000; padding-top: 8px; margin-top: -1px; margin-bottom: 16px; page-break-inside: avoid; }
+.rpt-total-inner { display: flex; justify-content: space-between; width: 240px; font-weight: bold; font-size: 13px; }
+.rpt-signatures { display: flex; justify-content: space-between; margin-top: 40px; page-break-inside: avoid; }
+.rpt-sig-box { text-align: center; width: 170px; }
+.rpt-sig-line { border-top: 1px solid #000; margin-top: 45px; padding-top: 6px; font-size: 11px; color: #555; }
+.print-hide { display: none !important; }
+@media print { .no-print { display: none !important; } body { background: white; padding: 0; } .container { padding: 0; } .screen-only { display: none !important; } .print-report { display: block !important; } }
+@media (max-width: 380px) { .container { padding: 14px; } .card { padding: 14px; } .kpi-value { font-size: 15px; } table { font-size: 11px; } th, td { padding: 8px 4px; } }

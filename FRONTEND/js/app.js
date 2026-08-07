@@ -551,4 +551,26 @@ function initialiserPage() {
   }
 }
 
+window.SchoolPayApp = {
+  apiFetch,
+  formatMonnaie,
+  notifier,
+  initialiserPage,
+  chargerTransactionsRecentes,
+  chargerJournal,
+  chargerClassesEtEleves,
+  validerPaiement,
+  ajouterEleve,
+  chargerCaissiers,
+  ajouterCaissier,
+  ouvrirModaleAdmin,
+  fermerModaleAdmin,
+  confirmerModaleAdmin,
+  ouvrirModaleExportDb,
+  fermerModaleExportDb,
+  confirmerExportDb,
+  exporterCloud,
+  enregistrerLog
+};
+
 window.addEventListener('DOMContentLoaded', initialiserPage);

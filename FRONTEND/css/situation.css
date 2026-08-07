@@ -1,0 +1,38 @@
+:root { --primary: #8b0000; --bg: #f8fafc; --white: #ffffff; --success: #059669; --danger: #dc2626; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+body { background-color: var(--bg); padding-bottom: 40px; }
+header { background: var(--white); padding: 15px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+.back-btn { text-decoration: none; color: var(--primary); font-size: 22px; font-weight: bold; padding: 4px 8px; border-radius: 8px; }
+.container { padding: 20px; max-width: 720px; margin: 0 auto; }
+.card { background: var(--white); border-radius: 16px; padding: 18px; margin-bottom: 16px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+.card-title { font-size: 13px; color: #0f172a; margin-bottom: 14px; font-weight: 700; }
+label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 5px; }
+select, input { width: 100%; padding: 11px 13px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; background: white; margin-bottom: 12px; }
+select:focus, input:focus { border-color: var(--primary); }
+.btn-action { background: var(--primary); color: white; padding: 13px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; font-size: 14px; }
+table { width: 100%; font-size: 12px; border-collapse: collapse; }
+th { text-align: left; color: #64748b; border-bottom: 2px solid #f1f5f9; padding: 8px 6px; font-size: 10px; text-transform: uppercase; }
+td { padding: 9px 6px; border-bottom: 1px solid #f8fafc; }
+.classe-heading { background: #fef2f2; color: var(--primary); font-weight: 800; padding: 10px 8px; font-size: 13px; }
+.sous-total-row td { font-weight: 800; background: #f8fafc; border-top: 1.5px solid #e2e8f0; }
+.ligne-eleve { cursor: pointer; }
+.ligne-eleve:hover td { background: #fef7f7; }
+.ligne-eleve td:first-child { color: var(--primary); font-weight: 700; text-decoration: underline; text-decoration-color: transparent; }
+.ligne-eleve:hover td:first-child { text-decoration-color: var(--primary); }
+.table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.grand-total-box { margin-top: 16px; padding: 14px; background: #0f172a; color: white; border-radius: 12px; display: flex; justify-content: space-between; font-weight: 800; }
+.loading, .empty-state { text-align: center; padding: 40px; color: #94a3b8; }
+.print-header { display: none; }
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; padding: 0; }
+  .container { padding: 0; max-width: 100%; }
+  .card { border: none; box-shadow: none; padding: 0; }
+  .ligne-eleve { cursor: default; }
+  .ligne-eleve td:first-child { text-decoration: none; }
+  .print-header { display: flex; align-items: center; gap: 14px; border-bottom: 2px solid #000; padding-bottom: 16px; margin-bottom: 20px; }
+  .print-header img { width: 60px; height: 60px; }
+  .print-header .ecole-nom { font-size: 17px; font-weight: 800; color: #8b0000; }
+  .print-header .periode-info { margin-left: auto; text-align: right; font-size: 12px; }
+}
+@media (max-width: 400px) { .container { padding: 12px; } .card { padding: 14px; border-radius: 12px; } table { font-size: 11px; } th, td { padding: 7px 4px; } .grand-total-box { flex-direction: column; gap: 6px; text-align: center; font-size: 13px; } }
