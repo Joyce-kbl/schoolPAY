@@ -240,7 +240,7 @@ chargerClasses();
 window.addEventListener('beforeprint', function () {
     if (window.enregistrerLog) {
         var periode = document.getElementById('filtre-periode')?.value || 'annuel';
-        window.enregistrerLog('impression_rapport', 'situation_' + periode);
+        window.enregistrerLog('impression_rapport', 'complet:' + periode);
     }
 });
 </script>

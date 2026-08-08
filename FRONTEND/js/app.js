@@ -88,8 +88,10 @@ async function chargerTransactionsRecentes() {
   }
 }
 
+//Fonction pour réimprimer un reçu
 function reimprimerRecu(numeroRecu) {
-  const url = `recu.html?numero=${encodeURIComponent(numeroRecu)}&auto_print=1`;
+  const url = `recu.html?numero=${encodeURIComponent(numeroRecu)}&source=reimpression`;
+//  const url = `recu.html?numero=${encodeURIComponent(numeroRecu)}&source=reimpression&auto_print=1`;
   window.open(url, '_blank', 'noopener,noreferrer');
 }
 

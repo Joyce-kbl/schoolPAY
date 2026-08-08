@@ -17,10 +17,25 @@
     const nom_utilisateur = session?.nom_utilisateur;
     if (!nom_utilisateur) return;
     try {
+      const chargeUtile = JSON.stringify({
+        nom_utilisateur,
+        action,
+        reference_action: String(reference_action)
+      });
+
+      if (navigator.sendBeacon) {
+        const envoye = navigator.sendBeacon(
+          '/api/logs',
+          new Blob([chargeUtile], { type: 'application/json' })
+        );
+        if (envoye) return;
+      }
+
       await fetch('/api/logs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nom_utilisateur, action, reference_action: String(reference_action) })
+        body: chargeUtile,
+        keepalive: true
       });
     } catch (e) {
       console.error('[LOGS] Erreur de journalisation :', e);

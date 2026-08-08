@@ -98,6 +98,7 @@
 </head>
 <body>
 <script src="/js/auth.js"></script>
+<script src="/js/logs.js"></script>
 
 <div class="screen-only">
     <header class="no-print">
@@ -498,6 +499,9 @@ function imprimerRapport(mode) {
     // Basculer vers le rapport, imprimer, revenir
     document.querySelector('.screen-only').style.display = 'none';
     document.getElementById('print-report').style.display = 'block';
+    if (window.enregistrerLog) {
+        window.enregistrerLog('impression_rapport', mode);
+    }
     window.print();
     setTimeout(function() {
         document.querySelector('.screen-only').style.display = '';
