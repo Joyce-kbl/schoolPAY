@@ -15,9 +15,9 @@
         .back-btn:hover { background: #fef2f2; }
         .logo-circle { width: 42px; height: 42px; background: var(--primary); color: var(--white); display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; font-size: 13px; }
 
-        .container { padding: 20px; max-width: 480px; margin: 0 auto; }
+        .container { padding: 20px; max-width: 750px; margin: 0 auto; }
         .card { background: var(--white); border-radius: 20px; padding: 22px; border: 1px solid #e2e8f0; box-shadow: 0 4px 10px rgba(0,0,0,0.04); }
-        .form-group { margin-bottom: 16px; }
+        .form-group { margin-bottom: 16px;}
         label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; display: block; }
         .form-control { width: 100%; padding: 13px 15px; border: 1.5px solid #e2e8f0; border-radius: 12px; background: #fdfdfd; font-size: 14px; outline: none; transition: border-color 0.2s; }
         .form-control:focus { border-color: var(--primary); }
@@ -28,7 +28,7 @@
         
         .row-2 { display: flex; gap: 12px; }
         .row-2 > * { flex: 1; }
-        .row-2 > *:first-child { flex: 2; }
+        .row-2 > *:first-child { flex: 3; }
 
         .success-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center; }
         .success-card { background: white; border-radius: 24px; padding: 35px 25px; text-align: center; width: 90%; max-width: 340px; }
@@ -75,10 +75,12 @@
 <div class="container">
     <div class="card">
         <div class="form-group">
+        
             <label>Classe</label>
             <select id="classe-select" class="form-control" onchange="filtrerEleves()">
-                <option value="">Sélectionner la classe...</option>
+            <option value="">Sélectionner la classe...</option>
             </select>
+            
         </div>
 
         <div class="form-group">
@@ -94,6 +96,7 @@
         <div class="form-group">
             <label>Déposant (qui paie pour l'élève)</label>
             <input type="text" id="deposant-input" class="form-control" placeholder="Nom du parent ou tuteur...">
+            <datalist id="categories-datalist"></datalist>
         </div>
 
 
