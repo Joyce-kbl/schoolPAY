@@ -205,6 +205,25 @@
                 font-size: 12.5px;
             }
         }
+        /*Css de la notification après l'ajout*/
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 6px;
+            color: white;
+            display: none;
+            z-index: 9999;
+        }
+
+        .notification.success {
+            background: #28a745;
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
     </style>
 </head>
 
@@ -245,6 +264,8 @@
                 <option value="M">Masculin</option>
                 <option value="F">Féminin</option>
             </select>
+            <!--La nouvelle notification pour l'ajout-->
+            <div id="notification" class="notification"></div>
 
             <select id="nouvel-eleve-classe" class="form-control">
                 <option value="">Sélectionner une classe...</option>

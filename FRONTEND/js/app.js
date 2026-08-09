@@ -17,11 +17,30 @@ function formatMonnaie(valeur) {
  * @param {string} message
  * @param {boolean} [succes=true]
  */
-function notifier(message, succes = true) {
+/*function notifier(message, succes = true) {
   if (window.alert) {
     window.alert(message);
   }
   console[succes ? 'log' : 'error'](message);
+}*/
+/**function notifier(message, succes = true) {
+    console[succes ? 'log' : 'error'](message);
+}**/
+function notifier(message, succes = true) {
+    const notif = document.getElementById('notification');
+
+    notif.textContent = message;
+    notif.className = succes
+        ? 'notification success'
+        : 'notification error';
+
+    notif.style.display = 'block';
+
+    setTimeout(() => {
+        notif.style.display = 'none';
+    }, 3000);
+
+    console[succes ? 'log' : 'error'](message);
 }
 
 /**
@@ -268,7 +287,7 @@ async function chargerCaissiers() {
     `).join('');
     conteneur.querySelectorAll('.btn-suppr-caissier').forEach(btn => {
       btn.addEventListener('click', () => {
-        if (!confirm('Retirer ce caissier ? Il ne pourra plus se connecter.')) return;
+        //if (!confirm('Retirer ce caissier ? Il ne pourra plus se connecter.')) return;
         // La suppression réelle n'a lieu qu'après validation de l'identité
         // administrateur (José) dans la modale de confirmation.
         ouvrirModaleAdmin('supprimer-caissier', btn.dataset.id);
