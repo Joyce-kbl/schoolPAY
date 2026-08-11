@@ -13,7 +13,8 @@
    */
   function obtenirSession() {
     try {
-      const brut = localStorage.getItem(CLE_SESSION);
+      //const brut = localStorage.getItem(CLE_SESSION);
+      const brut = sessionStorage.getItem(CLE_SESSION);
       return brut ? JSON.parse(brut) : null;
     } catch (e) {
       return null;
@@ -25,7 +26,8 @@
    * @param {Object} donnees
    */
   function definirSession(donnees) {
-    localStorage.setItem(CLE_SESSION, JSON.stringify(donnees));
+    //localStorage.setItem(CLE_SESSION, JSON.stringify(donnees));
+    sessionStorage.setItem(CLE_SESSION, JSON.stringify(donnees));
   }
 
   /**
@@ -48,7 +50,8 @@
         console.error(e);
       }
     }
-    localStorage.removeItem(CLE_SESSION);
+    //localStorage.removeItem(CLE_SESSION);
+    sessionStorage.removeItem(CLE_SESSION);
     window.location.href = 'login.html';
   }
 
