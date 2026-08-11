@@ -38,7 +38,7 @@ function notifier(message, succes = true) {
 
     setTimeout(() => {
         notif.style.display = 'none';
-    }, 10000);
+    }, 3000);
 
     console[succes ? 'log' : 'error'](message);
 }

@@ -65,11 +65,15 @@
             position: fixed;
             top: 20px;
             right: 20px;
+            height: 3.5em; 
+            font-size: 1em;
+            font-weight: bold;
             padding: 12px 20px;
             border-radius: 6px;
             color: white;
             display: none;
             z-index: 9999;
+            align-content: center ;
         }
 
         .notification.success {
@@ -117,7 +121,7 @@
         <div class="form-group">
             <label>Déposant (qui paie pour l'élève)</label>
             <input type="text" id="deposant-input" class="form-control" placeholder="Nom du parent ou tuteur...">
-            <datalist id="categories-datalist"></datalist>
+            <datalist id="categories-datalist" ></datalist>
         </div>
 
 
@@ -382,7 +386,7 @@ document.addEventListener('click', function(e) {
 function notifier(message, succes = true) {
     const notif = document.getElementById('notification');
 
-    notif.textContent = message;
+    notif.textContent = succes ? "✅"+message : "⚠️"+message;
     notif.className = succes
         ? 'notification success'
         : 'notification error';
@@ -391,7 +395,7 @@ function notifier(message, succes = true) {
 
     setTimeout(() => {
         notif.style.display = 'none';
-    }, 10000);
+    }, 6000);
 
     console[succes ? 'log' : 'error'](message);
 }
@@ -492,7 +496,7 @@ document.getElementById('btn-valider-paiement').addEventListener('click', async 
         document.getElementById('success-overlay').style.display = 'flex';
     } catch (err) {
         //alert('Erreur : ' + err.message);
-        notifier('Erreur : ' + err.message)
+        notifier('Erreur : ' + err.message,false)
         this.disabled = false;
         this.textContent = '✅ VALIDER LE PAIEMENT';
     }
