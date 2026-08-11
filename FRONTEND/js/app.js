@@ -38,10 +38,11 @@ function notifier(message, succes = true) {
 
     setTimeout(() => {
         notif.style.display = 'none';
-    }, 3000);
+    }, 10000);
 
     console[succes ? 'log' : 'error'](message);
 }
+
 
 /**
  * Wrapper de fetch pour appeler l'API backend en JSON.
@@ -111,7 +112,8 @@ async function chargerTransactionsRecentes() {
 function reimprimerRecu(numeroRecu) {
   const url = `recu.html?numero=${encodeURIComponent(numeroRecu)}&source=reimpression`;
 //  const url = `recu.html?numero=${encodeURIComponent(numeroRecu)}&source=reimpression&auto_print=1`;
-  window.open(url, '_blank', 'noopener,noreferrer');
+  //window.open(url, '_blank', 'noopener,noreferrer');
+    window.location.href=url
 }
 
 /**

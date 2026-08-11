@@ -59,6 +59,27 @@
             .card { padding: 16px; }
             .row-2 { flex-wrap: wrap; }
         }
+
+/*Css pour les notifications*/
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 6px;
+            color: white;
+            display: none;
+            z-index: 9999;
+        }
+
+        .notification.success {
+            background: #28a745;
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+
     </style>
 </head>
 <body>
@@ -116,7 +137,8 @@
         <button id="btn-valider-paiement" class="btn-valider" type="button">✅ VALIDER LE PAIEMENT</button>
     </div>
 </div>
-
+<!--notification -->
+ <div id="notification" class="notification"></div>
 <!-- Overlay succès : message de confirmation et lien vers impression du reçu -->
 <div class="success-overlay" id="success-overlay">
     <div class="success-card">
@@ -128,7 +150,7 @@
     </div>
 </div>
 
-<script>
+<script >
 let tousLesEleves = [];
 let toutesLesCategories = [];
 // Reste à payer sur les frais scolaires pour l'élève actuellement sélectionné.
@@ -198,7 +220,8 @@ function creerLigneOperation() {
         // payés, on empêche immédiatement de choisir cette catégorie de frais.
         if (trouve && trouve.libelle.toUpperCase().includes('FRAIS SCOLAIRES')
             && resteScolaireEleveActuel !== null && resteScolaireEleveActuel <= 0) {
-            alert('Les frais scolaires de cet élève sont déjà payés intégralement. Impossible de saisir un nouveau paiement pour cette catégorie.');
+            //alert('Les frais scolaires de cet élève sont déjà payés intégralement. Impossible de saisir un nouveau paiement pour cette catégorie.');
+            notifier('Les frais scolaires de cet élève sont déjà payés intégralement. Impossible de saisir un nouveau paiement pour cette catégorie.',false)
             catInput.value = '';
             catId.value = '';
             catId.dataset.libelle = '';
@@ -212,7 +235,8 @@ function creerLigneOperation() {
         if (!estLigneFraisScolaires(div) || resteScolaireEleveActuel === null) return;
         const montant = Number(montantInput.value);
         if (montant > resteScolaireEleveActuel) {
-            alert(`Le montant restant à payer pour les frais scolaires est ${resteScolaireEleveActuel.toFixed(2)} $. Veuillez saisir un montant inférieur ou égal.`);
+            //alert(`Le montant restant à payer pour les frais scolaires est ${resteScolaireEleveActuel.toFixed(2)} $. Veuillez saisir un montant inférieur ou égal.`);
+            notifier("Le montant restant à payer pour les frais scolaires est "+resteScolaireEleveActuel.toFixed(2)+"$. Veuillez saisir un montant inférieur ou égal.", false)
             montantInput.value = resteScolaireEleveActuel > 0 ? resteScolaireEleveActuel : '';
         }
     });
@@ -355,6 +379,23 @@ document.addEventListener('click', function(e) {
     }
 });
 
+function notifier(message, succes = true) {
+    const notif = document.getElementById('notification');
+
+    notif.textContent = message;
+    notif.className = succes
+        ? 'notification success'
+        : 'notification error';
+
+    notif.style.display = 'block';
+
+    setTimeout(() => {
+        notif.style.display = 'none';
+    }, 10000);
+
+    console[succes ? 'log' : 'error'](message);
+}
+
 document.getElementById('btn-valider-paiement').addEventListener('click', async function() {
     const eleve_id = Number(document.getElementById('eleve-id-input').value);
     const devise = 'USD';
@@ -373,8 +414,8 @@ document.getElementById('btn-valider-paiement').addEventListener('click', async 
     });
 
     if (!eleve_id || operations.length === 0) {
-        alert('Veuillez sélectionner un élève et ajouter au moins une opération valide (code ou type de frais reconnu).');
-        return;
+        //alert('Veuillez sélectionner un élève et ajouter au moins une opération valide (code ou type de frais reconnu).');
+        return notifier("Veuillez sélectionner un élève et ajouter au moins une opération valide (code ou type de frais reconnu).",false);
     }
 
     const session = window.SchoolPayAuth?.obtenirSession();
@@ -409,7 +450,8 @@ document.getElementById('btn-valider-paiement').addEventListener('click', async 
                 }
                 
                 if (Number(operationScolaire.montant) > Number(reste)) {
-                    alert(`Veuillez saisir un autre montant. Le montant restant à payer est ${reste} $`);
+                    //alert(`Veuillez saisir un autre montant. Le montant restant à payer est ${reste} $`);
+                    notifier(`Veuillez saisir un autre montant. Le montant restant à payer est ${reste} $`)
                     this.disabled = false;
                     this.textContent = '✅ VALIDER LE PAIEMENT';
                     return;
@@ -419,7 +461,8 @@ document.getElementById('btn-valider-paiement').addEventListener('click', async 
             }
         } catch (err) {
             console.error('Erreur lors de la vérification du solde', err);
-            alert("Erreur: Impossible de vérifier le solde restant. Vérifiez votre connexion.");
+            //alert("Erreur: Impossible de vérifier le solde restant. Vérifiez votre connexion.");
+            notifier("Erreur: Impossible de vérifier le solde restant. Vérifiez votre connexion.")
             this.disabled = false;
             this.textContent = '✅ VALIDER LE PAIEMENT';
             return;
@@ -448,7 +491,8 @@ document.getElementById('btn-valider-paiement').addEventListener('click', async 
         document.getElementById('btn-voir-facture').href = `facture.html?numero=${facture.numero_facture}`;
         document.getElementById('success-overlay').style.display = 'flex';
     } catch (err) {
-        alert('Erreur : ' + err.message);
+        //alert('Erreur : ' + err.message);
+        notifier('Erreur : ' + err.message)
         this.disabled = false;
         this.textContent = '✅ VALIDER LE PAIEMENT';
     }

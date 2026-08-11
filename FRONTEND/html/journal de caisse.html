@@ -277,8 +277,12 @@
 </div>
 
 <script>
+
+import ''
+
 let tousLesPaiements = [];
 let ongletActifJournal = 'synthese';
+
 
 function afficherOngletJournal(onglet) {
     ongletActifJournal = onglet;
@@ -440,8 +444,7 @@ function imprimerRapport(mode) {
     var fin = document.getElementById('filtre-date-fin').value;
 
     if (!debut || !fin) {
-        alert('Veuillez d\'abord sélectionner une date de début et une date de fin, puis appliquer les filtres.');
-        return;
+        //alert('Veuillez d\'abord sélectionner une date de début et une date de fin, puis appliquer les filtres.');
     }
 
     // Dates
