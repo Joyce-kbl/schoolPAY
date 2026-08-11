@@ -126,7 +126,7 @@
                     <option value="">Toutes les catégories</option>
                 </select>
             </div>
-            <button onclick="chargerJournal()" style="width: 100%; background: #8b0000; color: white; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">Appliquer les filtres</button>
+            <button onclick=chargerJournal() style="width: 100%; background: #8b0000; color: white; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">Appliquer les filtres</button>
         </div>
 
         <div class="card no-print" id="zone-masquee">
@@ -278,7 +278,6 @@
 
 <script>
 
-import ''
 
 let tousLesPaiements = [];
 let ongletActifJournal = 'synthese';
@@ -337,14 +336,15 @@ async function chargerJournal() {
     if (!debut || !fin) {
         zoneDonnees.style.display = 'none';
         zoneMasquee.style.display = 'block';
-        if (journalTabs) journalTabs.style.display = 'none';
-        return;
+        //if (journalTabs) journalTabs.style.display = 'none';
+        return ;
     }
 
     // Sécurité : la date de début ne peut pas être après la date de fin
     if (debut > fin) {
         document.getElementById('filtre-date-fin').value = debut;
         fin = debut;
+        return alert("Le debut ne peut pas être supérieur à la fin ")
     }
 
     var params = new URLSearchParams();
