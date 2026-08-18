@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoolPAY - Tous les élèves</title>
+    <link rel="icon" href="/img/logoFat.jpeg" type="image/jpeg">
+    <style>
+        :root { --primary: #8b0000; --bg: #f8fafc; --white: #ffffff; --success: #059669; --text: #1e293b; --muted: #64748b; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        body { background-color: var(--bg); padding-bottom: 90px; }
+
+        header { background: var(--white); padding: 15px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .back-btn { text-decoration: none; color: var(--primary); font-size: 22px; font-weight: bold; padding: 4px 8px; border-radius: 8px; transition: background 0.15s; }
+        .back-btn:hover { background: #fef2f2; }
+
+        .page-title { font-size: 18px; font-weight: 800; color: var(--text); }
+
+        /* KPI */
+        .kpi-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 20px 20px 0; }
+        .kpi-card { background: var(--white); border-radius: 14px; padding: 16px 12px; text-align: center; border: 1px solid #e2e8f0; }
+        .kpi-value { font-size: 22px; font-weight: 900; color: var(--text); }
+        .kpi-label { font-size: 10px; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-top: 2px; }
+
+        /* Filtres */
+        .filters { padding: 18px 20px 0; display: flex; gap: 10px; }
+        .filter-input { flex: 1; padding: 12px 14px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 14px; outline: none; background: var(--white); transition: border-color 0.2s; }
+        .filter-input:focus { border-color: var(--primary); }
+        .filter-select { padding: 12px 14px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 14px; background: var(--white); color: var(--text); min-width: 140px; outline: none; }
+        .filter-select:focus { border-color: var(--primary); }
+
+        /* Tableau */
+        .table-section { padding: 18px 20px; }
+        .table-card { background: var(--white); border-radius: 16px; padding: 15px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.03); overflow: hidden; }
+        .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-title { font-weight: 800; font-size: 13px; color: var(--text); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .count-badge { background: #fef2f2; color: var(--primary); border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; color: var(--muted); padding: 10px 10px; border-bottom: 2px solid #f1f5f9; font-size: 11px; text-transform: uppercase; white-space: nowrap; }
+        td { padding: 13px 10px; border-bottom: 1px solid #f8fafc; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fef2f2; }
+
+        .btn-fiche { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 7px 12px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-block; }
+        .btn-fiche:hover { background: #6b0000; }
+
+        .avatar-cell { width: 36px; height: 36px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; flex-shrink: 0; }
+        .name-cell { display: flex; align-items: center; gap: 10px; }
+        .name-text { font-weight: 700; color: var(--text); }
+        .meta-text { font-size: 11px; color: var(--muted); }
+
+        .empty-state { text-align: center; padding: 40px 20px; color: #94a3b8; }
+        .empty-state span { font-size: 32px; display: block; margin-bottom: 10px; }
+
+        /* Nav bottom */
+        .nav-bottom { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: var(--white); border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding: 0 10px; }
+        .nav-link { text-decoration: none; color: #64748b; font-size: 11px; font-weight: 700; text-align: center; flex: 1; }
+        .home-icon-circle { width: 60px; height: 60px; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 24px; box-shadow: 0 4px 10px rgba(139,0,0,0.4); margin-top: -30px; border: 4px solid var(--bg); }
+
+        @media (max-width: 380px) {
+            header { padding: 12px 14px; }
+            .kpi-row { padding: 14px 14px 0; }
+            .filters { padding: 14px 14px 0; flex-direction: column; }
+            .table-section { padding: 14px; }
+            table { font-size: 12px; }
+            th, td { padding: 10px 6px; }
+        }
+    </style>
+</head>
+<body>
+<script src="/js/auth.js"></script>
+
+<header>
+    <a href="index.html" class="back-btn">←</a>
+    <div class="branding" style="display:flex;align-items:center;gap:10px;">
+        <img src="/img/logoFat.jpeg" alt="Logo" style="width:38px;height:38px;border-radius:50%;">
+        <h2 class="page-title">Tous les élèves</h2>
+    </div>
+</header>
+
+<!-- KPI -->
+<div class="kpi-row">
+    <div class="kpi-card">
+        <div class="kpi-value" id="kpi-total">—</div>
+        <div class="kpi-label">Total élèves</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-value" id="kpi-masculin">—</div>
+        <div class="kpi-label">Masculin</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-value" id="kpi-feminin">—</div>
+        <div class="kpi-label">Féminin</div>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div class="filters">
+    <input type="text" class="filter-input" id="filter-search" placeholder="🔍 Rechercher un nom ou matricule...">
+    <select class="filter-select" id="filter-classe">
+        <option value="">Toutes les classes</option>
+    </select>
+</div>
+
+<!-- Tableau -->
+<div class="table-section">
+    <div class="table-card">
+        <div class="table-title">
+            <span>Liste des élèves</span>
+            <span class="count-badge" id="count-badge">0</span>
+        </div>
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Élève</th>
+                        <th>Matricule</th>
+                        <th>Classe</th>
+                        <th>Sexe</th>
+                        <th style="text-align:right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="body-eleves"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<nav class="nav-bottom no-print">
+    <a href="journal de caisse.html" class="nav-link"><span style="font-size:26px;">📒</span><br>Journal</a>
+    <a href="index.html"><div class="home-icon-circle">🏠</div></a>
+    <a href="modifier.html" class="nav-link"><span style="font-size:26px;">⚙️</span><br>Paramètres</a>
+</nav>
+
+<script>
+let tousLesEleves = [];
+let toutesLesClasses = [];
+
+function formatSexe(s) {
+    if (s === 'M') return 'Masculin';
+    if (s === 'F') return 'Féminin';
+    return '—';
+}
+
+function getInitiales(nom) {
+    return (nom || '?').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function majKPI() {
+    document.getElementById('kpi-total').textContent = tousLesEleves.length;
+    document.getElementById('kpi-masculin').textContent = tousLesEleves.filter(e => e.sexe === 'M').length;
+    document.getElementById('kpi-feminin').textContent = tousLesEleves.filter(e => e.sexe === 'F').length;
+}
+
+function filtrerEtAfficher() {
+    const terme = document.getElementById('filter-search').value.trim().toLowerCase();
+    const classeId = document.getElementById('filter-classe').value;
+
+    let filtres = tousLesEleves;
+
+    if (terme) {
+        filtres = filtres.filter(e =>
+            (e.nom_complet || '').toLowerCase().includes(terme) ||
+            (e.matricule || '').toLowerCase().includes(terme)
+        );
+    }
+    if (classeId) {
+        filtres = filtres.filter(e => String(e.classe_id) === classeId);
+    }
+
+    const corps = document.getElementById('body-eleves');
+    const badge = document.getElementById('count-badge');
+    badge.textContent = filtres.length;
+
+    if (filtres.length === 0) {
+        corps.innerHTML = '<tr><td colspan="5"><div class="empty-state"><span>📭</span>Aucun élève trouvé</div></td></tr>';
+        return;
+    }
+
+    corps.innerHTML = filtres.map(e => {
+        const initiales = getInitiales(e.nom_complet);
+        return `
+        <tr>
+            <td>
+                <div class="name-cell">
+                    <div class="avatar-cell">${initiales}</div>
+                    <div>
+                        <div class="name-text">${e.nom_complet}</div>
+                        <div class="meta-text">${e.matricule || '—'}</div>
+                    </div>
+                </div>
+            </td>
+            <td style="color:var(--muted);font-size:12px;">${e.matricule || '—'}</td>
+            <td style="font-weight:600;">${e.nom_classe || '—'}</td>
+            <td style="color:var(--muted);font-size:12px;">${formatSexe(e.sexe)}</td>
+            <td style="text-align:right;"><a href="fiche_eleve.html?id=${e.id}" class="btn-fiche">Voir la fiche</a></td>
+        </tr>`;
+    }).join('');
+}
+
+document.getElementById('filter-search').addEventListener('input', filtrerEtAfficher);
+document.getElementById('filter-classe').addEventListener('change', filtrerEtAfficher);
+
+async function chargerPage() {
+    try {
+        const [resEleves, resClasses] = await Promise.all([
+            fetch('/api/eleves'),
+            fetch('/api/classes')
+        ]);
+        const dataEleves = await resEleves.json();
+        const dataClasses = await resClasses.json();
+
+        tousLesEleves = dataEleves.donnees || [];
+        toutesLesClasses = dataClasses.donnees || [];
+
+        const selectClasse = document.getElementById('filter-classe');
+        toutesLesClasses.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = c.nom;
+            selectClasse.appendChild(opt);
+        });
+
+        majKPI();
+        filtrerEtAfficher();
+    } catch (err) {
+        document.getElementById('body-eleves').innerHTML =
+            '<tr><td colspan="5"><div class="empty-state"><span>⚠️</span>Erreur de chargement</div></td></tr>';
+    }
+}
+
+chargerPage();
+</script>
+</body>
+</html>

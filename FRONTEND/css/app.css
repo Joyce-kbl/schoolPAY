@@ -1,0 +1,21 @@
+/* Styles partages du frontend SchoolPAY.
+   Les styles specifiques des pages seront extraits ici progressivement. */
+
+:root {
+  --primary: #8b0000;
+  --bg: #f8fafc;
+  --white: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", sans-serif;
+}
