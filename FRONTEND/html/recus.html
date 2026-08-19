@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoolPAY - Tous les reçus</title>
+    <meta name="description" content="Historique complet de tous les reçus de paiement enregistrés dans SchoolPAY.">
+    <link rel="icon" href="/img/logoFat.jpeg" type="image/jpeg">
+    <style>
+        :root {
+            --primary: #8b0000;
+            --primary-light: #fef2f2;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --success: #059669;
+            --danger: #b91c1c;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        body { background-color: var(--bg); padding-bottom: 90px; }
+
+        /* ── HEADER ── */
+        header {
+            background: var(--white);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .back-btn {
+            text-decoration: none;
+            color: var(--primary);
+            font-size: 22px;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: background 0.15s;
+        }
+        .back-btn:hover { background: var(--primary-light); }
+        .page-title { font-size: 18px; font-weight: 800; color: var(--text); }
+
+        /* ── KPI ── */
+        .kpi-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 20px 20px 0; }
+        .kpi-card {
+            background: var(--white);
+            border-radius: 14px;
+            padding: 16px 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .kpi-value { font-size: 22px; font-weight: 900; color: var(--text); }
+        .kpi-label { font-size: 10px; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-top: 2px; }
+
+        /* ── FILTRES ── */
+        .filters { padding: 18px 20px 0; display: flex; gap: 10px; flex-wrap: wrap; }
+        .filter-input {
+            flex: 1;
+            min-width: 160px;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
+            background: var(--white);
+            transition: border-color 0.2s;
+        }
+        .filter-input:focus { border-color: var(--primary); }
+        .filter-date-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .filter-date-label { font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+        .filter-date {
+            padding: 11px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-size: 13px;
+            background: var(--white);
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .filter-date:focus { border-color: var(--primary); }
+        .btn-reset-dates {
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-size: 12px;
+            background: var(--white);
+            color: var(--muted);
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.15s;
+        }
+        .btn-reset-dates:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* ── TABLEAU ── */
+        .table-section { padding: 18px 20px; }
+        .table-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 15px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            overflow: hidden;
+        }
+        .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-title {
+            font-weight: 800;
+            font-size: 13px;
+            color: var(--text);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .count-badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th {
+            text-align: left;
+            color: var(--muted);
+            padding: 10px 10px;
+            border-bottom: 2px solid #f1f5f9;
+            font-size: 11px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        td { padding: 13px 10px; border-bottom: 1px solid #f8fafc; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: var(--primary-light); }
+
+        .recu-num { font-weight: 800; color: var(--text); font-size: 13px; }
+        .recu-eleve { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+        /* ── BOUTONS D'ACTION ── */
+        .btn-reimprimer {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 7px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.15s;
+        }
+        .btn-reimprimer:hover { background: #6b0000; }
+
+        .btn-supprimer {
+            background: var(--primary-light);
+            color: var(--danger);
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 7px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            margin-left: 5px;
+            transition: all 0.15s;
+        }
+        .btn-supprimer:hover { background: #fecaca; }
+
+        .empty-state { text-align: center; padding: 40px 20px; color: #94a3b8; }
+        .empty-state span { font-size: 32px; display: block; margin-bottom: 10px; }
+
+        /* ── MODALE ADMIN ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-box {
+            background: var(--white);
+            border-radius: 18px;
+            padding: 22px;
+            width: 100%;
+            max-width: 340px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .modal-box h3 { font-size: 15px; color: var(--primary); margin-bottom: 4px; font-weight: 700; }
+        .modal-box p { font-size: 12px; color: var(--muted); margin-bottom: 14px; line-height: 1.4; }
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+            display: block;
+        }
+        .modal-input:focus { border-color: var(--primary); }
+        .modal-actions { display: flex; gap: 10px; margin-top: 4px; }
+        .modal-actions button {
+            flex: 1;
+            padding: 11px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 13px;
+            transition: opacity 0.15s;
+        }
+        .modal-actions button:hover { opacity: 0.85; }
+        .btn-modal-annuler { background: #f1f5f9; color: #475569; }
+        .btn-modal-confirmer { background: var(--primary); color: white; }
+
+        /* ── NOTIFICATION ── */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            max-width: 320px;
+            font-size: 13px;
+            font-weight: bold;
+            padding: 12px 20px;
+            border-radius: 10px;
+            color: white;
+            display: none;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            line-height: 1.4;
+        }
+        .notification.success { background: #059669; }
+        .notification.error { background: #dc3545; }
+
+        /* ── NAV BOTTOM ── */
+        .nav-bottom {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 75px;
+            background: var(--white);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            padding: 0 10px;
+        }
+        .nav-link { text-decoration: none; color: #64748b; font-size: 11px; font-weight: 700; text-align: center; flex: 1; }
+        .home-icon-circle {
+            width: 60px; height: 60px;
+            background: var(--primary);
+            color: white;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+            font-size: 24px;
+            box-shadow: 0 4px 10px rgba(139,0,0,0.4);
+            margin-top: -30px;
+            border: 4px solid var(--bg);
+        }
+
+        @media (max-width: 380px) {
+            header { padding: 12px 14px; }
+            .kpi-row { padding: 14px 14px 0; }
+            .filters { padding: 14px 14px 0; flex-direction: column; }
+            .table-section { padding: 14px; }
+            table { font-size: 12px; }
+            th, td { padding: 10px 6px; }
+            .btn-reimprimer, .btn-supprimer { padding: 6px 8px; font-size: 10px; }
+        }
+    </style>
+</head>
+<body>
+<script src="/js/auth.js"></script>
+
+<!-- En-tête -->
+<header>
+    <a href="index.html" class="back-btn" title="Retour à l'accueil">←</a>
+    <div style="display:flex; align-items:center; gap:10px;">
+        <img src="/img/logoFat.jpeg" alt="Logo SchoolPAY" style="width:38px;height:38px;border-radius:50%;">
+        <h1 class="page-title">Tous les reçus</h1>
+    </div>
+</header>
+
+<!-- KPI -->
+<div class="kpi-row">
+    <div class="kpi-card">
+        <div class="kpi-value" id="kpi-total">—</div>
+        <div class="kpi-label">Total reçus</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-value" id="kpi-encaisse">—</div>
+        <div class="kpi-label">Encaissé (USD)</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-value" id="kpi-aujourdhui">—</div>
+        <div class="kpi-label">Aujourd'hui</div>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div class="filters">
+    <input
+        type="text"
+        class="filter-input"
+        id="filter-search"
+        placeholder="🔍 Élève, reçu, libellé..."
+        autocomplete="off"
+    >
+    <div class="filter-date-group">
+        <span class="filter-date-label">Du</span>
+        <input type="date" class="filter-date" id="filter-date-debut">
+        <span class="filter-date-label">au</span>
+        <input type="date" class="filter-date" id="filter-date-fin">
+        <button class="btn-reset-dates" id="btn-reset-dates" title="Effacer les dates">✕</button>
+    </div>
+</div>
+
+<!-- Tableau -->
+<div class="table-section">
+    <div class="table-card">
+        <div class="table-title">
+            <span>Historique des reçus</span>
+            <span class="count-badge" id="count-badge">0</span>
+        </div>
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Reçu</th>
+                        <th>Libellé</th>
+                        <th style="text-align:right;">Montant</th>
+                        <th>Date</th>
+                        <th>Caissier</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="body-recus"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Notification -->
+<div id="notification" class="notification"></div>
+
+<!-- Modale d'authentification administrateur -->
+<div class="modal-overlay" id="modal-suppression-recu">
+    <div class="modal-box">
+        <h3>🔒 Confirmation administrateur</h3>
+        <p>Entrez vos identifiants administrateur pour confirmer la suppression définitive de ce reçu.</p>
+        <input id="admin-suppr-utilisateur" type="text" class="modal-input" placeholder="Identifiant administrateur" autocomplete="off">
+        <input id="admin-suppr-mdp" type="password" class="modal-input" placeholder="Mot de passe administrateur" autocomplete="off">
+        <div class="modal-actions">
+            <button type="button" class="btn-modal-annuler" id="btn-suppr-annuler">Annuler</button>
+            <button type="button" class="btn-modal-confirmer" id="btn-suppr-confirmer">Confirmer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation -->
+<nav class="nav-bottom no-print">
+    <a href="journal de caisse.html" class="nav-link"><span style="font-size:26px;">📒</span><br>Journal</a>
+    <a href="index.html"><div class="home-icon-circle">🏠</div></a>
+    <a href="modifier.html" class="nav-link"><span style="font-size:26px;">⚙️</span><br>Paramètres</a>
+</nav>
+
+<script>
+// ─── Constantes ───────────────────────────────────────────────────────────────
+const ADMIN_UTILISATEUR = 'José';
+const ADMIN_MOT_DE_PASSE = 'cicm@';
+
+// ─── État global ──────────────────────────────────────────────────────────────
+let tousLesRecus = [];
+let recuASupprimerId = null;
+let recuASupprimerNumero = null;
+let recuASupprimerMontant = null;
+
+// ─── Utilitaires ──────────────────────────────────────────────────────────────
+function formatMonnaie(valeur) {
+    return new Intl.NumberFormat('fr-FR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(valeur) + ' $';
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return '—';
+    const [annee, mois, jour] = dateStr.slice(0, 10).split('-');
+    return `${jour}/${mois}/${annee}`;
+}
+
+function dateAujourdhui() {
+    return new Date().toISOString().slice(0, 10);
+}
+
+// ─── Notification ─────────────────────────────────────────────────────────────
+function notifier(message, succes = true) {
+    const notif = document.getElementById('notification');
+    notif.textContent = message;
+    notif.className = succes ? 'notification success' : 'notification error';
+    notif.style.display = 'block';
+    setTimeout(() => { notif.style.display = 'none'; }, 3500);
+}
+
+// ─── Log backend ──────────────────────────────────────────────────────────────
+async function enregistrerLog(action, reference_action = '-') {
+    const session = window.SchoolPayAuth?.obtenirSession();
+    const nom_utilisateur = session?.nom_utilisateur;
+    if (!nom_utilisateur) return;
+    try {
+        await fetch('/api/logs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nom_utilisateur, action, reference_action })
+        });
+    } catch (e) {
+        console.error('Erreur de journalisation :', e);
+    }
+}
+
+// ─── KPI ──────────────────────────────────────────────────────────────────────
+function majKPI(recus) {
+    const aujourd_hui = dateAujourdhui();
+    const total = recus.length;
+    const encaisse = recus.reduce((s, r) => s + Number(r.montant || 0), 0);
+    const nbAujourdhui = recus.filter(r => (r.paye_le || '').slice(0, 10) === aujourd_hui).length;
+
+    document.getElementById('kpi-total').textContent = total;
+    document.getElementById('kpi-encaisse').textContent = formatMonnaie(encaisse);
+    document.getElementById('kpi-aujourdhui').textContent = nbAujourdhui;
+}
+
+// ─── Affichage du tableau ─────────────────────────────────────────────────────
+function afficherRecus(recus) {
+    const corps = document.getElementById('body-recus');
+    const badge = document.getElementById('count-badge');
+    badge.textContent = recus.length;
+
+    if (recus.length === 0) {
+        corps.innerHTML = `
+            <tr><td colspan="6">
+                <div class="empty-state">
+                    <span>🧾</span>
+                    Aucun reçu ne correspond aux critères de filtrage.
+                </div>
+            </td></tr>`;
+        return;
+    }
+
+    corps.innerHTML = recus.map(r => `
+        <tr>
+            <td>
+                <div class="recu-num">${r.numero_recu || '—'}</div>
+                <div class="recu-eleve">${r.nom_eleve || '—'}</div>
+            </td>
+            <td style="color:var(--text);font-weight:600;">${r.libelle || '—'}</td>
+            <td style="text-align:right;font-weight:800;color:var(--text);">${formatMonnaie(r.montant)}</td>
+            <td style="color:var(--muted);font-size:12px;white-space:nowrap;">${formatDate(r.paye_le)}</td>
+            <td style="color:var(--muted);font-size:12px;">${r.caissier || '—'}</td>
+            <td style="white-space:nowrap;">
+                <button
+                    class="btn-reimprimer"
+                    data-numero="${r.numero_recu || ''}"
+                    title="Réimprimer ce reçu"
+                >🖨 Réimprimer</button>
+                <button
+                    class="btn-supprimer"
+                    data-id="${r.id}"
+                    data-numero="${r.numero_recu || ''}"
+                    data-montant="${r.montant || 0}"
+                    title="Supprimer ce reçu"
+                >🗑 Supprimer</button>
+            </td>
+        </tr>
+    `).join('');
+
+    // Attacher les événements sur les boutons nouvellement créés
+    corps.querySelectorAll('.btn-reimprimer').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const num = btn.dataset.numero;
+            if (!num) return notifier('Numéro de reçu introuvable.', false);
+            window.location.href = `recu.html?numero=${encodeURIComponent(num)}&source=reimpression`;
+        });
+    });
+
+    corps.querySelectorAll('.btn-supprimer').forEach(btn => {
+        btn.addEventListener('click', () => {
+            ouvrirModaleSuppression(btn.dataset.id, btn.dataset.numero, btn.dataset.montant);
+        });
+    });
+}
+
+// ─── Filtrage ─────────────────────────────────────────────────────────────────
+function filtrerEtAfficher() {
+    const terme = document.getElementById('filter-search').value.trim().toLowerCase();
+    const dateDebut = document.getElementById('filter-date-debut').value;
+    const dateFin = document.getElementById('filter-date-fin').value;
+
+    let filtres = tousLesRecus;
+
+    if (terme) {
+        filtres = filtres.filter(r =>
+            (r.nom_eleve || '').toLowerCase().includes(terme) ||
+            (r.numero_recu || '').toLowerCase().includes(terme) ||
+            (r.libelle || '').toLowerCase().includes(terme) ||
+            (r.caissier || '').toLowerCase().includes(terme)
+        );
+    }
+
+    if (dateDebut) {
+        filtres = filtres.filter(r => (r.paye_le || '').slice(0, 10) >= dateDebut);
+    }
+    if (dateFin) {
+        filtres = filtres.filter(r => (r.paye_le || '').slice(0, 10) <= dateFin);
+    }
+
+    afficherRecus(filtres);
+}
+
+// ─── Modale de suppression ────────────────────────────────────────────────────
+function ouvrirModaleSuppression(id, numero, montant) {
+    recuASupprimerId = id;
+    recuASupprimerNumero = numero;
+    recuASupprimerMontant = montant;
+
+    const modale = document.getElementById('modal-suppression-recu');
+    document.getElementById('admin-suppr-utilisateur').value = '';
+    document.getElementById('admin-suppr-mdp').value = '';
+    modale.style.display = 'flex';
+    document.getElementById('admin-suppr-utilisateur').focus();
+}
+
+function fermerModaleSuppression() {
+    document.getElementById('modal-suppression-recu').style.display = 'none';
+    document.getElementById('admin-suppr-utilisateur').value = '';
+    document.getElementById('admin-suppr-mdp').value = '';
+    recuASupprimerId = null;
+    recuASupprimerNumero = null;
+    recuASupprimerMontant = null;
+}
+
+async function confirmerSuppression() {
+    const utilisateur = document.getElementById('admin-suppr-utilisateur').value.trim();
+    const motDePasse = document.getElementById('admin-suppr-mdp').value;
+
+    if (!utilisateur || !motDePasse) {
+        return notifier('Identifiant et mot de passe administrateur requis.', false);
+    }
+    if (utilisateur !== ADMIN_UTILISATEUR || motDePasse !== ADMIN_MOT_DE_PASSE) {
+        return notifier('Identifiant ou mot de passe administrateur incorrect.', false);
+    }
+
+    const id = recuASupprimerId;
+    const numero = recuASupprimerNumero;
+    const montant = recuASupprimerMontant;
+
+    fermerModaleSuppression();
+
+    try {
+        // 1. Journalisation
+        await enregistrerLog('suppression_paiement', `${numero} --- ${montant}`);
+
+        // 2. Suppression via l'API
+        const reponse = await fetch(`/api/paiements/${id}`, { method: 'DELETE' });
+        if (!reponse.ok) {
+            const data = await reponse.json().catch(() => null);
+            throw new Error(data?.erreur || `Code HTTP : ${reponse.status}`);
+        }
+
+        // 3. Mise à jour de l'interface
+        tousLesRecus = tousLesRecus.filter(r => String(r.id) !== String(id));
+        majKPI(tousLesRecus);
+        filtrerEtAfficher();
+        notifier(`Reçu ${numero} supprimé avec succès.`, true);
+
+    } catch (erreur) {
+        notifier(`Impossible de supprimer ce reçu : ${erreur.message}`, false);
+    }
+}
+
+// ─── Chargement initial ───────────────────────────────────────────────────────
+async function chargerPage() {
+    const corps = document.getElementById('body-recus');
+    corps.innerHTML = `
+        <tr><td colspan="6">
+            <div class="empty-state">
+                <span>⏳</span>Chargement en cours...
+            </div>
+        </td></tr>`;
+    try {
+        const res = await fetch('/api/paiements');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        tousLesRecus = data.donnees || [];
+        majKPI(tousLesRecus);
+        filtrerEtAfficher();
+    } catch (err) {
+        corps.innerHTML = `
+            <tr><td colspan="6">
+                <div class="empty-state">
+                    <span>⚠️</span>Erreur de chargement : ${err.message}
+                </div>
+            </td></tr>`;
+    }
+}
+
+// ─── Événements ───────────────────────────────────────────────────────────────
+document.getElementById('filter-search').addEventListener('input', filtrerEtAfficher);
+document.getElementById('filter-date-debut').addEventListener('change', filtrerEtAfficher);
+document.getElementById('filter-date-fin').addEventListener('change', filtrerEtAfficher);
+
+document.getElementById('btn-reset-dates').addEventListener('click', () => {
+    document.getElementById('filter-date-debut').value = '';
+    document.getElementById('filter-date-fin').value = '';
+    filtrerEtAfficher();
+});
+
+document.getElementById('btn-suppr-confirmer').addEventListener('click', confirmerSuppression);
+document.getElementById('btn-suppr-annuler').addEventListener('click', fermerModaleSuppression);
+document.getElementById('admin-suppr-mdp').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); confirmerSuppression(); }
+});
+
+// Fermer la modale en cliquant sur l'arrière-plan
+document.getElementById('modal-suppression-recu').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) fermerModaleSuppression();
+});
+
+chargerPage();
+</script>
+</body>
+</html>
