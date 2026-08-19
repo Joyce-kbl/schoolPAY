@@ -2,6 +2,10 @@
 // API_BASE_URL reste vide ici car le frontend est servi depuis le même serveur que le backend.
 const API_BASE_URL = '';
 
+let recuASupprimerId = null;
+let recuASupprimerNumero = null;
+let recuASupprimerMontant = null;
+
 /**
  * Formate un montant en devise USD pour l'affichage.
  * @param {number|string} valeur
@@ -89,6 +93,7 @@ async function chargerTransactionsRecentes() {
         <td style="text-align: right; font-weight:700;">${formatMonnaie(paiement.montant)}</td>
         <td style="white-space:nowrap;">
           <button type="button" class="btn-reimprimer-recu" data-numero="${paiement.numero_recu || ''}">Réimprimer le reçu</button>
+          <button type="button" class="btn-supprimer-recu" data-id="${paiement.id}" data-numero="${paiement.numero_recu || ''}" data-montant="${paiement.montant || 0}" style="background:#fef2f2; color:#b91c1c; border:none; border-radius:8px; padding:8px 10px; font-size:11px; font-weight:700; cursor:pointer; margin-left: 5px;">Supprimer</button>
         </td>
       `;
       tableau.appendChild(tr);
@@ -101,6 +106,15 @@ async function chargerTransactionsRecentes() {
           return notifier('Numéro de reçu introuvable.', false);
         }
         reimprimerRecu(numeroRecu);
+      });
+    });
+
+    tableau.querySelectorAll('.btn-supprimer-recu').forEach((bouton) => {
+      bouton.addEventListener('click', () => {
+        const id = bouton.dataset.id;
+        const numeroRecu = bouton.dataset.numero;
+        const montant = bouton.dataset.montant;
+        ouvrirModaleSuppression(id, numeroRecu, montant);
       });
     });
   } catch (erreur) {
@@ -475,6 +489,82 @@ async function confirmerExportDb() {
 }
 
 /**
+ * Ouvre la modale de confirmation administrateur pour la suppression de reçu.
+ */
+function ouvrirModaleSuppression(id, numero, montant) {
+  const modale = document.getElementById('modal-suppression-recu');
+  if (!modale) return;
+  recuASupprimerId = id;
+  recuASupprimerNumero = numero;
+  recuASupprimerMontant = montant;
+  const inputUtilisateur = document.getElementById('admin-suppr-utilisateur');
+  const inputMdp = document.getElementById('admin-suppr-mdp');
+  if (inputUtilisateur) inputUtilisateur.value = '';
+  if (inputMdp) inputMdp.value = '';
+  modale.style.display = 'flex';
+  if (inputUtilisateur) inputUtilisateur.focus();
+}
+
+/**
+ * Ferme la modale de confirmation administrateur pour la suppression de reçu.
+ */
+function fermerModaleSuppression() {
+  const modale = document.getElementById('modal-suppression-recu');
+  if (modale) modale.style.display = 'none';
+  recuASupprimerId = null;
+  recuASupprimerNumero = null;
+  recuASupprimerMontant = null;
+  const inputUtilisateur = document.getElementById('admin-suppr-utilisateur');
+  const inputMdp = document.getElementById('admin-suppr-mdp');
+  if (inputUtilisateur) inputUtilisateur.value = '';
+  if (inputMdp) inputMdp.value = '';
+}
+
+/**
+ * Confirme les identifiants administrateur et procède à la suppression sécurisée du reçu.
+ */
+async function confirmerSuppression() {
+  const utilisateur = document.getElementById('admin-suppr-utilisateur')?.value.trim();
+  const motDePasse = document.getElementById('admin-suppr-mdp')?.value;
+
+  if (!utilisateur || !motDePasse) {
+    return notifier('Identifiant et mot de passe administrateur requis.', false);
+  }
+
+  if (utilisateur !== ADMIN_UTILISATEUR || motDePasse !== ADMIN_MOT_DE_PASSE) {
+    return notifier('Identifiant ou mot de passe administrateur incorrect.', false);
+  }
+
+  const id = recuASupprimerId;
+  const numero = recuASupprimerNumero;
+  const montant = recuASupprimerMontant;
+
+  fermerModaleSuppression();
+
+  try {
+    // 1. Journalisation de l'action avec référence [numero_recu] --- [montant]
+    const reference = `${numero} --- ${montant}`;
+    await enregistrerLog('suppression_paiement', reference);
+
+    // 2. Appel de l'API DELETE du backend
+    const reponse = await fetch(`/api/paiements/${id}`, {
+      method: 'DELETE'
+    });
+
+    if (!reponse.ok) {
+      const data = await reponse.json().catch(() => null);
+      throw new Error(data?.erreur || `Code statut : ${reponse.status}`);
+    }
+
+    // 3. Notification utilisateur et rafraîchissement du tableau
+    notifier(`Nous avons supprimé le reçu ${numero} avec succès !`, true);
+    await chargerTransactionsRecentes();
+  } catch (erreur) {
+    notifier(`Erreur : nous n'avons pas pu supprimer ce reçu : ${erreur.message}`, false);
+  }
+}
+
+/**
  * Envoie une requête de log au backend.
  * @param {string} action - Le type d'action à journaliser
  * @param {string} [reference_action='-'] - Référence contextuelle
@@ -510,6 +600,14 @@ function initialiserPage() {
   const chemin = decodeURIComponent(window.location.pathname.toLowerCase());
   if (chemin.endsWith('/index.html') || chemin === '/' || chemin.endsWith('/')) {
     chargerTransactionsRecentes();
+    document.getElementById('btn-suppr-confirmer')?.addEventListener('click', confirmerSuppression);
+    document.getElementById('btn-suppr-annuler')?.addEventListener('click', fermerModaleSuppression);
+    document.getElementById('admin-suppr-mdp')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        confirmerSuppression();
+      }
+    });
   }
   if (chemin.endsWith('paiement.html')) {
     chargerClassesEtEleves();

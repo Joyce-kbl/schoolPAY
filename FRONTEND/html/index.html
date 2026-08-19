@@ -72,6 +72,91 @@
             .table-container { padding: 0 14px 14px; }
             table { font-size: 12px; }
         }
+
+        /* Fenêtre modale de confirmation administrateur */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 18px;
+            padding: 22px;
+            width: 100%;
+            max-width: 340px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .modal-box h3 {
+            font-size: 15px;
+            color: #8b0000;
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .modal-box p {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 14px;
+            line-height: 1.4;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 11px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-modal-annuler {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-modal-confirmer {
+            background: #8b0000;
+            color: white;
+        }
+
+        /* Styles CSS pour les notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            height: 3.5em; 
+            font-size: 1em;
+            font-weight: bold;
+            padding: 12px 20px;
+            border-radius: 6px;
+            color: white;
+            display: none;
+            z-index: 9999;
+            align-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .notification.success {
+            background: #28a745;
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
     </style>
 </head>
 <body>
@@ -130,6 +215,23 @@
             </thead>
             <tbody id="liste-transactions"></tbody>
         </table>
+    </div>
+</div>
+
+<!-- Conteneur de notification -->
+<div id="notification" class="notification"></div>
+
+<!-- Modale de confirmation administrateur pour la suppression de reçu -->
+<div class="modal-overlay" id="modal-suppression-recu">
+    <div class="modal-box">
+        <h3>🔒 Confirmation administrateur</h3>
+        <p>Veuillez entrer vos identifiants administrateur pour confirmer la suppression de ce reçu.</p>
+        <input id="admin-suppr-utilisateur" type="text" class="form-control" placeholder="Identifiant administrateur" style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 13px; outline: none;">
+        <input id="admin-suppr-mdp" type="password" class="form-control" placeholder="Mot de passe administrateur" style="width: 100%; padding: 12px; margin-bottom: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 13px; outline: none;">
+        <div class="modal-actions">
+            <button type="button" class="btn-modal-annuler" id="btn-suppr-annuler">Annuler</button>
+            <button type="button" class="btn-modal-confirmer" id="btn-suppr-confirmer">Confirmer</button>
+        </div>
     </div>
 </div>
 

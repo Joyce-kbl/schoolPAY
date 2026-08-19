@@ -221,7 +221,7 @@ function creer_base_de_donnees() {
                          'connexion', 'deconnexion', 'paiement',
                          'impression_recu', 'impression_rapport', 'impression_releve',
                          'ajout_classe', 'ajout_eleve', 'ajout_caissier',
-                         'suppression_caissier', 'export_base'
+                         'suppression_caissier', 'export_base', 'suppression_paiement'
                        )),
       reference_action TEXT NOT NULL DEFAULT '-',
       FOREIGN KEY (caissier_id) REFERENCES caissiers(id)
@@ -247,6 +247,42 @@ function creer_base_de_donnees() {
   }
   if (!colonne_existe(base_de_donnees, 'paiements', 'deposant')) {
     base_de_donnees.exec('ALTER TABLE paiements ADD COLUMN deposant TEXT');
+  }
+
+  // Migration de la table logs pour ajouter l'action 'suppression_paiement' dans le CHECK
+  const schema_logs = base_de_donnees.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='logs'").get()?.sql;
+  if (schema_logs && !schema_logs.includes('suppression_paiement')) {
+    try {
+      base_de_donnees.exec('PRAGMA foreign_keys = OFF');
+      base_de_donnees.exec('BEGIN TRANSACTION');
+      base_de_donnees.exec('ALTER TABLE logs RENAME TO logs_ancienne');
+      base_de_donnees.exec(`
+        CREATE TABLE logs (
+          id               INTEGER PRIMARY KEY AUTOINCREMENT,
+          caissier_id      INTEGER NOT NULL,
+          horodatage       TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          action           TEXT NOT NULL CHECK (action IN (
+                             'connexion', 'deconnexion', 'paiement',
+                             'impression_recu', 'impression_rapport', 'impression_releve',
+                             'ajout_classe', 'ajout_eleve', 'ajout_caissier',
+                             'suppression_caissier', 'export_base', 'suppression_paiement'
+                           )),
+          reference_action TEXT NOT NULL DEFAULT '-',
+          FOREIGN KEY (caissier_id) REFERENCES caissiers(id)
+        )
+      `);
+      base_de_donnees.exec(`
+        INSERT INTO logs (id, caissier_id, horodatage, action, reference_action)
+        SELECT id, caissier_id, horodatage, action, reference_action FROM logs_ancienne
+      `);
+      base_de_donnees.exec('DROP TABLE logs_ancienne');
+      base_de_donnees.exec('COMMIT');
+      base_de_donnees.exec('PRAGMA foreign_keys = ON');
+      console.log('[MIGRATION] Table logs migree avec succes pour suppression_paiement.');
+    } catch (e) {
+      try { base_de_donnees.exec('ROLLBACK'); } catch (_) {}
+      console.error('[MIGRATION] Echec de la migration de la table logs:', e.message);
+    }
   }
 
   // Insertion de la nomenclature comptable standard
