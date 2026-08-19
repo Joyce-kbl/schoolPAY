@@ -105,6 +105,9 @@ document.getElementById('login-form').addEventListener('submit', async function(
 
         //localStorage.setItem('schoolpay_session', JSON.stringify(data.donnees));
         sessionStorage.setItem('schoolpay_session', JSON.stringify(data.donnees));
+        if (window.ElectronAPI && data.donnees.nom_utilisateur) {
+            window.ElectronAPI.notifierSessionActive(data.donnees.nom_utilisateur);
+        }
         window.location.href = next;
     } catch (err) {
         erreurDiv.textContent = err.message;

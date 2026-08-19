@@ -75,7 +75,7 @@ async function chargerTransactionsRecentes() {
     if (!tableau) return;
     tableau.innerHTML = '';
 
-    const lignes = (donnees.donnees || []).slice(0, 6);
+    const lignes = (donnees.donnees || []).slice(0, 20);
     if (lignes.length === 0) {
       tableau.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color: #64748b;">Aucune transaction enregistrée.</td></tr>';
       return;

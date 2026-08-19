@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, nativeImage } = require('electron');
+const { app, BrowserWindow, Tray, nativeImage, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const net = require('net');
@@ -10,6 +10,39 @@ let fenetre = null;
 let tray = null;
 let serveur_backend = null;
 let port_utilise = PORT;
+let session_utilisateur = null;
+
+// Gestion de session caissier via IPC pour la déconnexion automatique à la fermeture
+ipcMain.on('session-active', (event, nom_utilisateur) => {
+  console.log(`Session active signalee via IPC pour : ${nom_utilisateur}`);
+  session_utilisateur = nom_utilisateur;
+});
+
+ipcMain.on('session-inactive', () => {
+  console.log('Session inactive signalee via IPC');
+  session_utilisateur = null;
+});
+
+function enregistrer_deconnexion_automatique() {
+  if (!session_utilisateur) return;
+  console.log(`Fermeture detectee. Enregistrement automatique de la deconnexion pour : ${session_utilisateur}`);
+  try {
+    const root = racine();
+    const app_db = path.join(root, 'BACKEND', 'src', 'base_de_donnees', 'base_de_donnees.js');
+    const app_logs = path.join(root, 'BACKEND', 'src', 'controleurs', 'logs.controleur.js');
+    
+    const { creer_base_de_donnees } = require(app_db);
+    const { enregistrer_log_par_nom } = require(app_logs);
+    
+    const base_de_donnees = creer_base_de_donnees();
+    // Enregistre l'action de déconnexion comme s'il avait cliqué (action = 'deconnexion', reference_action = '-')
+    enregistrer_log_par_nom(base_de_donnees, session_utilisateur, 'deconnexion', '-');
+    console.log('Deconnexion de fermeture enregistree avec succes.');
+    session_utilisateur = null;
+  } catch (erreur) {
+    console.error('Erreur lors de l\'enregistrement de la deconnexion automatique :', erreur);
+  }
+}
 
 function racine() {
   return app.isPackaged ? process.resourcesPath : path.join(__dirname, '..');
@@ -67,7 +100,8 @@ function creer_fenetre() {
     show: false,
     webPreferences: {
       nodeIntegration: false,
-      contextIsolation: true
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
     }
   });
 
@@ -77,6 +111,7 @@ function creer_fenetre() {
   });
 
   fenetre.on('close', () => {
+    enregistrer_deconnexion_automatique();
     arreter_backend();
     fenetre = null;
   });
@@ -170,6 +205,7 @@ app.whenReady().then(async () => {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
+    enregistrer_deconnexion_automatique();
     arreter_backend();
   }
 });
@@ -179,5 +215,6 @@ app.on('activate', () => {
 });
 
 app.on('before-quit', () => {
+  enregistrer_deconnexion_automatique();
   arreter_backend();
 });

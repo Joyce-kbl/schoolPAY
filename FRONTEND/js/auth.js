@@ -35,6 +35,9 @@
    */
   async function deconnecter() {
     const session = obtenirSession();
+    if (window.ElectronAPI) {
+      window.ElectronAPI.notifierSessionInactive();
+    }
     if (session && session.nom_utilisateur) {
       try {
         await fetch('/api/logs', {
@@ -72,6 +75,12 @@
       const retour = encodeURIComponent(page);
       window.location.replace(`login.html?next=${retour}`);
     }
+  }
+
+  // Notifie le processus principal d'Electron de l'utilisateur actif de la session courante
+  const sessionActive = obtenirSession();
+  if (sessionActive && sessionActive.nom_utilisateur && window.ElectronAPI) {
+    window.ElectronAPI.notifierSessionActive(sessionActive.nom_utilisateur);
   }
 
   window.SchoolPayAuth = { obtenirSession, definirSession, deconnecter };
