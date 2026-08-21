@@ -492,8 +492,11 @@ function afficherRecus(recus) {
     corps.querySelectorAll('.btn-reimprimer').forEach(btn => {
         btn.addEventListener('click', () => {
             const num = btn.dataset.numero;
+            const numeroFacture= encodeURIComponent(num).slice(0,6) // Récupère uniquement les 
+            const url = `facture.html?numero=${numeroFacture}&source=reimpression`;
             if (!num) return notifier('Numéro de reçu introuvable.', false);
-            window.location.href = `recu.html?numero=${encodeURIComponent(num)}&source=reimpression`;
+            //window.location.href = `recu.html?numero=${encodeURIComponent(num)}&source=reimpression`;
+            window.location.href=url
         });
     });
 

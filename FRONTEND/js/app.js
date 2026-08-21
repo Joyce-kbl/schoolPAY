@@ -124,7 +124,9 @@ async function chargerTransactionsRecentes() {
 
 //Fonction pour réimprimer un reçu
 function reimprimerRecu(numeroRecu) {
-  const url = `recu.html?numero=${encodeURIComponent(numeroRecu)}&source=reimpression`;
+  const numeroFacture= encodeURIComponent(numeroRecu).slice(0,6)
+  const url = `facture.html?numero=${numeroFacture}&source=reimpression`;
+  //const url = `recu.html?numero=${encodeURIComponent(numeroRecu)}&source=reimpression`;
 //  const url = `recu.html?numero=${encodeURIComponent(numeroRecu)}&source=reimpression&auto_print=1`;
   //window.open(url, '_blank', 'noopener,noreferrer');
     window.location.href=url

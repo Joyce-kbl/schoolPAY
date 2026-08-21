@@ -423,9 +423,14 @@ document.addEventListener('keydown', function(e) {
 // Log impression reçu (déclenché juste avant l'impression)
 var _params_facture = new URLSearchParams(window.location.search);
 var _numero_recu_log = _params_facture.get('numero') || '-';
+const source = _params_facture.get('source') || 'normal';
 window.addEventListener('beforeprint', function () {
     if (window.enregistrerLog) {
-        window.enregistrerLog('impression_recu', _numero_recu_log);
+    //    window.enregistrerLog('impression_recu', _numero_recu_log);
+        
+        //window.enregistrerLog('impression_recu', source === 'reimpression' ? 'reimpression:' + numero : _numero_recu_log);
+        window.enregistrerLog(source === 'reimpression'? "reimpression_recu" : 'impression_recu',  _numero_recu_log);
+
     }
 });
 </script>

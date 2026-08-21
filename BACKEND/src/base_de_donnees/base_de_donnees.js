@@ -219,7 +219,7 @@ function creer_base_de_donnees() {
       horodatage       TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       action           TEXT NOT NULL CHECK (action IN (
                          'connexion', 'deconnexion', 'paiement',
-                         'impression_recu', 'impression_rapport', 'impression_releve',
+                         'reimpression_recu','impression_recu', 'impression_rapport', 'impression_releve',
                          'ajout_classe', 'ajout_eleve', 'ajout_caissier',
                          'suppression_caissier', 'export_base', 'suppression_paiement'
                        )),
@@ -263,7 +263,7 @@ function creer_base_de_donnees() {
           horodatage       TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
           action           TEXT NOT NULL CHECK (action IN (
                              'connexion', 'deconnexion', 'paiement',
-                             'impression_recu', 'impression_rapport', 'impression_releve',
+                             'reimpression_recu','impression_recu', 'impression_rapport', 'impression_releve',
                              'ajout_classe', 'ajout_eleve', 'ajout_caissier',
                              'suppression_caissier', 'export_base', 'suppression_paiement'
                            )),
@@ -318,16 +318,10 @@ function creer_base_de_donnees() {
     inserer_classe.run('1ere A', 500);
     inserer_classe.run('1ere B', 500);
     inserer_classe.run('2e A', 520);
-  } else {
-    const inserer_classe = base_de_donnees.prepare(
-      'INSERT OR IGNORE INTO classes (nom, montant_frais) VALUES (?, ?)'
-    );
-    inserer_classe.run('1ere A', 500);
-    inserer_classe.run('1ere B', 500);
-    inserer_classe.run('2e A', 520);
     inserer_classe.run('2e B', 520);
     inserer_classe.run('3e A', 560);
     inserer_classe.run('3e B', 520);
+    inserer_classe.run('3e C', 2000);
   }
 
   // Garantir que chaque classe avec un montant_frais possede une ligne de frais attendus
@@ -340,6 +334,7 @@ function creer_base_de_donnees() {
     `);
   }
 
+  /*
   const eleves_count = base_de_donnees.prepare('SELECT COUNT(*) AS total FROM eleves').get().total;
   if (eleves_count === 0) {
     const classe_l3 = base_de_donnees.prepare('SELECT id FROM classes WHERE nom = ?').get('L3 Informatique');
@@ -351,6 +346,7 @@ function creer_base_de_donnees() {
     const inserer_eleve = base_de_donnees.prepare(
       'INSERT OR IGNORE INTO eleves (nom_complet, sexe, classe_id, matricule) VALUES (?, ?, ?, ?)'
     );
+  
     inserer_eleve.run('Joyce Sala', 'F', classe_l3?.id || null, '2026-SP-001');
     inserer_eleve.run('Doudou K.', 'M', classe_l2?.id || null, '2026-SP-002');
     inserer_eleve.run('Amina T.', 'F', classe_l1?.id || null, '2026-SP-003');
@@ -392,7 +388,7 @@ function creer_base_de_donnees() {
     inserer_paiement.run('R-0004', eleve_samuel?.id || null, 'Minerval', 45, 'USD', '2026-07-03');
     inserer_paiement.run('R-0005', eleve_samuel?.id || null, 'Cantine', 25, 'USD', '2026-07-04');
     inserer_paiement.run('R-0006', eleve_doudou?.id || null, 'Inscription', 35, 'USD', '2026-07-05');
-  }
+  }*/
 
   return base_de_donnees;
 }
