@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoolPAY - Administration</title>
+    <link rel="icon" href="/img/logoFat.jpeg" type="image/jpeg">
+    <style>
+        :root {
+            --primary: #8b0000;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --success: #059669;
+            --accent: #d97706;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            padding-bottom: 90px;
+        }
+
+        /* Header */
+        header {
+            background: var(--white);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-circle {
+            width: 45px;
+            height: 45px;
+            background: var(--primary);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        /* Conteneur */
+        .container {
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        /* Formulaires */
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            background: #fcfcfc;
+        }
+
+        .btn-action {
+            background: var(--primary);
+            color: var(--white);
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        /* Navigation Bas */
+        .nav-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 75px;
+            background: var(--white);
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .home-icon-circle {
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 24px;
+            box-shadow: 0 4px 10px rgba(139, 0, 0, 0.3);
+            margin-top: -30px;
+            border: 4px solid var(--bg);
+        }
+
+        /* Fenêtre modale de confirmation administrateur, exigée avant la création d'un nouveau caissier */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-box {
+            background: var(--white);
+            border-radius: 18px;
+            padding: 22px;
+            width: 100%;
+            max-width: 340px;
+        }
+
+        .modal-box h3 {
+            font-size: 15px;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .modal-box p {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 14px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 11px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-modal-annuler {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-modal-confirmer {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* === Adaptation écrans de téléphone (petits mobiles) === */
+        @media (max-width: 380px) {
+            .container {
+                padding: 14px;
+            }
+
+            .card {
+                padding: 16px;
+                border-radius: 16px;
+            }
+
+            .card-title {
+                font-size: 12.5px;
+            }
+        }
+
+        /*Css de la notification après l'ajout*/
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 6px;
+            color: white;
+            display: none;
+            z-index: 9999;
+        }
+
+        .notification.success {
+            background: #28a745;
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="/js/auth.js"></script>
+
+    <!-- Page administrative de paramétrage : modification de reçus, ajout d'élèves et gestion des caissiers -->
+    <header>
+        <a href="index.html"
+            style="text-decoration:none;color:var(--primary);font-size:22px;font-weight:bold;padding:4px 8px;border-radius:8px;">←</a>
+        <img src="/img/logoFat.jpeg" alt="Logo école" class="logo-circle">
+        <h2 style="color: var(--primary); font-size: 16px;">Administration</h2>
+    </header>
+
+    <div class="container">
+        <!-- Rapport situation générale -->
+        <div class="card">
+            <div class="card-title">📊 Situation générale des élèves</div>
+            <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">
+                Imprimez la situation de paiement de tous les élèves, par classe ou pour toute l'école, par trimestre ou
+                pour l'année.
+            </p>
+            <a href="./situation_generale.html" class="btn-action"
+                style="display:block;text-align:center;text-decoration:none;background: var(--success);">Ouvrir le
+                rapport</a>
+        </div>
+
+        <!-- Partie Ajout Élève (Mise à jour avec liste déroulante) -->
+        <div class="card">
+            <div class="card-title">👤 Ajouter un élève</div>
+            <p style="font-size: 11px; color: #94a3b8; margin: -6px 0 10px;">
+                Les classes et leurs frais scolaires sont gérées directement dans la base de données.
+            </p>
+            <input id="nouvel-eleve-nom" type="text" class="form-control" placeholder="Nom complet">
+
+            <select id="nouvel-eleve-sexe" class="form-control">
+                <option value="">Sélectionner le sexe</option>
+                <option value="M">Masculin</option>
+                <option value="F">Féminin</option>
+            </select>
+            <select id="nouvel-eleve-statut" class="form-control">
+                <option value="N">Nouveau élève</option>
+                <option value="A">Ancien élève</option>
+            </select>
+            <select id="nouvel-eleve-classe" class="form-control">
+                <option value="">Sélectionner une classe...</option>
+            </select>
+
+            <button id="btn-ajouter-eleve" class="btn-action" style="background: var(--success);">Enregistrer
+                Élève</button>
+            <p style="font-size: 11px; color: #94a3b8; margin-top: 8px;">
+                Ancien élève : inscription à 10 $ · Nouveau élève : inscription à 15 $.
+            </p>
+        </div>
+
+        <!-- Gestion des caissiers -->
+        <div class="card">
+            <div class="card-title">🔐 Caissiers</div>
+            <div id="liste-caissiers" style="margin-bottom: 14px; font-size: 13px;"></div>
+            <input id="nouveau-caissier-utilisateur" type="text" class="form-control"
+                placeholder="Identifiant (ex : sala.joyce)">
+            <input id="nouveau-caissier-nom" type="text" class="form-control" placeholder="Nom complet">
+            <input id="nouveau-caissier-mdp" type="password" class="form-control" placeholder="Mot de passe">
+            <button id="btn-ajouter-caissier" class="btn-action" style="background: var(--success);">Ajouter un caissier</button>
+        </div>
+
+        <!-- Exportation de la base de données -->
+        <div class="card" id="section-export-db">
+            <div class="card-title">💾 Base de données</div>
+            <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">
+                Exportez et téléchargez une copie de sauvegarde de la base de données (<code>schoolpay.sqlite</code>).
+            </p>
+            <button id="btn-exporter-db" class="btn-action" style="background: #1e293b;">💾 Exporter la base de
+                données</button>
+        </div>
+
+        <!-- Conteneur de notification global -->
+        <div id="notification" class="notification"></div>
+
+    </div>
+
+    <!-- Modale de confirmation administrateur : requise pour les actions sensibles (création/suppression caissier, export BD) -->
+    <div class="modal-overlay" id="modal-admin">
+        <div class="modal-box">
+            <h3 id="admin-modal-titre">🔒 Confirmation Econome</h3>
+            <p id="admin-modal-description">Pour des raisons de sécurité, seul l'économe peut effectuer cette action. Veuillez confirmer votre identité.</p>
+            <input id="admin-utilisateur" type="text" class="form-control" placeholder="Identifiant économe" autocomplete="off">
+            <input id="admin-mdp" type="password" class="form-control" placeholder="Mot de passe économe" autocomplete="off">
+            <div class="modal-actions">
+                <button type="button" class="btn-modal-annuler" id="btn-modal-annuler">Annuler</button>
+                <button type="button" class="btn-modal-confirmer" id="btn-modal-confirmer">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="nav-bottom no-print">
+        <a href="journal de caisse.html" class="nav-link"><span style="font-size: 26px;">📒</span><br>Journal</a>
+        <a href="index.html">
+            <div class="home-icon-circle">🏠</div>
+        </a>
+        <a href="modifier.html" class="nav-link" style="color: #8b0000;"><span
+                style="font-size: 26px;">⚙️</span><br>Paramètres</a>
+    </nav>
+    <script src="/js/app.js" defer></script>
+</body>
+
+</html>

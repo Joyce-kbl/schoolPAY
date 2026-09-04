@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoolPAY - Tous les élèves</title>
+    <link rel="icon" href="/img/logoFat.jpeg" type="image/jpeg">
+    <style>
+        :root { 
+            --primary: #8b0000; 
+            --primary-hover: #6b0000;
+            --danger: #dc2626;
+            --danger-hover: #b91c1c;
+            --bg: #f8fafc; 
+            --white: #ffffff; 
+            --success: #059669; 
+            --text: #1e293b; 
+            --muted: #64748b; 
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        body { background-color: var(--bg); padding-bottom: 90px; }
+
+        header { background: var(--white); padding: 15px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .back-btn { text-decoration: none; color: var(--primary); font-size: 22px; font-weight: bold; padding: 4px 8px; border-radius: 8px; transition: background 0.15s; }
+        .back-btn:hover { background: #fef2f2; }
+
+        .page-title { font-size: 18px; font-weight: 800; color: var(--text); }
+
+        /* KPI */
+        .kpi-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 20px 20px 0; }
+        .kpi-card { background: var(--white); border-radius: 14px; padding: 16px 12px; text-align: center; border: 1px solid #e2e8f0; }
+        .kpi-value { font-size: 22px; font-weight: 900; color: var(--text); }
+        .kpi-label { font-size: 10px; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-top: 2px; }
+
+        /* Filtres */
+        .filters { padding: 18px 20px 0; display: flex; gap: 10px; }
+        .filter-input { flex: 1; padding: 12px 14px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 14px; outline: none; background: var(--white); transition: border-color 0.2s; }
+        .filter-input:focus { border-color: var(--primary); }
+        .filter-select { padding: 12px 14px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 14px; background: var(--white); color: var(--text); min-width: 140px; outline: none; }
+        .filter-select:focus { border-color: var(--primary); }
+
+        /* Tableau */
+        .table-section { padding: 18px 20px; }
+        .table-card { background: var(--white); border-radius: 16px; padding: 15px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.03); overflow: hidden; }
+        .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-title { font-weight: 800; font-size: 13px; color: var(--text); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .count-badge { background: #fef2f2; color: var(--primary); border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; color: var(--muted); padding: 10px 10px; border-bottom: 2px solid #f1f5f9; font-size: 11px; text-transform: uppercase; white-space: nowrap; }
+        td { padding: 13px 10px; border-bottom: 1px solid #f8fafc; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fef2f2; }
+
+        .actions-cell { display: flex; gap: 8px; justify-content: flex-end; align-items: center; }
+        .btn-fiche { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 7px 12px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; transition: background 0.15s; }
+        .btn-fiche:hover { background: var(--primary-hover); }
+
+        .btn-supprimer { background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; border-radius: 8px; padding: 7px 12px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s; }
+        .btn-supprimer:hover { background: var(--danger); color: white; border-color: var(--danger); }
+
+        .btn-modifier { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; border-radius: 8px; padding: 7px 12px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s; }
+        .btn-modifier:hover { background: #0369a1; color: white; border-color: #0369a1; }
+
+        /* Modale d'édition d'élève */
+        .modal-edit-form .form-group { margin-bottom: 14px; text-align: left; }
+        .modal-edit-form label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
+        .modal-edit-form input, .modal-edit-form select {
+            width: 100%; padding: 11px 13px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+            font-size: 14px; outline: none; background: var(--white); color: var(--text); box-sizing: border-box;
+        }
+        .modal-edit-form input:focus, .modal-edit-form select:focus { border-color: var(--primary); }
+        .modal-eco-section {
+            background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 14px;
+            margin-top: 6px; margin-bottom: 4px;
+        }
+        .modal-eco-section .eco-title { font-size: 12px; font-weight: 800; color: var(--danger); margin-bottom: 4px; }
+        .modal-eco-section .eco-note { font-size: 11px; color: #b91c1c; margin-bottom: 10px; }
+        .btn-eco-confirmer { flex: 1; background: var(--primary); color: white; border: none; padding: 12px 18px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; }
+        .btn-eco-confirmer:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .avatar-cell { width: 36px; height: 36px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; flex-shrink: 0; }
+        .name-cell { display: flex; align-items: center; gap: 10px; }
+        .name-text { font-weight: 700; color: var(--text); }
+        .meta-text { font-size: 11px; color: var(--muted); }
+
+        .empty-state { text-align: center; padding: 40px 20px; color: #94a3b8; }
+        .empty-state span { font-size: 32px; display: block; margin-bottom: 10px; }
+
+        /* Notification Toast */
+        #notification-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            padding: 14px 20px;
+            border-radius: 12px;
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
+            transform: translateY(-20px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: 90vw;
+        }
+        #notification-toast.visible {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #notification-toast.success { background: #059669; }
+        #notification-toast.error { background: #dc2626; }
+
+        /* Modale de Confirmation Stylisée */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 26px;
+            max-width: 440px;
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: scale(0.95);
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: center;
+        }
+        .modal-overlay.active .modal-card {
+            transform: scale(1);
+        }
+        .modal-icon-badge {
+            width: 56px;
+            height: 56px;
+            background: #fee2e2;
+            color: var(--danger);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            margin: 0 auto 16px;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+        .modal-message {
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+        .modal-eleve-name {
+            font-weight: 800;
+            color: var(--text);
+        }
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: space-between;
+        }
+        /* Contrainte de design : Annuler à GAUCHE, Oui à DROITE */
+        .btn-modal-annuler {
+            flex: 1;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-modal-annuler:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+        .btn-modal-confirmer {
+            flex: 1;
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+            transition: all 0.15s;
+        }
+        .btn-modal-confirmer:hover {
+            background: var(--danger-hover);
+        }
+        .btn-modal-confirmer:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Nav bottom */
+        .nav-bottom { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: var(--white); border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding: 0 10px; }
+        .nav-link { text-decoration: none; color: #64748b; font-size: 11px; font-weight: 700; text-align: center; flex: 1; }
+        .home-icon-circle { width: 60px; height: 60px; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 24px; box-shadow: 0 4px 10px rgba(139,0,0,0.4); margin-top: -30px; border: 4px solid var(--bg); }
+
+        @media (max-width: 480px) {
+            header { padding: 12px 14px; }
+            .kpi-row { padding: 14px 14px 0; }
+            .filters { padding: 14px 14px 0; flex-direction: column; }
+            .table-section { padding: 14px; }
+            table { font-size: 12px; }
+            th, td { padding: 10px 6px; }
+            .actions-cell { flex-direction: column; align-items: flex-end; gap: 4px; }
+        }
+    </style>
+</head>
+<body>
+<script src="/js/auth.js"></script>
+
+<header>
+    <a href="index.html" class="back-btn">←</a>
+    <div class="branding" style="display:flex;align-items:center;gap:10px;">
+        <img src="/img/logoFat.jpeg" alt="Logo" style="width:38px;height:38px;border-radius:50%;">
+        <h2 class="page-title">Tous les élèves</h2>
+    </div>
+</header>
+
+<!-- Toast Notification -->
+<div id="notification-toast">
+    <span id="notification-icon">ℹ️</span>
+    <span id="notification-text">Message</span>
+</div>
+
+<!-- KPI -->
+<div class="kpi-row">
+    <div class="kpi-card">
+        <div class="kpi-value" id="kpi-total">—</div>
+        <div class="kpi-label">Total élèves</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-value" id="kpi-masculin">—</div>
+        <div class="kpi-label">Masculin</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-value" id="kpi-feminin">—</div>
+        <div class="kpi-label">Féminin</div>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div class="filters">
+    <input type="text" class="filter-input" id="filter-search" placeholder="🔍 Rechercher un nom ou matricule...">
+    <select class="filter-select" id="filter-classe">
+        <option value="">Toutes les classes</option>
+    </select>
+</div>
+
+<!-- Tableau -->
+<div class="table-section">
+    <div class="table-card">
+        <div class="table-title">
+            <span>Liste des élèves</span>
+            <span class="count-badge" id="count-badge">0</span>
+        </div>
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Élève</th>
+                        <th>Matricule</th>
+                        <th>Classe</th>
+                        <th>Sexe</th>
+                        <th>Statut</th>
+                        <th style="text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="body-eleves"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modale de Confirmation de Suppression -->
+<div class="modal-overlay" id="modal-suppression">
+    <div class="modal-card">
+        <div class="modal-icon-badge">⚠️</div>
+        <h3 class="modal-title">Confirmer la suppression</h3>
+        <p class="modal-message">
+            Voulez-vous vraiment supprimer <span class="modal-eleve-name" id="modal-eleve-nom">[NOM DE L'ÉLÈVE]</span> ?
+            <br><span style="font-size:12px; color:#94a3b8; margin-top:6px; display:inline-block;">Cette action est irréversible.</span>
+        </p>
+        <div class="modal-actions">
+            <!-- Option "Annuler" à GAUCHE -->
+            <button class="btn-modal-annuler" id="btn-annuler-suppression" onclick="fermerModaleConfirmation()">Annuler</button>
+            <!-- Option "Oui" à DROITE -->
+            <button class="btn-modal-confirmer" id="btn-confirmer-suppression" onclick="executerSuppression()">Oui, supprimer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modale de Modification d'Élève -->
+<div class="modal-overlay" id="modal-modification">
+    <div class="modal-card" style="text-align:left;">
+        <div class="modal-edit-form">
+            <h3 class="modal-title" style="margin-bottom:16px;">✏️ Modifier l'élève</h3>
+
+            <div class="form-group">
+                <label>Nom complet *</label>
+                <input type="text" id="edit-nom-complet" placeholder="Nom complet de l'élève">
+            </div>
+
+            <div class="form-group">
+                <label>Sexe</label>
+                <select id="edit-sexe">
+                    <option value="">— Sélectionner —</option>
+                    <option value="M">Masculin</option>
+                    <option value="F">Féminin</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Classe</label>
+                <select id="edit-classe">
+                    <option value="">— Sélectionner —</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Statut d'inscription</label>
+                <select id="edit-statut">
+                    <option value="N">Nouveau</option>
+                    <option value="A">Ancien</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Matricule</label>
+                <input type="text" id="edit-matricule" placeholder="Matricule">
+            </div>
+
+            <div class="modal-eco-section" id="edit-eco-section" style="display:none;">
+                <div class="eco-title">🔒 Autorisation de l'économe requise</div>
+                <div class="eco-note">Cet élève possède déjà des paiements. La modification du nom affecte les reçus et le journal. Veuillez saisir les identifiants de l'économe pour autoriser la modification.</div>
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label>Identifiant économe</label>
+                    <input type="text" id="edit-eco-identifiant" placeholder="Identifiant de l'économe" autocomplete="off">
+                </div>
+                <div class="form-group" style="margin-bottom:4px;">
+                    <label>Mot de passe économe</label>
+                    <input type="password" id="edit-eco-mot-de-passe" placeholder="Mot de passe de l'économe" autocomplete="off">
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-actions" style="margin-top:20px;">
+            <button class="btn-modal-annuler" onclick="fermerModaleModification()">Annuler</button>
+            <button class="btn-eco-confirmer" id="btn-confirmer-modification" onclick="executerModification()">💾 Enregistrer</button>
+        </div>
+    </div>
+</div>
+
+<nav class="nav-bottom no-print">
+    <a href="journal de caisse.html" class="nav-link"><span style="font-size:26px;">📒</span><br>Journal</a>
+    <a href="index.html"><div class="home-icon-circle">🏠</div></a>
+    <a href="modifier.html" class="nav-link"><span style="font-size:26px;">⚙️</span><br>Paramètres</a>
+</nav>
+
+<script>
+let tousLesEleves = [];
+let toutesLesClasses = [];
+let eleveCibleSuppression = null;
+let eleveCibleModification = null;
+let toastTimeout = null;
+
+function notifier(message, estSucces = true) {
+    const toast = document.getElementById('notification-toast');
+    const toastText = document.getElementById('notification-text');
+    const toastIcon = document.getElementById('notification-icon');
+
+    if (!toast || !toastText || !toastIcon) return;
+
+    clearTimeout(toastTimeout);
+    toastText.textContent = message;
+    toastIcon.textContent = estSucces ? '✅' : '❌';
+    toast.className = `visible ${estSucces ? 'success' : 'error'}`;
+
+    toastTimeout = setTimeout(() => {
+        toast.className = '';
+    }, 4500);
+}
+
+function formatSexe(s) {
+    if (s === 'M') return 'Masculin';
+    if (s === 'F') return 'Féminin';
+    return '—';
+}
+
+function formatStatut(statut) {
+    if (statut === 'A' || statut === 'ANCIEN') {
+        return '<span style="background:#fef3c7;color:#92400e;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap;">Ancien</span>';
+    }
+    return '<span style="background:#dbeafe;color:#1e40af;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap;">Nouveau</span>';
+}
+
+function getInitiales(nom) {
+    return (nom || '?').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function majKPI() {
+    document.getElementById('kpi-total').textContent = tousLesEleves.length;
+    document.getElementById('kpi-masculin').textContent = tousLesEleves.filter(e => e.sexe === 'M').length;
+    document.getElementById('kpi-feminin').textContent = tousLesEleves.filter(e => e.sexe === 'F').length;
+}
+
+function filtrerEtAfficher() {
+    const terme = document.getElementById('filter-search').value.trim().toLowerCase();
+    const classeId = document.getElementById('filter-classe').value;
+
+    let filtres = tousLesEleves;
+
+    if (terme) {
+        filtres = filtres.filter(e =>
+            (e.nom_complet || '').toLowerCase().includes(terme) ||
+            (e.matricule || '').toLowerCase().includes(terme)
+        );
+    }
+    if (classeId) {
+        filtres = filtres.filter(e => String(e.classe_id) === classeId);
+    }
+
+    const corps = document.getElementById('body-eleves');
+    const badge = document.getElementById('count-badge');
+    badge.textContent = filtres.length;
+
+    if (filtres.length === 0) {
+        corps.innerHTML = '<tr><td colspan="6"><div class="empty-state"><span>📭</span>Aucun élève trouvé</div></td></tr>';
+        return;
+    }
+
+    corps.innerHTML = filtres.map(e => {
+        const initiales = getInitiales(e.nom_complet);
+        const nomSecurise = (e.nom_complet || '').replace(/"/g, '&quot;');
+        return `
+        <tr id="eleve-row-${e.id}">
+            <td>
+                <div class="name-cell">
+                    <div class="avatar-cell">${initiales}</div>
+                    <div>
+                        <div class="name-text">${e.nom_complet}</div>
+                        <div class="meta-text">${e.matricule || '—'}</div>
+                    </div>
+                </div>
+            </td>
+            <td style="color:var(--muted);font-size:12px;">${e.matricule || '—'}</td>
+            <td style="font-weight:600;">${e.nom_classe || '—'}</td>
+            <td style="color:var(--muted);font-size:12px;">${formatSexe(e.sexe)}</td>
+            <td>${formatStatut(e.ancien_nouveau)}</td>
+            <td style="text-align:right;">
+                <div class="actions-cell">
+                    <a href="fiche_eleve.html?id=${e.id}" class="btn-fiche">Voir la fiche</a>
+                    <button class="btn-modifier" 
+                            data-id="${e.id}" 
+                            data-nom="${nomSecurise}" 
+                            data-sexe="${e.sexe || ''}" 
+                            data-classe="${e.classe_id || ''}" 
+                            data-statut="${e.ancien_nouveau || ''}" 
+                            data-matricule="${e.matricule || ''}"
+                            onclick="initierModification(this)">
+                        ✏️ Modifier
+                    </button>
+                    <button class="btn-supprimer" 
+                            data-id="${e.id}" 
+                            data-nom="${nomSecurise}" 
+                            onclick="initierSuppression(this)">
+                        🗑️ Supprimer
+                    </button>
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+/**
+ * Étape A : Vérification de l'historique financier
+ * Si l'élève possède au moins un paiement, arrêt immédiat et notification.
+ * Si aucun paiement, affichage de la modale de confirmation.
+ */
+async function initierSuppression(btnElement) {
+    const eleveId = Number(btnElement.getAttribute('data-id'));
+    const nomEleve = btnElement.getAttribute('data-nom') || 'cet élève';
+
+    if (!eleveId) return;
+
+    btnElement.disabled = true;
+    btnElement.style.opacity = '0.5';
+
+    try {
+        const res = await fetch(`/api/eleves/${eleveId}/fiche`);
+        if (!res.ok) {
+            throw new Error("Impossible de vérifier l'historique de l'élève.");
+        }
+        const data = await res.json();
+        const paiements = data?.donnees?.paiements || [];
+
+        // Condition d'échec : Si au moins un paiement est enregistré
+        if (paiements.length > 0) {
+            notifier("Impossible de supprimer cet élève car il possède déjà un ou plusieurs paiements enregistrés.", false);
+            return;
+        }
+
+        // Étape B : Fenêtre de Confirmation (Si aucun paiement)
+        eleveCibleSuppression = { id: eleveId, nom: nomEleve };
+        document.getElementById('modal-eleve-nom').textContent = nomEleve;
+        document.getElementById('modal-suppression').classList.add('active');
+    } catch (err) {
+        notifier(err.message || "Erreur de communication avec le serveur.", false);
+    } finally {
+        btnElement.disabled = false;
+        btnElement.style.opacity = '1';
+    }
+}
+
+function fermerModaleConfirmation() {
+    document.getElementById('modal-suppression').classList.remove('active');
+    eleveCibleSuppression = null;
+}/**
+ * Étape C : Journalisation (Log) et Requête de Suppression (DELETE)
+ */
+async function executerSuppression() {
+    if (!eleveCibleSuppression || !eleveCibleSuppression.id) return;
+
+    const btnConfirmer = document.getElementById('btn-confirmer-suppression');
+    const eleveId = eleveCibleSuppression.id;
+    const nomEleve = eleveCibleSuppression.nom;
+
+    btnConfirmer.disabled = true;
+    btnConfirmer.textContent = "Suppression...";
+
+    try {
+        const session = window.SchoolPayAuth?.obtenirSession();
+        const caissier = session?.nom_utilisateur || '';
+
+        const res = await fetch(`/api/eleves/${eleveId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Caissier': caissier
+            }
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+            const messageErreur = data.erreur || data.message || "Erreur lors de la suppression.";
+            notifier(messageErreur, false);
+            fermerModaleConfirmation();
+            return;
+        }
+
+        // Succès : Notification et rafraîchissement local
+        fermerModaleConfirmation();
+        notifier(`L'élève ${nomEleve} a été supprimé avec succès.`, true);
+
+        // Retrait de la liste locale et réactualisation
+        tousLesEleves = tousLesEleves.filter(e => e.id !== eleveId);
+        majKPI();
+        filtrerEtAfficher();
+
+    } catch (err) {
+        notifier("Erreur lors de la suppression de l'élève : " + err.message, false);
+        fermerModaleConfirmation();
+    } finally {
+        btnConfirmer.disabled = false;
+        btnConfirmer.textContent = "Oui, supprimer";
+    }
+}
+
+document.getElementById('filter-search').addEventListener('input', filtrerEtAfficher);
+document.getElementById('filter-classe').addEventListener('change', filtrerEtAfficher);
+
+// Fermer la modale si clic sur le fond sombre
+document.getElementById('modal-suppression').addEventListener('click', (e) => {
+    if (e.target.id === 'modal-suppression') {
+        fermerModaleConfirmation();
+    }
+});
+document.getElementById('modal-modification').addEventListener('click', (e) => {
+    if (e.target.id === 'modal-modification') {
+        fermerModaleModification();
+    }
+});
+
+/**
+ * Ouvre la modale de modification pré-remplie avec les données de l'élève.
+ * Si l'élève possède déjà des paiements, demande l'autorisation de l'économe.
+ */
+async function initierModification(btnElement) {
+    const eleveId = Number(btnElement.getAttribute('data-id'));
+    if (!eleveId) return;
+
+    const eleve = tousLesEleves.find(e => Number(e.id) === eleveId);
+    if (!eleve) {
+        notifier("Élève introuvable.", false);
+        return;
+    }
+
+    eleveCibleModification = eleve;
+
+    document.getElementById('edit-nom-complet').value = eleve.nom_complet || '';
+    document.getElementById('edit-sexe').value = eleve.sexe || '';
+    document.getElementById('edit-classe').value = eleve.classe_id || '';
+    document.getElementById('edit-statut').value = (eleve.ancien_nouveau === 'A' || eleve.ancien_nouveau === 'ANCIEN') ? 'A' : 'N';
+    document.getElementById('edit-matricule').value = eleve.matricule || '';
+    document.getElementById('edit-eco-identifiant').value = '';
+    document.getElementById('edit-eco-mot-de-passe').value = '';
+
+    // Vérification de l'historique financier pour savoir s'il faut l'autorisation économe
+    const ecSection = document.getElementById('edit-eco-section');
+    try {
+        const res = await fetch(`/api/eleves/${eleveId}/fiche`);
+        const data = await res.json();
+        const paiements = data?.donnees?.paiements || [];
+        if (paiements.length > 0) {
+            ecSection.style.display = 'block';
+            notifier("Cet élève a des paiements. L'autorisation de l'économe est requise pour modifier son nom.", true);
+        } else {
+            ecSection.style.display = 'none';
+        }
+    } catch (err) {
+        ecSection.style.display = 'block';
+        notifier("Impossible de vérifier l'historique de l'élève. L'autorisation économe sera demandée.", false);
+    }
+
+    document.getElementById('modal-modification').classList.add('active');
+}
+
+function fermerModaleModification() {
+    document.getElementById('modal-modification').classList.remove('active');
+    eleveCibleModification = null;
+}
+
+async function executerModification() {
+    if (!eleveCibleModification || !eleveCibleModification.id) return;
+
+    const btnConfirmer = document.getElementById('btn-confirmer-modification');
+    const nomComplet = document.getElementById('edit-nom-complet').value.trim();
+    const sexe = document.getElementById('edit-sexe').value;
+    const classeId = document.getElementById('edit-classe').value || null;
+    const statut = document.getElementById('edit-statut').value;
+    const matricule = document.getElementById('edit-matricule').value.trim() || null;
+
+    if (!nomComplet) {
+        notifier("Le nom complet est obligatoire.", false);
+        return;
+    }
+
+    const besoinEco = document.getElementById('edit-eco-section').style.display === 'block';
+    const nomEconome = document.getElementById('edit-eco-identifiant').value.trim();
+    const motDePasseEconome = document.getElementById('edit-eco-mot-de-passe').value;
+
+    if (besoinEco && (!nomEconome || !motDePasseEconome)) {
+        notifier("Veuillez saisir l'identifiant et le mot de passe de l'économe.", false);
+        return;
+    }
+
+    btnConfirmer.disabled = true;
+    btnConfirmer.textContent = "Enregistrement...";
+
+    try {
+        const session = window.SchoolPayAuth?.obtenirSession();
+        const caissier = session?.nom_utilisateur || '';
+
+        const corps = {
+            nom_complet: nomComplet,
+            sexe: sexe,
+            classe_id: classeId ? Number(classeId) : null,
+            ancien_nouveau: statut,
+            matricule: matricule,
+            caissier: caissier
+        };
+
+        if (besoinEco) {
+            corps.nom_utilisateur_econome = nomEconome;
+            corps.mot_de_passe_econome = motDePasseEconome;
+        }
+
+        const res = await fetch(`/api/eleves/${eleveCibleModification.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(corps)
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+            notifier(data.erreur || data.message || "Erreur lors de la modification.", false);
+            return;
+        }
+
+        fermerModaleModification();
+        notifier("Élève modifié avec succès.", true);
+
+        // Mise à jour locale de la liste sans recharger toute la page
+        const maj = tousLesEleves.find(e => Number(e.id) === Number(data.donnees.id));
+        if (maj) {
+            maj.nom_complet = data.donnees.nom_complet;
+            maj.sexe = data.donnees.sexe;
+            maj.classe_id = data.donnees.classe_id;
+            maj.ancien_nouveau = data.donnees.ancien_nouveau;
+            maj.matricule = data.donnees.matricule;
+            if (data.donnees.classe_id) {
+                const cl = toutesLesClasses.find(c => Number(c.id) === Number(data.donnees.classe_id));
+                maj.nom_classe = cl ? cl.nom : (maj.nom_classe || '');
+            }
+        }
+        majKPI();
+        filtrerEtAfficher();
+
+    } catch (err) {
+        notifier("Erreur lors de la modification de l'élève : " + err.message, false);
+    } finally {
+        btnConfirmer.disabled = false;
+        btnConfirmer.textContent = "💾 Enregistrer";
+    }
+}
+
+async function chargerPage() {
+    try {
+        const [resEleves, resClasses] = await Promise.all([
+            fetch('/api/eleves'),
+            fetch('/api/classes')
+        ]);
+        const dataEleves = await resEleves.json();
+        const dataClasses = await resClasses.json();
+
+        tousLesEleves = dataEleves.donnees || [];
+        toutesLesClasses = dataClasses.donnees || [];
+
+        const selectClasse = document.getElementById('filter-classe');
+        toutesLesClasses.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = c.nom;
+            selectClasse.appendChild(opt);
+        });
+
+        const selectEditClasse = document.getElementById('edit-classe');
+        toutesLesClasses.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = c.nom;
+            selectEditClasse.appendChild(opt);
+        });
+
+        majKPI();
+        filtrerEtAfficher();
+    } catch (err) {
+        document.getElementById('body-eleves').innerHTML =
+            '<tr><td colspan="6"><div class="empty-state"><span>⚠️</span>Erreur de chargement</div></td></tr>';
+    }
+}
+
+chargerPage();
+</script>
+</body>
+</html>

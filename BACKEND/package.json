@@ -1,0 +1,15 @@
+{
+  "name": "schoolpay-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "allowScripts": {
+    "better-sqlite3@13.0.3": true
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3"
+  }
+}

@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal de Caisse - SchoolPAY</title>
+    <link rel="icon" href="/img/logoFat.jpeg" type="image/jpeg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f8fafc; padding-bottom: 90px; }
+
+        header { background: white; padding: 15px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .back-btn { text-decoration: none; color: #8b0000; font-size: 22px; font-weight: bold; padding: 4px 8px; border-radius: 8px; }
+        .logo-circle { width: 42px; height: 42px; background: #8b0000; color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; font-size: 13px; }
+
+        .container { padding: 20px; }
+
+        .kpi-row { display: flex; gap: 10px; margin-bottom: 20px; }
+        .kpi-card { flex: 1; background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; text-align: center; }
+        .kpi-label { font-size: 9px; color: #64748b; text-transform: uppercase; font-weight: 700; }
+        .kpi-value { font-size: 18px; font-weight: 800; color: #0f172a; margin-top: 4px; }
+
+        .card { background: #ffffff; border-radius: 16px; padding: 18px; margin-bottom: 16px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+        .card-title { font-size: 13px; color: #0f172a; margin-bottom: 14px; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
+
+        label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        input[type="date"] { width: 100%; padding: 11px 13px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; }
+        input[type="date"]:focus { border-color: #8b0000; }
+
+        table { width: 100%; font-size: 12px; border-collapse: collapse; }
+        th { text-align: left; color: #64748b; border-bottom: 2px solid #f1f5f9; padding: 10px 6px; font-size: 11px; text-transform: uppercase; }
+        td { padding: 11px 6px; border-bottom: 1px solid #f8fafc; }
+        tr:last-child td { border-bottom: none; }
+
+        .total-box { margin-top: 15px; padding: 12px 0 0; border-top: 2px dashed #8b0000; font-size: 15px; font-weight: 800; color: #b91c1c; display: flex; justify-content: space-between; }
+
+        .btn-group { display: flex; gap: 8px; margin-top: 5px; }
+        .btn-action { flex: 1; padding: 12px 8px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; color: white; font-size: 12px; }
+        .btn-print-synthese { background-color: #6366f1; }
+        .btn-print-details { background-color: #0891b2; }
+        .btn-print-all { background-color: #8b0000; }
+
+        .tabs { display: flex; gap: 10px; margin-bottom: 14px; }
+        .tab-btn { flex: 1; border: 1px solid #e2e8f0; background: white; color: #64748b; border-radius: 999px; padding: 10px 12px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
+        .tab-btn.active { background: #8b0000; color: white; border-color: #8b0000; box-shadow: 0 4px 10px rgba(139, 0, 0, 0.16); }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        .nav-bottom { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: white; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .nav-link { text-decoration: none; color: #64748b; font-size: 11px; font-weight: 600; text-align: center; }
+        .home-icon-circle { width: 60px; height: 60px; background: #8b0000; color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 24px; box-shadow: 0 4px 10px rgba(139,0,0,0.4); margin-top: -30px; border: 4px solid #f8fafc; }
+
+        .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+        /* === RAPPORT IMPRIMABLE === */
+        .print-report { display: none; padding: 25px 30px; font-family: Arial, sans-serif; color: #000; }
+        .rpt-header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 14px; margin-bottom: 20px; align-items: flex-start; }
+        .rpt-logo-box { display: flex; gap: 12px; align-items: center; }
+        .rpt-logo { width: 60px; height: 60px; background: #8b0000; color: white; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; border-radius: 8px; }
+        .rpt-school { font-size: 16px; font-weight: 800; color: #8b0000; }
+        .rpt-info { font-size: 11px; color: #444; margin-top: 2px; }
+        .rpt-meta { text-align: right; font-size: 12px; }
+        .rpt-meta strong { display: block; font-size: 14px; color: #8b0000; margin-bottom: 4px; }
+
+        .rpt-section-title { font-weight: bold; font-size: 12px; margin-bottom: 6px; color: #8b0000; }
+
+        .rpt-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+        .rpt-table th { border-bottom: 2px solid #000; padding: 8px 6px; text-align: left; font-size: 10px; text-transform: uppercase; }
+        .rpt-table td { border-bottom: 1px solid #ccc; padding: 7px 6px; }
+        .rpt-table tfoot { display: table-row-group; }
+
+        .rpt-total-bloc { display: flex; justify-content: flex-end; border-top: 2px solid #000; padding-top: 8px; margin-top: -1px; margin-bottom: 16px; page-break-inside: avoid; }
+        .rpt-total-inner { display: flex; justify-content: space-between; width: 240px; font-weight: bold; font-size: 13px; }
+
+        .rpt-signatures { display: flex; justify-content: space-between; margin-top: 40px; page-break-inside: avoid; }
+        .rpt-sig-box { text-align: center; width: 170px; }
+        .rpt-sig-line { border-top: 1px solid #000; margin-top: 45px; padding-top: 6px; font-size: 11px; color: #555; }
+
+        /* Masquer les sections inactives pendant l'impression */
+        .print-hide { display: none !important; }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; }
+            .container { padding: 0; }
+            .screen-only { display: none !important; }
+            .print-report { display: block !important; }
+        }
+
+        /* === MULTI-SELECT CATEGORIES === */
+        .multi-select-wrapper { position: relative; width: 100%; }
+        .multi-select-trigger {
+            width: 100%;
+            padding: 11px 13px;
+            background: white;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            transition: all .2s ease;
+        }
+        .multi-select-trigger:hover { border-color: #8b0000; }
+        .multi-select-trigger.active { border-color: #8b0000; box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1); }
+        .multi-select-trigger .arrow {
+            font-size: 11px;
+            color: #64748b;
+            transition: transform .2s ease;
+        }
+        .multi-select-trigger.active .arrow { transform: rotate(180deg); color: #8b0000; }
+
+        .multi-select-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            z-index: 50;
+            display: none;
+            overflow: hidden;
+            animation: fadeIn .15s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .multi-select-dropdown.open { display: block; }
+
+        .dropdown-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 11px;
+        }
+        .dropdown-actions button {
+            background: none;
+            border: none;
+            color: #8b0000;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+        .dropdown-actions button:hover { background: #fef2f2; }
+
+        .dropdown-list {
+            max-height: 220px;
+            overflow-y: auto;
+            padding: 6px 0;
+        }
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 14px;
+            cursor: pointer;
+            transition: background .12s;
+            user-select: none;
+            font-size: 13px;
+            font-weight: 500;
+            color: #334155;
+        }
+        .dropdown-item:hover { background: #fef2f2; color: #8b0000; }
+        .dropdown-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #8b0000;
+            cursor: pointer;
+        }
+
+        @media (max-width: 380px) {
+            .container { padding: 14px; }
+            .card { padding: 14px; }
+            .kpi-value { font-size: 15px; }
+            table { font-size: 11px; }
+            th, td { padding: 8px 4px; }
+        }
+    </style>
+</head>
+<body>
+<script src="/js/auth.js"></script>
+<script src="/js/logs.js"></script>
+<script src="/js/preview_impression.js"></script>
+
+<div class="screen-only">
+    <header class="no-print">
+        <a href="index.html" class="back-btn">←</a>
+        <img src="/img/logoFat.jpeg" alt="Logo école" class="logo-circle">
+        <div><h2 style="color: #8b0000; font-size: 16px;">Journal de Caisse</h2></div>
+    </header>
+
+    <div class="container">
+        <div class="card no-print">
+            <div class="card-title">Filtrage Avancé</div>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <div style="flex: 1;">
+                    <label>Date Début</label>
+                    <input type="date" id="filtre-date-debut">
+                </div>
+                <div style="flex: 1;">
+                    <label>Date Fin</label>
+                    <input type="date" id="filtre-date-fin">
+                </div>
+            </div>
+            <div style="margin-bottom: 14px;">
+                <div class="multi-select-wrapper">
+                    <label>Catégories de Frais</label>
+                    <div class="multi-select-trigger" id="multi-select-trigger">
+                        <span id="multi-select-label">Toutes les catégories</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="multi-select-dropdown" id="multi-select-dropdown">
+                        <div class="dropdown-actions">
+                            <button type="button" id="btn-select-all">Tout cocher</button>
+                            <button type="button" id="btn-deselect-all">Tout décocher</button>
+                        </div>
+                        <div class="dropdown-list" id="multi-select-list">
+                            <div style="padding:12px; text-align:center; color:#94a3b8;">Chargement des catégories...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button onclick=chargerJournal() style="width: 100%; background: #8b0000; color: white; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">Appliquer les filtres</button>
+        </div>
+
+        <div class="card no-print" id="zone-masquee">
+            <div style="text-align:center; padding: 10px 6px; color:#64748b;">
+                <div style="font-size: 30px; margin-bottom: 8px;">🔒</div>
+                <div style="font-weight:700; color:#1e293b; margin-bottom:4px;">Données masquées</div>
+                <div style="font-size: 13px;">Sélectionnez une <strong>date de début</strong> et une <strong>date de fin</strong>, puis cliquez sur « Appliquer les filtres ».</div>
+            </div>
+        </div>
+
+        <div id="zone-donnees" style="display:none;">
+        <div class="kpi-row">
+            <div class="kpi-card"><div class="kpi-label">Total en USD</div><div id="montant-jour" class="kpi-value">0,00 $</div></div>
+            <div class="kpi-card"><div class="kpi-label">Nb Transactions</div><div id="nb-transactions" class="kpi-value" style="color: #8b0000;">0</div></div>
+        </div>
+
+        <div class="tabs no-print" id="journal-tabs" style="display:none;">
+            <button type="button" class="tab-btn active" data-tab="synthese">Synthèse par Catégorie</button>
+            <button type="button" class="tab-btn" data-tab="details">Détails des transactions</button>
+        </div>
+
+        <div class="tab-panel active" id="panel-synthese">
+            <div class="card">
+                <div class="card-title">Synthèse par Catégorie</div>
+                <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Catégorie</th>
+                            <th style="text-align: right;">Total $</th>
+                        </tr>
+                    </thead>
+                    <tbody id="body-synthese">
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-panel" id="panel-details">
+            <div class="card">
+                <div class="card-title">Détails des transactions</div>
+                <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>N° Reçu</th>
+                            <th>Élève</th>
+                            <th>Libellé</th>
+                            <th>Caissier(e)</th>
+                            <th style="text-align: right;">Montant</th>
+                        </tr>
+                    </thead>
+                    <tbody id="body-releve-ventes"></tbody>
+                </table>
+                </div>
+                <div class="total-box" style="flex-direction: column; gap: 5px;">
+                    <div class="summary-item" style="border-top: 2px solid #e2e8f0; padding-top: 10px; margin-top: 10px;">
+                        <span>TOTAL $</span>
+                        <strong id="total-recettes" style="color:#8b0000; font-size:18px;">0,00 $</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <div class="btn-group no-print">
+            <button class="btn-action btn-print-synthese" onclick="imprimerRapport('synthese')">Imprimer le Rapport Synthétisé</button>
+            <button class="btn-action btn-print-details" onclick="imprimerRapport('details')">Imprimer le Rapport Détaillé</button>
+            <button class="btn-action btn-print-all" onclick="imprimerRapport('complet')">Imprimer le Rapport Complet</button>
+        </div>
+    </div>
+
+    <nav class="nav-bottom no-print">
+        <a href="journal de caisse.html" class="nav-link" style="color: #8b0000;"><span style="font-size: 26px;">📒</span><br>Journal</a>
+        <a href="index.html"><div class="home-icon-circle">🏠</div></a>
+        <a href="modifier.html" class="nav-link"><span style="font-size: 26px;">⚙️</span><br>Paramètres</a>
+    </nav>
+</div>
+
+<!-- RAPPORT IMPRIMABLE -->
+<div class="print-report" id="print-report">
+    <div class="rpt-header">
+        <div class="rpt-logo-box">
+            <img src="/img/logoFat.jpeg" alt="Logo" class="rpt-logo" style="background:none;">
+            <div>
+                <div class="rpt-school" id="rpt-ecole">ÉCOLE MATERNELLE FATIMA</div>
+                <div class="rpt-info" id="rpt-adresse">Kinshasa, République Démocratique du Congo</div>
+            </div>
+        </div>
+        <div class="rpt-meta">
+            <strong id="rpt-titre-rapport">Rapport Journalier de Caisse</strong>
+            <div>Période : <span id="rpt-date">—</span></div>
+            <div>Imprimé le : <span id="rpt-print-date">—</span></div>
+        </div>
+    </div>
+
+    <!-- SECTION SYNTHÈSE -->
+    <div id="rpt-section-synthese">
+        <div class="rpt-section-title">SYNTHÈSE PAR CATÉGORIE</div>
+        <table class="rpt-table">
+            <thead>
+                <tr>
+                    <th>Catégorie</th>
+                    <th style="text-align: right;">Total $</th>
+                </tr>
+            </thead>
+            <tbody id="rpt-synthese-body"></tbody>
+        </table>
+    </div>
+
+    <!-- SECTION DÉTAILS -->
+    <div id="rpt-section-details">
+        <div class="rpt-section-title">DÉTAIL DES TRANSACTIONS</div>
+        <table class="rpt-table">
+            <thead>
+                <tr>
+                    <th>N° Reçu</th>
+                    <th>Nom de l'élève</th>
+                    <th>Libellé</th>
+                    <th>Caissier(e)</th>
+                    <th style="text-align: right;">Montant</th>
+                </tr>
+            </thead>
+            <tbody id="rpt-body"></tbody>
+        </table>
+    </div>
+
+    <!-- TOTAL -->
+    <div class="rpt-total-bloc" id="rpt-total-bloc">
+        <div class="rpt-total-inner">
+            <span>TOTAL $ :</span>
+            <strong id="rpt-total-usd">0,00 $</strong>
+        </div>
+    </div>
+
+    <!-- SIGNATURES -->
+    <div class="rpt-signatures" id="rpt-signatures">
+        <div class="rpt-sig-box">
+            <p style="font-weight: bold;">Le Caissier</p>
+            <div class="rpt-sig-line">Nom & Signature</div>
+        </div>
+        <div class="rpt-sig-box">
+            <p style="font-weight: bold;">L'Économe</p>
+            <div class="rpt-sig-line">Nom & Signature</div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+
+let tousLesPaiements = [];
+let ongletActifJournal = 'synthese';
+
+
+function afficherOngletJournal(onglet) {
+    ongletActifJournal = onglet;
+    document.querySelectorAll('.tab-btn').forEach(function(bouton) {
+        bouton.classList.toggle('active', bouton.dataset.tab === onglet);
+    });
+    document.querySelectorAll('.tab-panel').forEach(function(panel) {
+        panel.classList.toggle('active', panel.id === 'panel-' + onglet);
+    });
+}
+
+function initialiserOngletsJournal() {
+    document.querySelectorAll('.tab-btn').forEach(function(bouton) {
+        bouton.addEventListener('click', function() { afficherOngletJournal(bouton.dataset.tab); });
+    });
+    afficherOngletJournal(ongletActifJournal);
+}
+
+function formatMonnaie(val) {
+    return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val) + ' $';
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return '—';
+    var d = new Date(dateStr);
+    return isNaN(d) ? dateStr : d.toLocaleDateString('fr-FR');
+}
+
+let listeCategoriesGlobal = [];
+
+/**
+ * Met à jour le libellé du bouton déclencheur du Multi-Select Catégories.
+ */
+function actualiserLibelleMultiSelectCategories() {
+    const checkboxes = document.querySelectorAll('#multi-select-list input[type="checkbox"]');
+    const checked = Array.from(checkboxes).filter(cb => cb.checked);
+    const label = document.getElementById('multi-select-label');
+
+    if (checked.length === 0) {
+        label.textContent = 'Aucune catégorie sélectionnée';
+        label.style.color = '#dc2626';
+    } else if (checked.length === checkboxes.length) {
+        label.textContent = `Toutes les catégories (${checked.length})`;
+        label.style.color = '#1e293b';
+    } else if (checked.length <= 2) {
+        const noms = checked.map(cb => cb.dataset.nom);
+        label.textContent = noms.join(', ');
+        label.style.color = '#1e293b';
+    } else {
+        label.textContent = `${checked.length} catégories sélectionnées`;
+        label.style.color = '#1e293b';
+    }
+}
+
+/**
+ * Retourne la liste des IDs de catégories cochées.
+ * @returns {string[]}
+ */
+function obtenirCategoriesSelectionnees() {
+    const checkboxes = document.querySelectorAll('#multi-select-list input[type="checkbox"]:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+}
+
+/**
+ * Initialise le composant Multi-Select avec les catégories de frais.
+ */
+async function initialiserMultiSelectCategories() {
+    const container = document.getElementById('multi-select-list');
+    try {
+        const res = await fetch('/api/categories-frais');
+        const data = await res.json();
+        listeCategoriesGlobal = data.donnees || [];
+
+        if (listeCategoriesGlobal.length === 0) {
+            container.innerHTML = '<div style="padding:12px; text-align:center; color:#94a3b8;">Aucune catégorie trouvée.</div>';
+            return;
+        }
+
+        container.innerHTML = listeCategoriesGlobal.map(c => `
+            <label class="dropdown-item">
+                <input type="checkbox" value="${c.id}" data-nom="${c.libelle}" checked>
+                <span>${c.libelle}</span>
+            </label>
+        `).join('');
+
+        container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', actualiserLibelleMultiSelectCategories);
+        });
+
+        actualiserLibelleMultiSelectCategories();
+    } catch (e) {
+        container.innerHTML = '<div style="padding:12px; text-align:center; color:#dc2626;">Erreur de chargement des catégories.</div>';
+    }
+}
+
+/**
+ * Gère les événements d'ouverture/fermeture et d'actions du Multi-Select Catégories.
+ */
+function attacherEvenementsMultiSelectCategories() {
+    const trigger = document.getElementById('multi-select-trigger');
+    const dropdown = document.getElementById('multi-select-dropdown');
+    const btnSelectAll = document.getElementById('btn-select-all');
+    const btnDeselectAll = document.getElementById('btn-deselect-all');
+
+    trigger?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = dropdown.classList.contains('open');
+        if (isOpen) {
+            dropdown.classList.remove('open');
+            trigger.classList.remove('active');
+        } else {
+            dropdown.classList.add('open');
+            trigger.classList.add('active');
+        }
+    });
+
+    dropdown?.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
+    document.addEventListener('click', () => {
+        if (dropdown?.classList.contains('open')) {
+            dropdown.classList.remove('open');
+            trigger?.classList.remove('active');
+        }
+    });
+
+    btnSelectAll?.addEventListener('click', () => {
+        document.querySelectorAll('#multi-select-list input[type="checkbox"]').forEach(cb => {
+            cb.checked = true;
+        });
+        actualiserLibelleMultiSelectCategories();
+    });
+
+    btnDeselectAll?.addEventListener('click', () => {
+        document.querySelectorAll('#multi-select-list input[type="checkbox"]').forEach(cb => {
+            cb.checked = false;
+        });
+        actualiserLibelleMultiSelectCategories();
+    });
+}
+
+async function chargerJournal() {
+    var debut = document.getElementById('filtre-date-debut').value;
+    var fin = document.getElementById('filtre-date-fin').value;
+    var categoriesSelectionnees = obtenirCategoriesSelectionnees();
+
+    var zoneMasquee = document.getElementById('zone-masquee');
+    var zoneDonnees = document.getElementById('zone-donnees');
+    var journalTabs = document.getElementById('journal-tabs');
+
+    if (!debut || !fin) {
+        zoneDonnees.style.display = 'none';
+        zoneMasquee.style.display = 'block';
+        return;
+    }
+
+    // Sécurité : la date de début ne peut pas être après la date de fin
+    if (debut > fin) {
+        document.getElementById('filtre-date-fin').value = debut;
+        fin = debut;
+        return alert("La date de début ne peut pas être postérieure à la date de fin.");
+    }
+
+    // Cas limite : aucune catégorie cochée
+    if (categoriesSelectionnees.length === 0 && listeCategoriesGlobal.length > 0) {
+        document.getElementById('body-releve-ventes').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;padding:20px">Veuillez cocher au moins une catégorie dans le filtre.</td></tr>';
+        document.getElementById('body-synthese').innerHTML = '<tr><td colspan="2" style="text-align:center;color:#64748b;padding:20px">Veuillez cocher au moins une catégorie dans le filtre.</td></tr>';
+        document.getElementById('montant-jour').textContent = '0,00 $';
+        document.getElementById('nb-transactions').textContent = '0';
+        document.getElementById('total-recettes').textContent = '0,00 $';
+        zoneMasquee.style.display = 'none';
+        zoneDonnees.style.display = 'block';
+        if (journalTabs) {
+            journalTabs.style.display = 'flex';
+            afficherOngletJournal(ongletActifJournal);
+        }
+        return;
+    }
+
+    var params = new URLSearchParams();
+    params.append('date_debut', debut);
+    params.append('date_fin', fin);
+    if (categoriesSelectionnees.length > 0 && categoriesSelectionnees.length < listeCategoriesGlobal.length) {
+        params.append('categories', categoriesSelectionnees.join(','));
+    }
+
+    var queryString = '?' + params.toString();
+
+    try {
+        var res = await fetch('/api/journal' + queryString);
+        var resSynthese = await fetch('/api/journal/synthese' + queryString);
+        var data = await res.json();
+        var dataSynthese = await resSynthese.json();
+        
+        tousLesPaiements = data.donnees || [];
+        afficherPaiements(tousLesPaiements);
+        afficherSynthese(dataSynthese.donnees || []);
+
+        zoneMasquee.style.display = 'none';
+        zoneDonnees.style.display = 'block';
+        if (journalTabs) {
+            journalTabs.style.display = 'flex';
+            afficherOngletJournal(ongletActifJournal);
+        }
+    } catch(e) {
+        document.getElementById('body-releve-ventes').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px">Erreur de chargement</td></tr>';
+        zoneMasquee.style.display = 'none';
+        zoneDonnees.style.display = 'block';
+        if (journalTabs) {
+            journalTabs.style.display = 'flex';
+            afficherOngletJournal(ongletActifJournal);
+        }
+    }
+}
+
+var dernieresSyntheseDonnees = [];
+
+function construireLignesSynthese(synthese) {
+    var map = {};
+    synthese.forEach(function(s) {
+        var cat = s.categorie || 'Autre';
+        if (!map[cat]) map[cat] = { total: 0 };
+        map[cat].total += Number(s.total || 0);
+    });
+
+    return Object.keys(map).map(function(cat) {
+        return '<tr><td>' + cat + '</td><td style="text-align:right;font-weight:700;color:#8b0000;">' + formatMonnaie(map[cat].total) + '</td></tr>';
+    }).join('');
+}
+
+function afficherSynthese(synthese) {
+    dernieresSyntheseDonnees = synthese;
+    var corps = document.getElementById('body-synthese');
+
+    if (synthese.length === 0) {
+        corps.innerHTML = '<tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:20px">Aucune donnée</td></tr>';
+        return;
+    }
+
+    corps.innerHTML = construireLignesSynthese(synthese);
+}
+
+function afficherPaiements(paiements) {
+    var corps = document.getElementById('body-releve-ventes');
+    corps.innerHTML = '';
+    var totalUsd = 0;
+
+    if (paiements.length === 0) {
+        corps.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px">Aucune transaction</td></tr>';
+    } else {
+        paiements.forEach(function(p) {
+            totalUsd += Number(p.montant || 0);
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td style="font-size:11px;color:#8b0000;font-weight:700;">' + p.numero_recu + '</td>' +
+                '<td>' + (p.nom_eleve || '—') + '</td>' +
+                '<td>' + p.libelle + '</td>' +
+                '<td style="font-size:11px;color:#64748b;">' + (p.caissier || '—') + '</td>' +
+                '<td style="text-align:right;font-weight:700;">' + formatMonnaie(p.montant) + '</td>';
+            corps.appendChild(tr);
+        });
+    }
+
+    document.getElementById('montant-jour').textContent = formatMonnaie(totalUsd);
+    document.getElementById('nb-transactions').textContent = paiements.length;
+    document.getElementById('total-recettes').textContent = formatMonnaie(totalUsd);
+}
+
+initialiserOngletsJournal();
+
+/**
+ * Prépare et lance l'impression du rapport dans le mode demandé.
+ * @param {'synthese'|'details'|'complet'} mode
+ */
+function imprimerRapport(mode) {
+    var debut = document.getElementById('filtre-date-debut').value;
+    var fin = document.getElementById('filtre-date-fin').value;
+
+    if (!debut || !fin) {
+        //alert('Veuillez d\'abord sélectionner une date de début et une date de fin, puis appliquer les filtres.');
+    }
+
+    // Dates
+    var dateAffichee = 'Du ' + formatDate(debut) + ' au ' + formatDate(fin);
+    document.getElementById('rpt-date').textContent = dateAffichee;
+    document.getElementById('rpt-print-date').textContent = new Date().toLocaleDateString('fr-FR');
+
+    // Titre selon le mode
+    var titres = {
+        synthese: 'Rapport de Caisse — Synthèse',
+        details: 'Rapport de Caisse — Détails',
+        complet: 'Rapport Journalier de Caisse'
+    };
+    document.getElementById('rpt-titre-rapport').textContent = titres[mode] || titres.complet;
+
+    // Synthèse
+    var sectionSynthese = document.getElementById('rpt-section-synthese');
+    if (mode === 'details') {
+        sectionSynthese.classList.add('print-hide');
+    } else {
+        sectionSynthese.classList.remove('print-hide');
+        document.getElementById('rpt-synthese-body').innerHTML = construireLignesSynthese(dernieresSyntheseDonnees);
+    }
+
+    // Détails
+    var sectionDetails = document.getElementById('rpt-section-details');
+    if (mode === 'synthese') {
+        sectionDetails.classList.add('print-hide');
+    } else {
+        sectionDetails.classList.remove('print-hide');
+        var rptBody = document.getElementById('rpt-body');
+        rptBody.innerHTML = '';
+        var totalUsd = 0;
+        tousLesPaiements.forEach(function(p) {
+            totalUsd += Number(p.montant || 0);
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td>' + p.numero_recu + '</td>' +
+                '<td>' + (p.nom_eleve || '—') + '</td>' +
+                '<td>' + p.libelle + '</td>' +
+                '<td>' + (p.caissier || '—') + '</td>' +
+                '<td style="text-align:right;">' + formatMonnaie(p.montant) + '</td>';
+            rptBody.appendChild(tr);
+        });
+        document.getElementById('rpt-total-usd').textContent = formatMonnaie(totalUsd);
+    }
+
+    // Total : visible sauf si mode synthèse seule (pas de total global dans ce cas)
+    var totalBloc = document.getElementById('rpt-total-bloc');
+    if (mode === 'synthese') {
+        totalBloc.classList.add('print-hide');
+    } else {
+        totalBloc.classList.remove('print-hide');
+    }
+
+    var dateDebut = document.getElementById('filtre-date-debut')?.value || '';
+    var dateFin = document.getElementById('filtre-date-fin')?.value || '';
+    var periodeStr = dateDebut ? (dateFin && dateFin !== dateDebut ? `${dateDebut}_au_${dateFin}` : dateDebut) : (window.SchoolPayPrinter ? window.SchoolPayPrinter.horodatageFichier() : '');
+    var nomFichier = `Rapport_Caisse_${mode.toUpperCase()}_${periodeStr}.pdf`;
+
+    var titres = {
+        synthese: 'Rapport Synthétisé de Caisse',
+        details: 'Rapport Détaillé de Caisse',
+        complet: 'Rapport Complet de Caisse'
+    };
+
+    if (window.SchoolPayPrinter) {
+        window.SchoolPayPrinter.ouvrirPreview({
+            typeDocument: 'rapport',
+            titre: `Aperçu — ${titres[mode] || 'Rapport de Caisse'}`,
+            nomFichierSuggere: nomFichier,
+            pdfOptions: {
+                pageSize: 'A4',
+                //landscape: (mode === 'details' || mode === 'complet'),
+                landscape: false,
+                printBackground: true,
+                preferCSSPageSize: true
+            },
+            actionLog: 'impression_rapport',
+            referenceLog: mode,
+            onAvantGeneration: function() {
+                document.querySelector('.screen-only').style.display = 'none';
+                document.getElementById('print-report').style.display = 'block';
+            },
+            onApresGeneration: function() {
+                document.querySelector('.screen-only').style.display = '';
+                document.getElementById('print-report').style.display = 'none';
+                sectionSynthese.classList.remove('print-hide');
+                sectionDetails.classList.remove('print-hide');
+                totalBloc.classList.remove('print-hide');
+            }
+        });
+    } else {
+        document.querySelector('.screen-only').style.display = 'none';
+        document.getElementById('print-report').style.display = 'block';
+        if (window.enregistrerLog) {
+            window.enregistrerLog('impression_rapport', mode);
+        }
+        window.print();
+        setTimeout(function() {
+            document.querySelector('.screen-only').style.display = '';
+            document.getElementById('print-report').style.display = 'none';
+            sectionSynthese.classList.remove('print-hide');
+            sectionDetails.classList.remove('print-hide');
+            totalBloc.classList.remove('print-hide');
+        }, 500);
+    }
+}
+
+async function chargerParametresEcole() {
+    try {
+        var res = await fetch('/api/parametres');
+        var json = await res.json();
+        if (json.donnees && json.donnees.nom_ecole) document.getElementById('rpt-ecole').textContent = json.donnees.nom_ecole;
+        if (json.donnees && json.donnees.adresse_ecole) document.getElementById('rpt-adresse').textContent = json.donnees.adresse_ecole;
+    } catch (e) {}
+}
+
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        imprimerRapport('complet');
+    }
+});
+
+// === Validation des dates : la date de début ne peut pas être après la date de fin ===
+var filtreDebut = document.getElementById('filtre-date-debut');
+var filtreFin = document.getElementById('filtre-date-fin');
+
+filtreDebut.addEventListener('change', function() {
+    if (filtreDebut.value && filtreFin.value && filtreDebut.value > filtreFin.value) {
+        filtreFin.value = filtreDebut.value;
+    }
+    filtreFin.min = filtreDebut.value || '';
+});
+
+filtreFin.addEventListener('change', function() {
+    if (filtreDebut.value && filtreFin.value && filtreFin.value < filtreDebut.value) {
+        filtreDebut.value = filtreFin.value;
+    }
+    filtreDebut.max = filtreFin.value || '';
+});
+
+chargerParametresEcole();
+attacherEvenementsMultiSelectCategories();
+initialiserMultiSelectCategories().then(() => {
+    chargerJournal();
+});
+</script>
+</body>
+</html>

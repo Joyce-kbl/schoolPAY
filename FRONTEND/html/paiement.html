@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouveau Paiement - SchoolPAY</title>
+    <link rel="icon" href="/img/logoFat.svg" type="image/jpeg">
+    <style>
+        :root { --primary: #8b0000; --bg: #f8fafc; --white: #fff; --success: #059669; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+        body { background-color: var(--bg); padding-bottom: 30px; }
+
+        header { background: var(--white); padding: 15px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .back-btn { text-decoration: none; color: var(--primary); font-size: 22px; font-weight: bold; padding: 4px 8px; border-radius: 8px; transition: background 0.15s; }
+        .back-btn:hover { background: #fef2f2; }
+        .logo-circle { width: 42px; height: 42px; background: var(--primary); color: var(--white); display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; font-size: 13px; }
+
+        .container { padding: 20px; max-width: 750px; margin: 0 auto; }
+        .card { background: var(--white); border-radius: 20px; padding: 22px; border: 1px solid #e2e8f0; box-shadow: 0 4px 10px rgba(0,0,0,0.04); }
+        .form-group { margin-bottom: 16px;}
+        label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; display: block; }
+        .form-control { width: 100%; padding: 13px 15px; border: 1.5px solid #e2e8f0; border-radius: 12px; background: #fdfdfd; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        .form-control:focus { border-color: var(--primary); }
+        
+        .btn-valider { background: var(--success); color: white; padding: 16px; border-radius: 14px; border: none; font-weight: bold; width: 100%; cursor: pointer; font-size: 15px; margin-top: 8px; transition: background 0.2s; }
+        .btn-valider:hover { background: #047857; }
+        .btn-valider:disabled { background: #94a3b8; cursor: not-allowed; }
+        
+        .row-2 { display: flex; gap: 12px; }
+        .row-2 > * { flex: 1; }
+        .row-2 > *:first-child { flex: 3; }
+
+        .success-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center; }
+        .success-card { background: white; border-radius: 24px; padding: 35px 25px; text-align: center; width: 90%; max-width: 340px; }
+        .success-icon { font-size: 56px; margin-bottom: 15px; }
+        .success-title { font-size: 20px; font-weight: 800; color: #059669; margin-bottom: 8px; }
+        .success-sub { color: #64748b; font-size: 14px; margin-bottom: 25px; }
+
+        /* Recherche intelligente */
+        .search-box { width: 100%; position: relative; }
+        .search-input-full { width: 100%; padding: 13px 40px 13px 15px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 14px; outline: none; background: white; transition: border-color 0.2s; }
+        .search-input-full:focus { border-color: var(--primary); }
+        .search-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; cursor: pointer; }
+        .search-results { position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 8px 20px rgba(0,0,0,0.1); display: none; margin-top: 5px; z-index: 10; max-height: 250px; overflow-y: auto; }
+        .search-result-item { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.15s; }
+        .search-result-item:last-child { border-bottom: none; }
+        .search-result-item:hover { background: #fef2f2; }
+        .result-avatar { width: 32px; height: 32px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; flex-shrink: 0; }
+        .result-name { font-weight: 700; font-size: 13px; color: #1e293b; }
+        .result-meta { font-size: 11px; color: #64748b; margin-top: 2px; }
+        .search-empty { padding: 15px; text-align: center; color: #94a3b8; font-size: 12px; }
+
+        .btn-facture { background: #8b0000; color: white; padding: 14px; border-radius: 12px; border: none; font-weight: bold; width: 100%; cursor: pointer; font-size: 14px; margin-bottom: 10px; text-decoration: none; display: block; }
+        .btn-skip { background: #f1f5f9; color: #64748b; padding: 12px; border-radius: 12px; border: none; font-weight: 600; width: 100%; cursor: pointer; font-size: 14px; }
+
+        /* === Adaptation écrans de téléphone (petits mobiles) === */
+        @media (max-width: 380px) {
+            .container { padding: 14px; }
+            .card { padding: 16px; }
+            .row-2 { flex-wrap: wrap; }
+        }
+
+/*Css pour les notifications*/
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            height: 3.5em; 
+            font-size: 1em;
+            font-weight: bold;
+            padding: 12px 20px;
+            border-radius: 6px;
+            color: white;
+            display: none;
+            z-index: 9999;
+            align-content: center ;
+        }
+
+        .notification.success {
+            background: #28a745;
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+
+    </style>
+</head>
+<body>
+<script src="/js/auth.js"></script>
+<script src="/js/logs.js"></script>
+
+<!-- Page de création d'un paiement avec lignes d'opérations multiple -->
+<header>
+    <a href="index.html" class="back-btn">←</a>
+    <img src="/img/logoFat.jpeg" alt="Logo école" class="logo-circle">
+    <h2 style="color: var(--primary); font-size: 16px;">Nouveau Paiement</h2>
+</header>
+
+<div class="container">
+    <div class="card">
+        <div class="form-group">
+        
+            <label>Classe</label>
+            <select id="classe-select" class="form-control" onchange="filtrerEleves()">
+            <option value="">Sélectionner la classe...</option>
+            </select>
+            
+        </div>
+
+        <div class="form-group">
+            <label>Nom de l'élève</label>
+            <div class="search-box">
+                <input type="text" id="search-input" class="search-input-full" placeholder="🔍 Rechercher un élève..." autocomplete="off">
+                <span class="search-icon" id="search-clear" style="display:none; color:#94a3b8;" onclick="viderRecherche()">✕</span>
+                <div class="search-results" id="search-results"></div>
+            </div>
+            <input type="hidden" id="eleve-id-input">
+        </div>
+
+        <div class="form-group">
+            <label>Déposant (qui paie pour l'élève)</label>
+            <input type="text" id="deposant-input" class="form-control" placeholder="Nom du parent ou tuteur..." required>
+            <datalist id="categories-datalist" ></datalist>
+        </div>
+
+
+
+        <div id="operations-container">
+            <!-- Les lignes d'operations -->
+        </div>
+        <datalist id="categories-datalist"></datalist>
+
+        <button type="button" class="btn-skip" id="btn-ajouter-ligne" style="margin-bottom: 15px;">+ Ajouter une opération</button>
+
+        <div class="form-group">
+            <label>Date</label>
+            <input id="date-input" type="date" class="form-control">
+        </div>
+
+        <button id="btn-valider-paiement" class="btn-valider" type="button">✅ VALIDER LE PAIEMENT</button>
+    </div>
+</div>
+<!--notification -->
+ <div id="notification" class="notification"></div>
+<!-- Overlay succès : message de confirmation et lien vers impression du reçu -->
+<div class="success-overlay" id="success-overlay">
+    <div class="success-card">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Paiement enregistré !</div>
+        <div class="success-sub" id="success-details">Le paiement a été enregistré avec succès.</div>
+        <a id="btn-voir-facture" href="#" class="btn-facture">🖨️ Imprimer la Facture</a>
+        <button class="btn-skip" onclick="window.location.href='index.html'">Retour à l'accueil</button>
+    </div>
+</div>
+
+<script >
+let tousLesEleves = [];
+let toutesLesCategories = [];
+// Soldes (attendu / paye / reste) de toutes les catégories de frais pour
+// l'élève actuellement sélectionné. null tant qu'aucun élève n'est choisi.
+let soldesEleveActuel = null;
+
+/**
+ * Récupère depuis l'API les soldes de toutes les catégories de frais pour un
+ * élève donné, et les met en cache dans soldesEleveActuel. Utilisé pour
+ * bloquer en amont la saisie d'un montant supérieur au reste dû (ou d'une
+ * catégorie déjà intégralement payée).
+ */
+async function actualiserSoldesEleveActuel(eleve_id) {
+    soldesEleveActuel = null;
+    if (!eleve_id) return;
+    try {
+        const res = await fetch(`/api/eleves/${eleve_id}/fiche`);
+        const data = await res.json();
+        if (res.ok && data.donnees) {
+            soldesEleveActuel = data.donnees.soldes || [];
+        }
+    } catch (e) {
+        console.error('Impossible de vérifier les soldes de l élève', e);
+    }
+}
+
+/**
+ * Retourne le solde { attendu, paye, reste } d'une catégorie pour l'élève
+ * sélectionné, ou null si la catégorie n'a pas de montant défini.
+ */
+function trouverSoldeCategorie(libelle) {
+    if (!soldesEleveActuel || !libelle) return null;
+    return soldesEleveActuel.find(s => String(s.categorie || '').toUpperCase() === String(libelle).toUpperCase()) || null;
+}
+
+function creerLigneOperation() {
+    const div = document.createElement('div');
+    div.className = 'row-2 operation-row';
+    div.style.marginBottom = '10px';
+
+    div.innerHTML = `
+        <div class="form-group" style="margin-bottom: 0;">
+            <input type="text" class="form-control cat-input" list="categories-datalist"
+                   placeholder="Code ou type de frais (ex: 78000)" autocomplete="off">
+            <input type="hidden" class="cat-id">
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+            <input type="number" class="form-control montant-input" placeholder="0.00" min="0">
+        </div>
+        <button type="button" class="btn-supprimer-ligne" style="padding: 10px; background: #fef2f2; color: #b91c1c; border: none; border-radius: 12px; cursor: pointer;">X</button>
+    `;
+
+    const catInput = div.querySelector('.cat-input');
+    const catId = div.querySelector('.cat-id');
+
+    catInput.addEventListener('input', () => {
+        const val = catInput.value.trim().toLowerCase();
+        const trouve = toutesLesCategories.find(c =>
+            `${c.code} — ${c.libelle}`.toLowerCase() === val ||
+            c.code.toLowerCase() === val ||
+            c.libelle.toLowerCase() === val
+        );
+        catId.value = trouve ? trouve.id : '';
+        catId.dataset.libelle = trouve ? trouve.libelle : '';
+
+        // Si les frais de cette catégorie sont déjà intégralement payés, on
+        // empêche immédiatement de choisir cette catégorie de frais.
+        const solde = trouve ? trouverSoldeCategorie(trouve.libelle) : null;
+        if (trouve && solde && Number(solde.attendu) > 0 && Number(solde.reste) <= 0) {
+            notifier(`Les ${trouve.libelle} de cet élève sont déjà payés intégralement. Impossible de saisir un nouveau paiement pour cette catégorie.`, false)
+            catInput.value = '';
+            catId.value = '';
+            catId.dataset.libelle = '';
+            div.querySelector('.montant-input').value = '';
+        }
+    });
+
+    const montantInput = div.querySelector('.montant-input');
+    montantInput.addEventListener('input', () => {
+        // Vérification en temps réel : on ne laisse pas saisir un montant
+        // supérieur au reste réellement dû pour la catégorie de la ligne.
+        const solde = trouverSoldeCategorie(catId.dataset.libelle);
+        if (!solde || Number(solde.attendu) <= 0) return;
+        const reste = Number(solde.reste);
+        const montant = Number(montantInput.value);
+        if (montant > reste) {
+            notifier(`Le montant restant à payer pour ${catId.dataset.libelle} est ${reste.toFixed(2)} $. Veuillez saisir un montant inférieur ou égal.`, false)
+            montantInput.value = reste > 0 ? reste : '';
+        }
+    });
+
+    div.querySelector('.btn-supprimer-ligne').addEventListener('click', () => {
+        if (document.querySelectorAll('.operation-row').length > 1) {
+            div.remove();
+        }
+    });
+
+    document.getElementById('operations-container').appendChild(div);
+}
+
+function remplirDatalistCategories() {
+    const datalist = document.getElementById('categories-datalist');
+    datalist.innerHTML = '';
+    toutesLesCategories.forEach(c => {
+        const option = document.createElement('option');
+        option.value = `${c.code} — ${c.libelle}`;
+        datalist.appendChild(option);
+    });
+}
+
+document.getElementById('btn-ajouter-ligne').addEventListener('click', creerLigneOperation);
+
+async function chargerDonnees() {
+    const [classesRes, elevesRes, categoriesRes] = await Promise.all([
+        fetch('/api/classes'),
+        fetch('/api/eleves'),
+        fetch('/api/categories-frais')
+    ]);
+    const classesData = await classesRes.json();
+    const elevesData = await elevesRes.json();
+    const categoriesData = await categoriesRes.json();
+    
+    tousLesEleves = elevesData.donnees || [];
+    toutesLesCategories = categoriesData.donnees || [];
+    
+    const selectClasses = document.getElementById('classe-select');
+    (classesData.donnees || []).forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.nom;
+        selectClasses.appendChild(opt);
+    });
+
+    creerLigneOperation();
+    remplirDatalistCategories();
+    document.getElementById('date-input').value = new Date().toISOString().slice(0, 10);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const prefillEleveId = urlParams.get('eleve_id');
+    if (prefillEleveId) {
+        const eleve = tousLesEleves.find(e => String(e.id) === String(prefillEleveId));
+        if (eleve) {
+            document.getElementById('classe-select').value = eleve.classe_id;
+            document.getElementById('eleve-id-input').value = eleve.id;
+            document.getElementById('search-input').value = eleve.nom_complet;
+            document.getElementById('search-clear').style.display = 'block';
+            actualiserSoldesEleveActuel(eleve.id);
+        }
+    }
+}
+
+function filtrerEleves() {
+    viderRecherche();
+}
+
+document.getElementById('search-input').addEventListener('input', function() {
+    const val = this.value.trim().toLowerCase();
+    document.getElementById('search-clear').style.display = val ? 'block' : 'none';
+    document.getElementById('eleve-id-input').value = '';
+    
+    if (val.length < 2) {
+        masquerResultats();
+        return;
+    }
+    
+    const classeId = document.getElementById('classe-select').value;
+    let elevesFiltres = tousLesEleves;
+    if (classeId) {
+        elevesFiltres = elevesFiltres.filter(e => String(e.classe_id) === String(classeId));
+    }
+    
+    const resultats = elevesFiltres.filter(e => 
+        e.nom_complet.toLowerCase().includes(val) || 
+        (e.matricule && e.matricule.toLowerCase().includes(val))
+    ).slice(0, 10);
+    
+    afficherResultatsRecherche(resultats);
+});
+
+function afficherResultatsRecherche(resultats) {
+    const resultatsDiv = document.getElementById('search-results');
+    resultatsDiv.style.display = 'block';
+    if (resultats.length === 0) {
+        resultatsDiv.innerHTML = '<div class="search-empty">Aucun élève trouvé</div>';
+        return;
+    }
+    
+    resultatsDiv.innerHTML = '';
+    resultats.forEach(eleve => {
+        const initiales = eleve.nom_complet.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        const item = document.createElement('div');
+        item.className = 'search-result-item';
+        item.innerHTML = `
+            <div class="result-avatar">${initiales}</div>
+            <div>
+                <div class="result-name">${eleve.nom_complet}</div>
+                <div class="result-meta">${eleve.nom_classe || 'Classe inconnue'} · ${eleve.matricule || '—'}</div>
+            </div>
+        `;
+        item.addEventListener('click', () => {
+            document.getElementById('search-input').value = eleve.nom_complet;
+            document.getElementById('eleve-id-input').value = eleve.id;
+            document.getElementById('classe-select').value = eleve.classe_id;
+            masquerResultats();
+            document.getElementById('search-clear').style.display = 'block';
+            actualiserSoldesEleveActuel(eleve.id);
+        });
+        resultatsDiv.appendChild(item);
+    });
+}
+
+function viderRecherche() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('eleve-id-input').value = '';
+    document.getElementById('search-clear').style.display = 'none';
+    soldesEleveActuel = null;
+    masquerResultats();
+}
+
+function masquerResultats() {
+    document.getElementById('search-results').style.display = 'none';
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.search-box')) {
+        masquerResultats();
+    }
+});
+
+function notifier(message, succes = true) {
+    const notif = document.getElementById('notification');
+
+    notif.textContent = succes ? "✅"+message : "⚠️"+message;
+    notif.className = succes
+        ? 'notification success'
+        : 'notification error';
+
+    notif.style.display = 'block';
+
+    setTimeout(() => {
+        notif.style.display = 'none';
+    }, 6000);
+
+    console[succes ? 'log' : 'error'](message);
+}
+
+document.getElementById('btn-valider-paiement').addEventListener('click', async function() {
+    const eleve_id = Number(document.getElementById('eleve-id-input').value);
+    const devise = 'USD';
+    const paye_le = document.getElementById('date-input').value || new Date().toISOString().slice(0, 10);
+
+    const operations = [];
+    let totalMontant = 0;
+    document.querySelectorAll('.operation-row').forEach(row => {
+        const cat = row.querySelector('.cat-id').value;
+        const libelle = row.querySelector('.cat-id').dataset.libelle || '';
+        const montant = Number(row.querySelector('.montant-input').value);
+        if (cat && montant > 0) {
+            operations.push({ categorie_frais_id: cat, libelle, montant });
+            totalMontant += montant;
+        }
+    });
+
+    if (!eleve_id || operations.length === 0) {
+        //alert('Veuillez sélectionner un élève et ajouter au moins une opération valide (code ou type de frais reconnu).');
+        return notifier("Veuillez sélectionner un élève et ajouter au moins une opération valide (code ou type de frais reconnu).",false);
+    }
+
+    const session = window.SchoolPayAuth?.obtenirSession();
+    const caissier = session?.nom_utilisateur || '';  // nom_utilisateur pour la journalisation
+    const deposant = document.getElementById('deposant-input').value.trim() || '';
+
+    if (!deposant) {
+        return notifier("Le nom du déposant est obligatoire.", false);
+    }
+
+    // Vérification que les montants saisis ne dépassent pas le reste dû pour
+    // chacune des catégories définies dans les frais attendus de l'élève.
+    this.disabled = true;
+    this.textContent = 'Vérification...';
+    try {
+        const resEleve = await fetch(`/api/eleves/${eleve_id}/fiche`);
+        const dataEleve = await resEleve.json();
+        if (resEleve.ok && dataEleve.donnees) {
+            const soldes = dataEleve.donnees.soldes || [];
+            for (let i = 0; i < operations.length; i++) {
+                const op = operations[i];
+                const catObj = toutesLesCategories.find(c => String(c.id) === String(op.categorie_frais_id));
+                const opLibelle = op.libelle || (catObj ? catObj.libelle : '');
+                const solde = soldes.find(s => String(s.categorie || '').toUpperCase() === String(opLibelle).toUpperCase());
+                if (solde && Number(solde.attendu) > 0 && Number(op.montant) > Number(solde.reste)) {
+                    notifier(`Le montant saisi pour ${opLibelle} dépasse le reste dû (${Number(solde.reste).toFixed(2)} $). Veuillez saisir un montant inférieur ou égal.`, false);
+                    this.disabled = false;
+                    this.textContent = '✅ VALIDER LE PAIEMENT';
+                    return;
+                }
+            }
+        } else {
+            throw new Error("Données de l'élève inaccessibles");
+        }
+    } catch (err) {
+        console.error('Erreur lors de la vérification du solde', err);
+        notifier("Erreur: Impossible de vérifier le solde restant. Vérifiez votre connexion.")
+        this.disabled = false;
+        this.textContent = '✅ VALIDER LE PAIEMENT';
+        return;
+    }
+
+    this.disabled = true;
+    this.textContent = 'Enregistrement...';
+    
+    try {
+        const res = await fetch('/api/factures', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eleve_id, operations, devise, paye_le, caissier, deposant })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.erreur || 'Erreur');
+
+        const facture = data.donnees;
+        const eleveNom = document.getElementById('search-input').value || '';
+        const symbole = '$';
+        
+        document.getElementById('success-details').innerHTML =
+            `${eleveNom.split('(')[0].trim()}<br>Facture ${facture.numero_facture} — <b>${totalMontant.toFixed(2)} ${symbole}</b>`;
+        
+        document.getElementById('btn-voir-facture').href = `facture.html?numero=${facture.numero_facture}`;
+        document.getElementById('success-overlay').style.display = 'flex';
+    } catch (err) {
+        //alert('Erreur : ' + err.message);
+        notifier('Erreur : ' + err.message,false)
+        this.disabled = false;
+        this.textContent = '✅ VALIDER LE PAIEMENT';
+    }
+});
+
+chargerDonnees();
+</script>
+</body>
+</html>
